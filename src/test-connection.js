@@ -1,16 +1,26 @@
 /*
-Code để test kết nối tới database
- */ 
-const sequelize = require('./config/database');
+Hàm để test kết nối tới database
+ */
+const { sequelize } = require('./models'); // Import từ models/index.js
 
-async function testConnection() {
+async function testDatabaseConnection() {
   try {
+    // Xác thực kết nối
     await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
+    console.log('✅ Kết nối database thành công!');
+
+    // Test raw query đơn giản
+    const [result] = await sequelize.query('SELECT 1 + 1 AS solution');
+    console.log('🔢 Kết quả test query:', result[0].solution); // Output: 2
+
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error('❌ Lỗi kết nối database:', error);
   } finally {
+    // Đóng kết nối
     await sequelize.close();
+    console.log('📴 Đã đóng kết nối database.');
   }
 }
-testConnection();
+
+// Chạy hàm test
+testDatabaseConnection();
