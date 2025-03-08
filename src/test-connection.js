@@ -1,3 +1,6 @@
+/*
+Code để test kết nối tới database
+ */ 
 const sequelize = require('./config/database');
 
 async function testConnection() {
