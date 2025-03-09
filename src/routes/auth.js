@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const roleMiddleware = require('../middleware/role');
-const validate = require('../middleware/validate'); // validate middleware
 const AuthController = require('../controllers/authController');
+const validate = require('../middleware/validate'); // validate middleware
 const { loginSchema } = require('../schemas/authSchema');  // Joi schema
 
 //router.use(roleMiddleware);

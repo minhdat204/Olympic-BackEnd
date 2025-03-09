@@ -1,4 +1,7 @@
-// src/middleware/validate.js
+/**
+ * Validate middleware : xử lý validate dữ liệu trước khi đi vào controller
+ * @param {Object} schema - Joi schema object
+ */
 const Joi = require('joi');
 
 const validate = (schema) => (req, res, next) => {

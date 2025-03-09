@@ -1,4 +1,4 @@
-// src/schemas/authSchema.js
+// Định nghĩa các schema cho việc đăng nhập và đăng ký
 const Joi = require('joi');
 
 const loginSchema = Joi.object({
