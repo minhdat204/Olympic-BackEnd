@@ -2,15 +2,19 @@
 
 Olympic Back-End App là một ứng dụng back-end được xây dựng bằng Node.js và Express.js, sử dụng MySQL làm cơ sở dữ liệu và hỗ trợ WebSocket thông qua Socket.io. Ứng dụng cung cấp API phục vụ cho hệ thống Olympic, bao gồm quản lý người dùng, xác thực, lưu trữ dữ liệu, và giao tiếp thời gian thực.
 
-## 📌 Công nghệ sử dụng
+## 📌 Công nghệ/Thư viện sử dụng
 - **Node.js**: Môi trường runtime cho JavaScript.
-- **Express.js**: Framework để xây dựng API nhanh và linh hoạt.
-- **MySQL + Sequelize**: Hệ quản trị cơ sở dữ liệu quan hệ và ORM.
-- **Redis**: Lưu trữ cache và xử lý phiên.
-- **Socket.io**: Hỗ trợ giao tiếp thời gian thực (WebSocket).
-- **JWT (jsonwebtoken)**: Xác thực người dùng.
-- **bcryptjs**: Hash mật khẩu.
-- **dotenv**: Quản lý biến môi trường.
+- **Express.js** (v4.21.2): Framework để xây dựng API nhanh và linh hoạt.
+- **MySQL2** (v3.13.0) + **Sequelize** (v6.37.6): Hệ quản trị cơ sở dữ liệu quan hệ và ORM.
+- **Sequelize-CLI** (v6.6.2): Công cụ command line cho Sequelize (dev).
+- **Redis** (v4.7.0): Lưu trữ cache và xử lý phiên.
+- **Socket.io** (v4.8.1): Hỗ trợ giao tiếp thời gian thực (WebSocket).
+- **JWT (jsonwebtoken)** (v9.0.2): Xác thực người dùng.
+- **bcryptjs** (v3.0.2): Hash mật khẩu.
+- **dotenv** (v16.4.7): Quản lý biến môi trường.
+- **Joi** (v17.13.3): Thư viện xác thực dữ liệu.
+- **CORS** (v2.8.5): Hỗ trợ Cross-Origin Resource Sharing.
+- **Nodemon** (v3.1.9): Công cụ tự động khởi động lại server khi có thay đổi (dev).
 
 ## 🚀 Cài đặt
 
