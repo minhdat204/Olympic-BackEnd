@@ -26,7 +26,7 @@ olympic-back-end/
 │   │   └── config.js    # Cấu hình database
 │   ├── controllers/     # Xử lý logic request/response
 │   │   ├── authController.js
-│   │   └── matchController.js
+│   │   └── ...
 │   ├── middleware/      # Middleware xử lý request
 │   │   ├── auth.js      # Xác thực JWT
 │   │   ├── role.js      # Kiểm tra vai trò
@@ -34,32 +34,26 @@ olympic-back-end/
 │   ├── migrations/      # Migration database
 │   │   └── 20250306071939-create-user.js
 │   ├── models/          # Định nghĩa model Sequelize
-│   │   ├── answer.js
-│   │   ├── contestant.js
-│   │   ├── group.js
 │   │   ├── index.js     # Kết nối và khởi tạo models
-│   │   ├── match.js
-│   │   ├── question.js
-│   │   ├── question_package.js
-│   │   ├── question_package_detail.js
-│   │   ├── round.js
-│   │   ├── score_log.js
 │   │   ├── user.js
-│   │   └── video_submission.js
+│   │   └── ...
 │   ├── routes/          # Định nghĩa API routes
 │   │   ├── auth.js
-│   │   └── match.js
+│   │   └── ...
 │   ├── schemas/         # Schema xác thực Joi
-│   │   └── authSchema.js
+│   │   ├── authSchema.js
+│   │   └── ...
 │   ├── seeders/         # Dữ liệu mẫu
 │   │   └── 20250306072221-demo-user.js
 │   ├── services/        # Business logic
 │   │   ├── authService.js
-│   │   └── matchService.js
+│   │   └── ...
 │   ├── socketEmitters/  # Phát sự kiện WebSocket
-│   │   └── matchEmitter.js
+│   │   ├── matchEmitter.js
+│   │   └── ...
 │   ├── socketHandlers/  # Xử lý sự kiện WebSocket
-│   │   └── matchHandler.js
+│   │   ├── matchHandler.js
+│   │   └── ...
 │   ├── server.js        # Entry point của ứng dụng
 │   ├── socketManager.js # Quản lý các kết nối Socket.io
 │   └── test-connection.js # Script kiểm tra kết nối database
