@@ -3,11 +3,11 @@ const express = require('express');
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const matchRoutes = require('./routes/match'); 
-const http = require('http');
 const socketIo = require('socket.io');
 const { initializeSocket } = require('./socketManager');
 const cors = require('cors'); // Import thư viện cors
 
+const http = require('http');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {

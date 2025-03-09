@@ -1,11 +1,14 @@
-const { AuthService } = require('../services/authService');
+const { AuthService } = require("../services/authService");
 
 class AuthController {
   static async login(req, res) {
     try {
-      const { username, password } = req.body;  // Lấy username và password từ body
-      const { token, user } = await AuthService.login(username, password);  // Gọi hàm login từ AuthService
-      res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+      const { username, password } = req.body; // Lấy username và password từ body
+      const { token, user } = await AuthService.login(username, password); // Gọi hàm login từ AuthService
+      res.json({
+        token,
+        user: { id: user.id, username: user.username, role: user.role },
+      });
     } catch (err) {
       res.status(401).json({ message: err.message });
     }
@@ -14,20 +17,24 @@ class AuthController {
     try {
       const { username, email, password } = req.body;
       const user = await AuthService.register(username, email, password);
-      res.status(201).json({ user: { id: user.id, username: user.username, role: user.role } });
+      res
+        .status(201)
+        .json({
+          user: { id: user.id, username: user.username, role: user.role },
+        });
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
   }
-static async logout(req, res) {
+  static async logout(req, res) {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        const result = await AuthService.logout(token);
-        res.json(result);
+      const token = req.headers.authorization?.split(" ")[1];
+      const result = await AuthService.logout(token);
+      res.json(result);
     } catch (err) {
-        res.status(401).json({ message: err.message });
+      res.status(401).json({ message: err.message });
     }
-}
+  }
 }
 
 module.exports = AuthController;
