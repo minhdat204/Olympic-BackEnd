@@ -16,6 +16,60 @@ Olympic Back-End App là một ứng dụng back-end được xây dựng bằng
 - **CORS** (v2.8.5): Hỗ trợ Cross-Origin Resource Sharing.
 - **Nodemon** (v3.1.9): Công cụ tự động khởi động lại server khi có thay đổi (dev).
 
+## 📂 Cấu trúc thư mục
+
+```
+olympic-back-end/
+├── node_modules/        # Thư mục chứa các dependencies
+├── src/                 # Mã nguồn chính
+│   ├── config/          # Cấu hình ứng dụng
+│   │   └── config.js    # Cấu hình database
+│   ├── controllers/     # Xử lý logic request/response
+│   │   ├── authController.js
+│   │   └── matchController.js
+│   ├── middleware/      # Middleware xử lý request
+│   │   ├── auth.js      # Xác thực JWT
+│   │   ├── role.js      # Kiểm tra vai trò
+│   │   └── validate.js  # Xác thực dữ liệu với Joi
+│   ├── migrations/      # Migration database
+│   │   └── 20250306071939-create-user.js
+│   ├── models/          # Định nghĩa model Sequelize
+│   │   ├── answer.js
+│   │   ├── contestant.js
+│   │   ├── group.js
+│   │   ├── index.js     # Kết nối và khởi tạo models
+│   │   ├── match.js
+│   │   ├── question.js
+│   │   ├── question_package.js
+│   │   ├── question_package_detail.js
+│   │   ├── round.js
+│   │   ├── score_log.js
+│   │   ├── user.js
+│   │   └── video_submission.js
+│   ├── routes/          # Định nghĩa API routes
+│   │   ├── auth.js
+│   │   └── match.js
+│   ├── schemas/         # Schema xác thực Joi
+│   │   └── authSchema.js
+│   ├── seeders/         # Dữ liệu mẫu
+│   │   └── 20250306072221-demo-user.js
+│   ├── services/        # Business logic
+│   │   ├── authService.js
+│   │   └── matchService.js
+│   ├── socketEmitters/  # Phát sự kiện WebSocket
+│   │   └── matchEmitter.js
+│   ├── socketHandlers/  # Xử lý sự kiện WebSocket
+│   │   └── matchHandler.js
+│   ├── server.js        # Entry point của ứng dụng
+│   ├── socketManager.js # Quản lý các kết nối Socket.io
+│   └── test-connection.js # Script kiểm tra kết nối database
+├── .env                 # Biến môi trường (không được commit)
+├── .env.example         # Mẫu biến môi trường
+├── .gitignore           # Loại trừ file khỏi Git
+├── package.json         # Thông tin project và dependencies
+└── README.md            # Tài liệu hướng dẫn
+```
+
 ## 🚀 Cài đặt
 
 ### 1️⃣ Yêu cầu hệ thống
