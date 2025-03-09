@@ -75,14 +75,24 @@ olympic-back-end/
 Tạo tệp `.env` trong thư mục gốc và thêm các biến môi trường:
 
 ```env
-PORT=5000
+# === CORE ===
+NODE_ENV=development
+PORT=3000
+
+# === DATABASE ===
 DB_HOST=localhost
+DB_PORT=3306
 DB_USER=root
-DB_PASS=yourpassword
-DB_NAME=olympic_db
-JWT_SECRET=your_secret_key
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
+DB_PASSWORD=your_database_password_here
+DB_NAME=your_database_name_here
+DB_DIALECT=mysql
+
+# === AUTHENTICATION ===
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRES_IN=1d
+
+# === REDIS ===
+REDIS_URL=redis://127.0.0.1:6379
 ```
 
 ### 3️⃣ Cài đặt package
