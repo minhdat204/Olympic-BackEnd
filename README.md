@@ -26,7 +26,7 @@ olympic-back-end/
 │   │   └── config.js    # Cấu hình database
 │   ├── controllers/     # Xử lý logic request/response
 │   │   ├── authController.js
-│   │   └── matchController.js
+│   │   └── ...
 │   ├── middleware/      # Middleware xử lý request
 │   │   ├── auth.js      # Xác thực JWT
 │   │   ├── role.js      # Kiểm tra vai trò
@@ -34,32 +34,26 @@ olympic-back-end/
 │   ├── migrations/      # Migration database
 │   │   └── 20250306071939-create-user.js
 │   ├── models/          # Định nghĩa model Sequelize
-│   │   ├── answer.js
-│   │   ├── contestant.js
-│   │   ├── group.js
 │   │   ├── index.js     # Kết nối và khởi tạo models
-│   │   ├── match.js
-│   │   ├── question.js
-│   │   ├── question_package.js
-│   │   ├── question_package_detail.js
-│   │   ├── round.js
-│   │   ├── score_log.js
 │   │   ├── user.js
-│   │   └── video_submission.js
+│   │   └── ...
 │   ├── routes/          # Định nghĩa API routes
 │   │   ├── auth.js
-│   │   └── match.js
+│   │   └── ...
 │   ├── schemas/         # Schema xác thực Joi
-│   │   └── authSchema.js
+│   │   ├── authSchema.js
+│   │   └── ...
 │   ├── seeders/         # Dữ liệu mẫu
 │   │   └── 20250306072221-demo-user.js
 │   ├── services/        # Business logic
 │   │   ├── authService.js
-│   │   └── matchService.js
+│   │   └── ...
 │   ├── socketEmitters/  # Phát sự kiện WebSocket
-│   │   └── matchEmitter.js
+│   │   ├── matchEmitter.js
+│   │   └── ...
 │   ├── socketHandlers/  # Xử lý sự kiện WebSocket
-│   │   └── matchHandler.js
+│   │   ├── matchHandler.js
+│   │   └── ...
 │   ├── server.js        # Entry point của ứng dụng
 │   ├── socketManager.js # Quản lý các kết nối Socket.io
 │   └── test-connection.js # Script kiểm tra kết nối database
@@ -81,14 +75,24 @@ olympic-back-end/
 Tạo tệp `.env` trong thư mục gốc và thêm các biến môi trường:
 
 ```env
-PORT=5000
+# === CORE ===
+NODE_ENV=development
+PORT=3000
+
+# === DATABASE ===
 DB_HOST=localhost
+DB_PORT=3306
 DB_USER=root
-DB_PASS=yourpassword
-DB_NAME=olympic_db
-JWT_SECRET=your_secret_key
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
+DB_PASSWORD=your_database_password_here
+DB_NAME=your_database_name_here
+DB_DIALECT=mysql
+
+# === AUTHENTICATION ===
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRES_IN=1d
+
+# === REDIS ===
+REDIS_URL=redis://127.0.0.1:6379
 ```
 
 ### 3️⃣ Cài đặt package
