@@ -18,6 +18,8 @@ module.exports = {
         group_name: `Nhóm ${i - 1}`,
         match_id: 1,
         judge_id: i,
+        created_at: new Date(),
+        updated_at: new Date(),
       });
     }
     await queryInterface.bulkInsert("groups", groups);

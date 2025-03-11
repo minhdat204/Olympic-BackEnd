@@ -10,6 +10,8 @@ module.exports = {
         name: `Video ${i}`,
         video_url: `url${i}`,
         type: type[Math.floor(Math.random() * type.length)],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
     }
     await queryInterface.bulkInsert("video_submissions", video);

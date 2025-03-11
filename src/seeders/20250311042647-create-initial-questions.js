@@ -20,6 +20,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Alpha",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         question_text: "Hệ điều hành nào được phát triển bởi Microsoft?",
@@ -35,6 +37,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Alpha",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         question_text: "Hình ảnh này là logo của ngôn ngữ lập trình nào?",
@@ -51,6 +55,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Alpha",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         question_text:
@@ -68,6 +74,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Alpha",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
 
       // 🔹 4 câu Beta
@@ -86,6 +94,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Beta",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         question_text: "Hình ảnh này mô tả công nghệ nào?",
@@ -101,6 +111,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Beta",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         question_text: "Đây là đoạn âm thanh thông báo từ ứng dụng nào?",
@@ -121,6 +133,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Beta",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         question_text: "Video này giải thích về công nghệ gì?",
@@ -141,6 +155,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Beta",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
 
       // 🔹 4 câu RC
@@ -159,6 +175,8 @@ module.exports = {
         time_left: 30,
         dificulty: "RC",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         question_text: "Hình ảnh này mô tả thuật toán nào?",
@@ -179,6 +197,8 @@ module.exports = {
         time_left: 30,
         dificulty: "RC",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
 
       // 🔹 1 câu Gold
@@ -202,6 +222,8 @@ module.exports = {
         time_left: 30,
         dificulty: "Gold",
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     ]);
   },

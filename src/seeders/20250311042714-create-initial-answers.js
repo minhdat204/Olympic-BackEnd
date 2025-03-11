@@ -11,6 +11,8 @@ module.exports = {
         question_id: Math.floor(Math.random() * 8) + 1,
         contestant_id: Math.floor(Math.random() * 60) + 1,
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       });
     }
 

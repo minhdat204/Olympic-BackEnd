@@ -21,6 +21,10 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      class: {
+        type: Sequelize.STRING(20),
+        allowNull: false,
+      },
       class_year: {
         type: Sequelize.TINYINT,
         allowNull: false,

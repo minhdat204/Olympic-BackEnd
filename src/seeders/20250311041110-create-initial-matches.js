@@ -18,6 +18,8 @@ module.exports = {
           rescued_count_1: 8,
           rescued_count_2: 6,
           round_name: "Bán Kết",
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ],
       {}

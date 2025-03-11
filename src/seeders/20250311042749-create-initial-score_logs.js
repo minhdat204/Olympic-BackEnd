@@ -11,6 +11,8 @@ module.exports = {
         rescued: Math.random() < 0.5,
         contestant_id: Math.floor(Math.random() * 59) + 1,
         match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       });
     }
 
