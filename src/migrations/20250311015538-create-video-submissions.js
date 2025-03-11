@@ -7,7 +7,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
       name: {
         type: Sequelize.STRING,
@@ -21,17 +21,26 @@ module.exports = {
         type: Sequelize.ENUM("Team", "Sponsor"),
         allowNull: false,
       },
-      createdAt: {
-        allowNull: false,
+      created_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      updatedAt: {
-        allowNull: false,
+      updated_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("video_submissions");
+    try {
+      // Tắt kiểm tra khóa ngoại
+      await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+      
+      // Xóa bảng
+      await queryInterface.dropTable("video_submissions");
+    } finally {
+      // Bật lại kiểm tra khóa ngoại
+      await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    }
   },
 };
