@@ -27,7 +27,6 @@ module.exports = {
       },
       current_question_id: {
         type: Sequelize.SMALLINT,
-        defaultValue: -1,
       },
       rescue_1: {
         type: Sequelize.TINYINT,
@@ -55,7 +54,6 @@ module.exports = {
       },
       gold_winner_id: {
         type: Sequelize.SMALLINT,
-        defaultValue: -1,
       },
       created_at: {
         allowNull: true,

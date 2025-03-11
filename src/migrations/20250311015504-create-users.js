@@ -1,4 +1,7 @@
 "use strict";
+
+const { defaultValueSchemable } = require("sequelize/lib/utils");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -25,6 +28,7 @@ module.exports = {
       },
       role: {
         type: Sequelize.ENUM("admin", "judge"),
+        DefaultValue: "judge",
         allowNull: false,
       },
       created_at: {
