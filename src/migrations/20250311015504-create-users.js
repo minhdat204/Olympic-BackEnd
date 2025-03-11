@@ -7,14 +7,16 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
       username: {
         type: Sequelize.STRING(50),
+        unique: true,
         allowNull: false,
       },
       email: {
         type: Sequelize.STRING,
+        unique: true,
         allowNull: false,
       },
       password: {
@@ -25,17 +27,26 @@ module.exports = {
         type: Sequelize.ENUM("admin", "judge"),
         allowNull: false,
       },
-      createdAt: {
-        allowNull: false,
+      created_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      updatedAt: {
-        allowNull: false,
+      updated_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("users");
+    try {
+      // Tắt kiểm tra khóa ngoại
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
+
+      // Xóa bảng
+      await queryInterface.dropTable("users");
+    } finally {
+      // Bật lại kiểm tra khóa ngoại
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+    }
   },
 };

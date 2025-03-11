@@ -10,7 +10,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
       match_name: {
         type: Sequelize.STRING,
@@ -26,7 +26,8 @@ module.exports = {
         type: Sequelize.ENUM("UpComing", "Ongoing", "Finished"),
       },
       current_question_id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
+        defaultValue: -1,
       },
       rescue_1: {
         type: Sequelize.TINYINT,
@@ -36,7 +37,7 @@ module.exports = {
         type: Sequelize.TINYINT,
         DefaultValue: -1,
       },
-      Plane: {
+      plane: {
         type: Sequelize.TINYINT,
         DefaultValue: -1,
       },
@@ -52,18 +53,30 @@ module.exports = {
         type: Sequelize.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
         allowNull: false,
       },
-      gold_winner_id: Sequelize.INTEGER,
-      createdAt: {
-        allowNull: false,
+      gold_winner_id: {
+        type: Sequelize.SMALLINT,
+        defaultValue: -1,
+      },
+      created_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      updatedAt: {
-        allowNull: false,
+      updated_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("matches");
+    try {
+      // Tắt kiểm tra khóa ngoại
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
+
+      // Xóa bảng
+      await queryInterface.dropTable("matches");
+    } finally {
+      // Bật lại kiểm tra khóa ngoại
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+    }
   },
 };

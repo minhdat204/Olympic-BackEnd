@@ -7,7 +7,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
       question_text: {
         type: Sequelize.TEXT,
@@ -34,7 +34,7 @@ module.exports = {
       media_url: {
         type: Sequelize.STRING,
       },
-      correct_anwer: {
+      correct_answer: {
         type: Sequelize.TEXT,
       },
       options: {
@@ -44,30 +44,39 @@ module.exports = {
         type: Sequelize.TINYINT,
       },
       timer: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
         allowNull: false,
       },
       time_left: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
       dificulty: {
         type: Sequelize.ENUM("Alpha", "Beta", "RC", "Gold"),
         allowNull: false,
       },
       match_id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
-      createdAt: {
-        allowNull: false,
+      created_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      updatedAt: {
-        allowNull: false,
+      updated_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("questions");
+    try {
+      // Tắt kiểm tra khóa ngoại
+      await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+      
+      // Xóa bảng
+      await queryInterface.dropTable("questions");
+    } finally {
+      // Bật lại kiểm tra khóa ngoại
+      await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    }
   },
 };

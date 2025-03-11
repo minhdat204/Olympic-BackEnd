@@ -10,7 +10,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
       fullname: {
         type: Sequelize.STRING(50),
@@ -21,36 +21,47 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
-      shool: {
-        type: Sequelize.STRING(100),
-      },
       class_year: {
         type: Sequelize.TINYINT,
         allowNull: false,
       },
       registration_number: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
       qualifying_score: {
         type: Sequelize.TINYINT,
       },
       current_question: {
         type: Sequelize.TINYINT,
+        defaultValue: -1,
       },
       group_id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.SMALLINT,
       },
-      createdAt: {
-        allowNull: false,
+      status: {
+        type: Sequelize.ENUM("not_started", "in_progress", "eliminated", "pending_revival"),
+        defaultValue: "not_started",
+      },
+      created_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      updatedAt: {
-        allowNull: false,
+      updated_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("contestants");
+    try {
+      // Tắt kiểm tra khóa ngoại
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
+
+      // Xóa bảng
+      await queryInterface.dropTable("contestants");
+    } finally {
+      // Bật lại kiểm tra khóa ngoại
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+    }
   },
 };
