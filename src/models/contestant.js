@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
+    class: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
     class_year: {
       type: DataTypes.TINYINT,
       allowNull: false,
