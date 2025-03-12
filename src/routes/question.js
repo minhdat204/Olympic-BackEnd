@@ -5,12 +5,14 @@ const AuthMiddleware = require("../middleware/auth");
 const role = require("../middleware/role");
 const { questionSchema } = require("../schemas/questionSchema");
 const validate = require("../middleware/validate");
-router.get("/", role("admin"), AuthMiddleware, QuestionController.getQuestions);
-router.get("/:id", AuthMiddleware, QuestionController.getMatchById);
+
+
+router.get("/", AuthMiddleware, QuestionController.getQuestions);
+router.get("/:id", AuthMiddleware, QuestionController.getQuestionById);
 router.post(
   "/",
-  role("admin"),
-  validate(questionSchema),
+  role("admin"), // role("admin") middleware
+  validate(questionSchema), // validate middleware
   AuthMiddleware,
   QuestionController.createQuestion
 );
@@ -19,12 +21,12 @@ router.patch(
   role("admin"),
   validate(questionSchema),
   AuthMiddleware,
-  QuestionController.updateMatchStatus
+  QuestionController.updateQuestionStatus
 );
 router.delete(
   "/:id",
   role("admin"),
   AuthMiddleware,
-  QuestionController.deleteMatch
+  QuestionController.deleteQuestion
 );
 module.exports = router;

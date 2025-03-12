@@ -1,31 +1,31 @@
-const { Questions } = require("../models");
+const { Question } = require("../models");
 module.exports = {
   // tạo trận đấu mới
-  async createQuestions(QuestionsData) {
-    return Questions.create(QuestionsData);
+  async createQuestion(QuestionsData) {
+    return Question.create(QuestionsData);
   },
 
   // lấy danh sách các trận đấu
-  async getQuestionses() {
-    return Questions.findAll();
+  async getQuestion() {
+    return Question.findAll();
   },
 
   //chi tiết trận đấu
-  async getQuestionsById(QuestionsId) {
-    return Questions.findByPk(QuestionsId);
+  async getQuestionById(QuestionsId) {
+    return Question.findByPk(QuestionsId);
   },
 
   // cập nhật trạng thái trận đấu
   async updateStatus(QuestionsId, data) {
-    const Questions = await Questions.findByPk(QuestionsId);
-    if (!Questions) throw new Error("⚠️ Questions not found");
+    const Question = await Question.findByPk(QuestionsId);
+    if (!Question) throw new Error("⚠️ Question not found");
 
-    Questions.status = newStatus;
-    await Questions.save();
-    return Questions;
+    Question.status = newStatus;
+    await Question.save();
+    return Question;
   },
-  async deteleQuestions(id) {
-    const Questions = await Questions.findByPk(id);
-    return Questions.destroy();
+  async deteleQuestion(id) {
+    const Question = await Question.findByPk(id);
+    return Question.destroy();
   },
 };
