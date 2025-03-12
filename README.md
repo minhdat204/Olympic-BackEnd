@@ -95,6 +95,11 @@ JWT_EXPIRES_IN=1d
 REDIS_URL=redis://127.0.0.1:6379
 ```
 
+Hoặc dùng lệnh để lấy file `.env`:
+```
+cp .env.example .env
+```
+
 ### 3️⃣ Cài đặt package
 Chạy lệnh sau để cài đặt tất cả dependencies:
 

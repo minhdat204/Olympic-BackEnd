@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/server.js"
+    "start": "nodemon src/server.js",
+    "dev": "node src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +19,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.13.0",
+    "olympic-back-end-app": "file:",
     "redis": "^4.7.0",
     "sequelize": "^6.37.6",
     "socket.io": "^4.8.1"

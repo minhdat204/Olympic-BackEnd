@@ -1,71 +1,88 @@
 'use strict';
 const { Model } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
   class Match extends Model {
     static associate(models) {
-      Match.belongsTo(models.Round, { foreignKey: 'round_id' });
-      Match.belongsTo(models.QuestionPackage, { foreignKey: 'package_id' });
-      Match.belongsTo(models.QuestionPackageDetail, { foreignKey: 'current_question_id' });
-      Match.belongsTo(models.Contestant, { foreignKey: 'gold_winner_id', as: 'goldWinner' });
-
-      Match.hasMany(models.Group, { foreignKey: 'match_id' });
-      Match.hasMany(models.ScoreLog, { foreignKey: 'match_id' });
-      Match.hasMany(models.Contestant, { foreignKey: 'current_round_id' });
+      Match.belongsTo(models.Question, {
+        foreignKey: 'current_question_id',
+        as: 'current_question'
+      });
+      Match.belongsTo(models.Contestant, {
+        foreignKey: 'gold_winner_id',
+        as: 'gold_winner'
+      });
+      Match.hasMany(models.Group, {
+        foreignKey: 'match_id',
+        as: 'groups'
+      });
+      Match.hasMany(models.Question, {
+        foreignKey: 'match_id',
+        as: 'questions'
+      });
+      Match.hasMany(models.Score_log, {
+        foreignKey: 'match_id',
+        as: 'score_logs'
+      });
+      Match.hasMany(models.Answer, {
+        foreignKey: 'match_id',
+        as: 'answers'
+      });
     }
   }
-
-  Match.init(
-    {
-      match_name: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-      },
-      start_time: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
-      end_time: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
-      status: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
-      },
-      current_question_id: {
-        type: DataTypes.BIGINT(20),
-        allowNull: false,
-      },
-      gold_winner_id: {
-        type: DataTypes.BIGINT(20),
-        allowNull: true,
-      },
-      current_question_status: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
-      },
-      completed_questions: {
-        type: DataTypes.BIGINT(20),
-        allowNull: false,
-      },
-      round_id: {
-        type: DataTypes.BIGINT(20),
-        allowNull: false,
-      },
-      package_id: {
-        type: DataTypes.BIGINT(20),
-        allowNull: false,
-      },
+  Match.init({
+    id: {
+      type: DataTypes.SMALLINT,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false
     },
-    {
-      sequelize,
-      modelName: 'Match',
-      tableName: 'matches',
-      timestamps: true,
-      underscored: true,
+    match_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    start_time: DataTypes.DATE,
+    end_time: DataTypes.DATE,
+    status: DataTypes.ENUM("UpComing", "Ongoing", "Finished"),
+    current_question_id: {
+      type: DataTypes.SMALLINT,
+      defaultValue: -1
+    },
+    rescue_1: {
+      type: DataTypes.TINYINT,
+      defaultValue: -1
+    },
+    rescue_2: {
+      type: DataTypes.TINYINT,
+      defaultValue: -1
+    },
+    plane: {
+      type: DataTypes.TINYINT,
+      defaultValue: -1
+    },
+    rescued_count_1: {
+      type: DataTypes.TINYINT,
+      defaultValue: -1
+    },
+    rescued_count_2: {
+      type: DataTypes.TINYINT,
+      defaultValue: -1
+    },
+    round_name: {
+      type: DataTypes.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
+      allowNull: false
+    },
+    gold_winner_id: {
+      type: DataTypes.SMALLINT,
+      defaultValue: -1
     }
-  );
-
+  }, {
+    sequelize,
+    modelName: 'Match',
+    tableName: 'matches',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    underscored: true
+  });
   return Match;
 };
