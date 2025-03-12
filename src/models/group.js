@@ -1,27 +1,43 @@
 'use strict';
 const { Model } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
   class Group extends Model {
     static associate(models) {
-      Group.belongsTo(models.Match, { foreignKey: 'match_id' });
-      Group.belongsTo(models.User, { foreignKey: 'judge_id' });
-      Group.hasMany(models.Contestant, { foreignKey: 'group_id' });
+      Group.belongsTo(models.Match, {
+        foreignKey: 'match_id',
+        as: 'match'
+      });
+      Group.belongsTo(models.User, {
+        foreignKey: 'judge_id',
+        as: 'judge'
+      });
+      Group.hasMany(models.Contestant, {
+        foreignKey: 'group_id',
+        as: 'contestants'
+      });
     }
   }
-
-  Group.init(
-    {
-      group_name: DataTypes.STRING(100),
+  Group.init({
+    id: {
+      type: DataTypes.SMALLINT,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false
     },
-    {
-      sequelize,
-      modelName: 'Group',
-      tableName: 'groups',
-      timestamps: true,
-      underscored: true,
-    }
-  );
-
+    group_name: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
+    match_id: DataTypes.SMALLINT,
+    judge_id: DataTypes.SMALLINT
+  }, {
+    sequelize,
+    modelName: 'Group',
+    tableName: 'groups',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    underscored: true
+  });
   return Group;
 };
