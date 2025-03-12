@@ -66,4 +66,4 @@ const matchSchema = Joi.object({
   updated_at: Joi.date().optional(),
 });
 
-module.exports = matchSchema;
+module.exports = { matchSchema };

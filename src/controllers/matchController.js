@@ -31,12 +31,9 @@ exports.getMatchById = async (req, res) => {
 };
 
 // cập nhật trạng thái trận đấu
-exports.updateMatchStatus = async (req, res) => {
+exports.updateMatch = async (req, res) => {
   try {
-    const match = await MatchService.updateStatus(
-      req.params.id,
-      req.body.status
-    );
+    const match = await MatchService.updateMatch(req.params.id, req.body);
     res.json(match);
   } catch (error) {
     res.status(400).json({ error: error.message });

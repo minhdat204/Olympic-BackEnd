@@ -1,4 +1,5 @@
 const { Question } = require("../models");
+const { error } = require("../schemas/questionSchema");
 module.exports = {
   // tạo trận đấu mới
   async createQuestion(QuestionsData) {
@@ -16,16 +17,15 @@ module.exports = {
   },
 
   // cập nhật trạng thái trận đấu
-  async updateStatus(QuestionsId, data) {
-    const Question = await Question.findByPk(QuestionsId);
-    if (!Question) throw new Error("⚠️ Question not found");
-
-    Question.status = newStatus;
-    await Question.save();
-    return Question;
+  async updateQuestion(QuestionsId, data) {
+    const question = await Question.findByPk(QuestionsId);
+    if (!question) throw new Error("Không tìm thấy câu hỏi");
+    question.set(data);
+    await question.save();
+    return question;
   },
   async deteleQuestion(id) {
-    const Question = await Question.findByPk(id);
-    return Question.destroy();
+    const question = await Question.findByPk(id);
+    return question.destroy();
   },
 };

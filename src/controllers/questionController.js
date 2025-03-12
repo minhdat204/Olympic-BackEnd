@@ -13,7 +13,7 @@ exports.createQuestion = async (req, res) => {
 // Lấy danh sách câu hỏi
 exports.getQuestions = async (req, res) => {
   try {
-    const questions = await QuestionService.getQuestions();
+    const questions = await QuestionService.getQuestion();
     res.json(questions);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -34,11 +34,11 @@ exports.getQuestionById = async (req, res) => {
 };
 
 // Cập nhật trạng thái câu hỏi
-exports.updateQuestionStatus = async (req, res) => {
+exports.updateQuestions = async (req, res) => {
   try {
-    const question = await QuestionService.updateStatus(
+    const question = await QuestionService.updateQuestion(
       req.params.id,
-      req.body.status
+      req.body
     );
     res.json(question);
   } catch (error) {
@@ -49,8 +49,8 @@ exports.updateQuestionStatus = async (req, res) => {
 // Xóa câu hỏi
 exports.deleteQuestion = async (req, res) => {
   try {
-    const question = await QuestionService.deleteQuestion(req.params.id);
-    res.json({ message: "✅ Xóa câu hỏi thành công" });
+    const question = await QuestionService.deteleQuestion(req.params.id);
+    res.json({ message: " Xóa câu hỏi thành công" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
