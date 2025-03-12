@@ -129,6 +129,7 @@ module.exports = {
       onUpdate: 'CASCADE'
     });
 
+
     // questions table
     await queryInterface.addConstraint('questions', {
       fields: ['match_id'],
@@ -142,6 +143,19 @@ module.exports = {
       onUpdate: 'CASCADE'
     });
 
+     // Thêm ràng buộc UNIQUE cho Users table
+     await queryInterface.addConstraint('users', {
+      fields: ['username'],
+      type: 'unique',
+      name: 'users_username_unique'
+    });
+
+    await queryInterface.addConstraint('users', {
+      fields: ['email'],
+      type: 'unique',
+      name: 'users_email_unique'
+    });
+
   },
 
   async down (queryInterface, Sequelize) {
@@ -149,6 +163,10 @@ module.exports = {
       // Tạm thời tắt kiểm tra khóa ngoại
       await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
   
+       // Xóa ràng buộc UNIQUE users
+       await queryInterface.removeConstraint('users', 'users_username_unique');
+       await queryInterface.removeConstraint('users', 'users_email_unique');
+
       // Xóa các ràng buộc khóa ngoại
       await queryInterface.removeConstraint('answers', 'fk_answers_question_id');
       await queryInterface.removeConstraint('answers', 'fk_answers_contestant_id');

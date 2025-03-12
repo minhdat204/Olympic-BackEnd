@@ -18,12 +18,16 @@ module.exports = (sequelize, DataTypes) => {
     },
     username: {
       type: DataTypes.STRING(50),
-      unique: true,
+      unique: {
+        name: 'users_email_unique'
+      },
       allowNull: false
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
+      unique: {
+        name: 'users_username_unique'
+      },
       allowNull: false
     },
     password: {
@@ -41,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    underscored: true
+    underscored: true,
   });
   return User;
 };

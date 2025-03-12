@@ -14,12 +14,10 @@ module.exports = {
       },
       username: {
         type: Sequelize.STRING(50),
-        unique: true,
         allowNull: false,
       },
       email: {
         type: Sequelize.STRING,
-        unique: true,
         allowNull: false,
       },
       password: {
@@ -28,7 +26,7 @@ module.exports = {
       },
       role: {
         type: Sequelize.ENUM("admin", "judge"),
-        DefaultValue: "judge",
+        defaultValue: "judge",
         allowNull: false,
       },
       created_at: {
