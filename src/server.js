@@ -7,6 +7,9 @@ const cors = require('cors'); // Import thư viện cors
 const authRoutes = require('./routes/auth');
 const matchRoutes = require('./routes/match'); 
 const contestantRoutes = require('./routes/contestant');
+const groupRoutes = require('./routes/group');
+const scoreLogRoutes = require('./routes/scoreLog');
+const videoSubmissionRoutes = require('./routes/videoSubmission');
 
 const http = require('http');
 const app = express();
@@ -23,6 +26,9 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/contestants', contestantRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api/score-logs', scoreLogRoutes);
+app.use('/api/videos', videoSubmissionRoutes);
 
 initializeSocket(io);
 
