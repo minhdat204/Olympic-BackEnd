@@ -46,6 +46,8 @@ Thumbs.db
 desktop.ini
 
 # Sequelize
+.sequelizerc
+config/config.js
 
 # Redis
 dump.rdb

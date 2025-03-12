@@ -1,12 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const { sequelize } = require('./models');
+const authRoutes = require('./routes/auth');
+const matchRoutes = require('./routes/match'); 
 const socketIo = require('socket.io');
 const { initializeSocket } = require('./socketManager');
 const cors = require('cors'); // Import thư viện cors
-const authRoutes = require('./routes/auth');
-const matchRoutes = require('./routes/match'); 
-const contestantRoutes = require('./routes/contestant');
 
 const http = require('http');
 const app = express();
@@ -22,7 +21,6 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/match', matchRoutes);
-app.use('/api/contestants', contestantRoutes);
 
 initializeSocket(io);
 

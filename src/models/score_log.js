@@ -1,40 +1,27 @@
 'use strict';
 const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  class Score_log extends Model {
+  class ScoreLog extends Model {
     static associate(models) {
-      Score_log.belongsTo(models.Contestant, {
-        foreignKey: 'contestant_id',
-        as: 'contestant'
-      });
-      Score_log.belongsTo(models.Match, {
-        foreignKey: 'match_id',
-        as: 'match'
-      });
+      ScoreLog.belongsTo(models.Contestant, { foreignKey: 'contestant_id' });
+      ScoreLog.belongsTo(models.Match, { foreignKey: 'match_id' });
     }
   }
-  Score_log.init({
-    id: {
-      type: DataTypes.SMALLINT,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false
+
+  ScoreLog.init(
+    {
+      score: DataTypes.DECIMAL(10, 2),
+      updated_at: DataTypes.DATE,
     },
-    score: DataTypes.TINYINT,
-    rescued: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    contestant_id: DataTypes.SMALLINT,
-    match_id: DataTypes.SMALLINT
-  }, {
-    sequelize,
-    modelName: 'Score_log',
-    tableName: 'score_logs',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    underscored: true
-  });
-  return Score_log;
+    {
+      sequelize,
+      modelName: 'ScoreLog',
+      tableName: 'score_logs',
+      timestamps: false,
+      underscored: true,
+    }
+  );
+
+  return ScoreLog;
 };

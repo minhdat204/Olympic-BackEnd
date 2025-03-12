@@ -3,11 +3,11 @@ const { AuthService } = require("../services/authService");
 class AuthController {
   static async login(req, res) {
     try {
-      const { usernameOrEmail, password } = req.body; // Lấy username và password từ body
-      const { token, user } = await AuthService.login(usernameOrEmail, password); // Gọi hàm login từ AuthService
+      const { username, password } = req.body; // Lấy username và password từ body
+      const { token, user } = await AuthService.login(username, password); // Gọi hàm login từ AuthService
       res.json({
         token,
-        user: { id: user.id, username: user.username, email: user.email, role: user.role },
+        user: { id: user.id, username: user.username, role: user.role },
       });
     } catch (err) {
       res.status(401).json({ message: err.message });
