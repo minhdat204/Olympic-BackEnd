@@ -9,6 +9,7 @@ const matchRoutes = require('./routes/match');
 const contestantRoutes = require('./routes/contestant');
 const groupRoutes = require('./routes/group');
 const scoreLogRoutes = require('./routes/scoreLog');
+const videoSubmissionRoutes = require('./routes/videoSubmission');
 
 const http = require('http');
 const app = express();
@@ -27,6 +28,7 @@ app.use('/api/match', matchRoutes);
 app.use('/api/contestants', contestantRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/score-logs', scoreLogRoutes);
+app.use('/api/videos', videoSubmissionRoutes);
 
 initializeSocket(io);
 
