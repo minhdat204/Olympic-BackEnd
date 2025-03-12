@@ -1,4 +1,5 @@
 const { Match } = require("../models");
+const { error } = require("../schemas/questionSchema");
 const { emitMatchStatusUpdate } = require("../socketEmitters/matchEmitter");
 
 module.exports = {
@@ -18,16 +19,11 @@ module.exports = {
   },
 
   // cập nhật trạng thái trận đấu
-  async updateStatus(matchId, newStatus) {
+  async updateMatch(matchId, data) {
     const match = await Match.findByPk(matchId);
-    if (!match) throw new Error("⚠️ Match not found");
-
-    match.status = newStatus;
+    if (!match) throw new Error("Không tìm thấy trận đấu");
+    match.set(data);
     await match.save();
-
-    // Emit sự kiện realtime
-    emitMatchStatusUpdate(matchId, newStatus);
-
     return match;
   },
   async deteleMatch(id) {

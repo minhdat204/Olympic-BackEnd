@@ -1,32 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const QuestionController = require("../controllers/questionController");
-const AuthMiddleware = require("../middleware/auth");
+const auth = require("../middleware/auth");
 const role = require("../middleware/role");
 const { questionSchema } = require("../schemas/questionSchema");
 const validate = require("../middleware/validate");
-
-
-router.get("/", AuthMiddleware, QuestionController.getQuestions);
-router.get("/:id", AuthMiddleware, QuestionController.getQuestionById);
+router.get("/", QuestionController.getQuestions);
+router.get("/:id", QuestionController.getQuestionById);
+router.use(auth);
 router.post(
   "/",
   role("admin"), // role("admin") middleware
   validate(questionSchema), // validate middleware
-  AuthMiddleware,
   QuestionController.createQuestion
 );
 router.patch(
   "/:id",
   role("admin"),
   validate(questionSchema),
-  AuthMiddleware,
-  QuestionController.updateQuestionStatus
+  QuestionController.updateQuestions
 );
-router.delete(
-  "/:id",
-  role("admin"),
-  AuthMiddleware,
-  QuestionController.deleteQuestion
-);
+router.delete("/:id", role("admin"), QuestionController.deleteQuestion);
 module.exports = router;

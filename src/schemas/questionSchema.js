@@ -72,4 +72,4 @@ const questionSchema = Joi.object({
   }),
 });
 
-module.exports = questionSchema;
+module.exports = { questionSchema };
