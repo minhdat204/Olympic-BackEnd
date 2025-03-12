@@ -1,8 +1,0 @@
-const path = require("path");
-
-module.exports = {
-  config: path.resolve(__dirname, "src/config/config.js"), // Chỉ đường dẫn tới file config.js
-  "models-path": path.resolve(__dirname, "src/models"),
-  "seeders-path": path.resolve(__dirname, "src/seeders"),
-  "migrations-path": path.resolve(__dirname, "src/migrations"),
-};

@@ -1,5 +1,5 @@
-const { Match } = require("../models");
-const { emitMatchStatusUpdate } = require("../socketEmitters/matchEmitter");
+const { Match } = require('../models');
+const { emitMatchStatusUpdate } = require('../socketEmitters/matchEmitter');
 
 module.exports = {
   // tạo trận đấu mới
@@ -20,7 +20,7 @@ module.exports = {
   // cập nhật trạng thái trận đấu
   async updateStatus(matchId, newStatus) {
     const match = await Match.findByPk(matchId);
-    if (!match) throw new Error("⚠️ Match not found");
+    if (!match) throw new Error('⚠️ Match not found');
 
     match.status = newStatus;
     await match.save();
@@ -29,9 +29,5 @@ module.exports = {
     emitMatchStatusUpdate(matchId, newStatus);
 
     return match;
-  },
-  async deleteMatch(id) {
-    const macth = await Match.findByPk(id);
-    return await macth.destroy();
-  },
+  }
 };
