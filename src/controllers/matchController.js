@@ -1,4 +1,4 @@
-const MatchService = require('../services/matchService');
+const MatchService = require("../services/matchService");
 
 // tạo trận đấu
 exports.createMatch = async (req, res) => {
@@ -33,8 +33,19 @@ exports.getMatchById = async (req, res) => {
 // cập nhật trạng thái trận đấu
 exports.updateMatchStatus = async (req, res) => {
   try {
-    const match = await MatchService.updateStatus(req.params.id, req.body.status);
+    const match = await MatchService.updateStatus(
+      req.params.id,
+      req.body.status
+    );
     res.json(match);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.deleteMatch = async (req, res) => {
+  try {
+    const match = await MatchService.deteleMatch(req.params.id);
+    res.json("Xóa trận đấu thành công");
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
