@@ -153,6 +153,12 @@ module.exports = {
       type: "unique",
       name: "users_email_unique",
     });
+
+    await queryInterface.addConstraint("contestants", {
+      fields: ["email"],
+      type: "unique",
+      name: "contestants_email_unique",
+    });
   },
 
   async down(queryInterface, Sequelize) {
@@ -163,6 +169,7 @@ module.exports = {
       // Xóa ràng buộc UNIQUE users
       await queryInterface.removeConstraint("users", "users_username_unique");
       await queryInterface.removeConstraint("users", "users_email_unique");
+      await queryInterface.removeConstraint("contestants", "contestants_email_unique");
 
       // Xóa các ràng buộc khóa ngoại
       await queryInterface.removeConstraint(
