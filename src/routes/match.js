@@ -8,6 +8,9 @@ const validate = require("../middleware/validate");
 const { matchSchema } = require("../schemas/matchSchema");
 
 router.get("/", MatchController.getMatches);
+router.get("/list/rounds", MatchController.getListRounds);
+router.get("/list/match/:round_name", MatchController.getMatchByIdRounds);
+router.get("/list/status", MatchController.getListSatatus);
 router.get("/:id", MatchController.getMatchById);
 router.use(auth);
 router.post(
@@ -16,12 +19,13 @@ router.post(
   validate(matchSchema),
   MatchController.createMatch
 );
-router.patch(
+router.put(
   "/:id",
   role("admin"),
   validate(matchSchema),
   MatchController.updateMatch
 );
+router.patch("/:id", role("admin"), MatchController.updateMatchBy);
 router.delete("/:id", role("admin"), MatchController.deleteMatch);
 
 module.exports = router;
