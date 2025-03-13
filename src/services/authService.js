@@ -22,7 +22,7 @@ class AuthService {
         }
         
         // Tạo token với id và role của user
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ id: user.id, role: user.role, username: user.username, email: user.password }, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRES_IN || '1d',
         });
         
