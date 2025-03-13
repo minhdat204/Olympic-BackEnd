@@ -47,3 +47,39 @@ exports.deleteMatch = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+exports.updateMatchBy = async (req, res) => {
+  try {
+    const match = await MatchService.updateMatchBy(req.params.id, req.body);
+    res.json(match);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.getListRounds = async (req, res) => {
+  try {
+    const listRounds = await MatchService.getListRounds();
+    console.log(listRounds);
+    res.json({ listRounds: listRounds });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.getMatchByIdRounds = async (req, res) => {
+  try {
+    const listMatchByIdRounds = await MatchService.getMatchByIdRounds(
+      req.params.round_name
+    );
+    res.json({ listMatch: listMatchByIdRounds });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getListSatatus = async (req, res) => {
+  try {
+    const listStatus = await MatchService.getListSatatus();
+    res.json({ listStatus: listStatus });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
