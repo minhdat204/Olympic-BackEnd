@@ -4,12 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     let contestants = [];
-    const statusList = [
-      "not_started",
-      "in_progress",
-      "eliminated",
-      "pending_revival",
-    ];
+    const statusList = ["Chưa thi", "Đang thi", "Bị loại", "Chờ cứu"];
     const classList = ["10A1", "10A2", "10A3", "10A4", "10A5", "10A6"];
     const classYearList = [22, 23, 24];
 

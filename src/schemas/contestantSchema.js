@@ -25,7 +25,7 @@ const createContestantSchema = Joi.object({
   qualifying_score: Joi.number().integer().min(0).max(100).allow(null),
   current_question: Joi.number().integer().default(-1),
   group_id: Joi.number().integer().allow(null),
-  status: Joi.string().valid('not_started', 'in_progress', 'eliminated', 'pending_revival').default('not_started')
+  status: Joi.string().valid("Chưa thi", "Đang thi", "Bị loại", "Chờ cứu").default("Chưa thi")
 });
 
 const updateContestantSchema = Joi.object({
@@ -42,7 +42,7 @@ const updateContestantSchema = Joi.object({
   qualifying_score: Joi.number().integer().min(0).max(100).allow(null),
   current_question: Joi.number().integer(),
   group_id: Joi.number().integer().allow(null),
-  status: Joi.string().valid('not_started', 'in_progress', 'eliminated', 'pending_revival')
+  status: Joi.string().valid("Chưa thi", "Đang thi", "Bị loại", "Chờ cứu")
 });
 
 module.exports = {

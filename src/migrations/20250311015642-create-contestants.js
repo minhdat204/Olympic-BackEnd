@@ -43,8 +43,8 @@ module.exports = {
         type: Sequelize.SMALLINT,
       },
       status: {
-        type: Sequelize.ENUM("not_started", "in_progress", "eliminated", "pending_revival"),
-        defaultValue: "not_started",
+        type: Sequelize.ENUM("Chưa thi", "Đang thi", "Bị loại", "Chờ cứu"),
+        defaultValue: "Chưa thi",
       },
       created_at: {
         allowNull: true,

@@ -23,7 +23,8 @@ module.exports = {
         type: Sequelize.DATE,
       },
       status: {
-        type: Sequelize.ENUM("UpComing", "Ongoing", "Finished"),
+        type: Sequelize.ENUM("Chưa diễn ra", "Đang diễn ra", "Đã kết thúc"),
+        defaultValue: "Chưa diễn ra",
       },
       current_question_id: {
         type: Sequelize.SMALLINT,

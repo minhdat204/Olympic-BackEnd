@@ -43,7 +43,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       start_time: DataTypes.DATE,
       end_time: DataTypes.DATE,
-      status: DataTypes.ENUM("UpComing", "Ongoing", "Finished"),
+      status: {
+        type: DataTypes.ENUM("Chưa diễn ra", "Đang diễn ra", "Đã kết thúc"),
+        defaultValue: "Chưa diễn ra",
+      },
       current_question_id: {
         type: DataTypes.SMALLINT,
         allowNull: true,

@@ -55,8 +55,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     group_id: DataTypes.SMALLINT,
     status: {
-      type: DataTypes.ENUM("not_started", "in_progress", "eliminated", "pending_revival"),
-      defaultValue: 'not_started',
+      type: DataTypes.ENUM("Chưa thi", "Đang thi", "Bị loại", "Chờ cứu"),
+      defaultValue: 'Chưa thi',
     },
   }, {
     sequelize,

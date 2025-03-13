@@ -15,11 +15,11 @@ const matchSchema = Joi.object({
   }),
 
   status: Joi.string()
-    .valid("UpComing", "Ongoing", "Finished")
+    .valid("Chưa diễn ra", "Đang diễn ra", "Đã kết thúc")
     .required()
     .messages({
       "any.only":
-        "Trạng thái chỉ có thể là 'UpComing', 'Ongoing' hoặc 'Finished'.",
+        "Trạng thái chỉ có thể là 'Chưa diễn ra', 'Đang diễn ra' hoặc 'Đã kết thúc'.",
       "any.required": "Trạng thái trận đấu là bắt buộc.",
     }),
 
