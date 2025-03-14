@@ -42,9 +42,6 @@ router.get("/list/status", ContestantController.getListStatus);
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
 
-// lấy danh sách thí sinh theo judge_id và match_id (lấy tên group, tên trận đấu...)
-router.get("/judge-match/:judge_id/:match_id", ContestantController.getContestantByJudgeAndMatch);
-
 
 
 /**
@@ -73,6 +70,9 @@ router.patch("/:id/status", ContestantController.updateContestantStatus);
 
 // Xóa thí sinh (admin)
 router.delete("/:id", role("admin"), ContestantController.deleteContestant);
+
+// lấy danh sách thí sinh theo group dựa vào judge_id và match_id (lấy tên group, tên trận đấu...)
+router.get("/judge-match/:judge_id/:match_id", role("judge"), ContestantController.getContestantByJudgeAndMatch);
 
 
 module.exports = router;
