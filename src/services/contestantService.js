@@ -1,5 +1,5 @@
-const { Contestant, Group, Score_log, Answer } = require('../models');
-const { Op } = require('sequelize');
+const { Contestant, Group, Score_log, Answer } = require("../models");
+const { Op } = require("sequelize");
 
 class ContestantService {
   // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
@@ -7,14 +7,14 @@ class ContestantService {
     const options = {
       where: {},
       include: [
-        { 
+        {
           model: Group,
-          as: 'group'
-        }
+          as: "group",
+        },
       ],
-      order: [['id', 'ASC']],
+      order: [["id", "ASC"]],
       offset: (page - 1) * limit,
-      limit
+      limit,
     };
 
     // Xử lý các bộ lọc
@@ -24,17 +24,17 @@ class ContestantService {
       options.where[Op.or] = [
         { fullname: { [Op.like]: `%${filters.search}%` } },
         { email: { [Op.like]: `%${filters.search}%` } },
-        { class: { [Op.like]: `%${filters.search}%` } }
+        { class: { [Op.like]: `%${filters.search}%` } },
       ];
     }
 
     const { count, rows } = await Contestant.findAndCountAll(options);
-    
+
     return {
       total: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      contestants: rows
+      contestants: rows,
     };
   }
 
@@ -42,14 +42,14 @@ class ContestantService {
   static async getContestantById(id) {
     const contestant = await Contestant.findByPk(id, {
       include: [
-        { model: Group, as: 'group' },
-        { model: Score_log, as: 'score_logs' },
-        { model: Answer, as: 'answers' }
-      ]
+        { model: Group, as: "group" },
+        { model: Score_log, as: "score_logs" },
+        { model: Answer, as: "answers" },
+      ],
     });
 
     if (!contestant) {
-      throw new Error('Thí sinh không tồn tại');
+      throw new Error("Thí sinh không tồn tại");
     }
 
     return contestant;
@@ -59,11 +59,11 @@ class ContestantService {
   static async createContestant(contestantData) {
     // Kiểm tra email đã tồn tại chưa
     const existingContestant = await Contestant.findOne({
-      where: { email: contestantData.email }
+      where: { email: contestantData.email },
     });
 
     if (existingContestant) {
-      throw new Error('Email đã được sử dụng');
+      throw new Error("Email đã được sử dụng");
     }
 
     return await Contestant.create(contestantData);
@@ -74,17 +74,17 @@ class ContestantService {
     const contestant = await Contestant.findByPk(id);
 
     if (!contestant) {
-      throw new Error('Thí sinh không tồn tại');
+      throw new Error("Thí sinh không tồn tại");
     }
 
     // Nếu thay đổi email, kiểm tra email mới đã tồn tại chưa
     if (contestantData.email && contestantData.email !== contestant.email) {
       const existingContestant = await Contestant.findOne({
-        where: { email: contestantData.email }
+        where: { email: contestantData.email },
       });
 
       if (existingContestant) {
-        throw new Error('Email đã được sử dụng');
+        throw new Error("Email đã được sử dụng");
       }
     }
 
@@ -97,13 +97,18 @@ class ContestantService {
     const contestant = await Contestant.findByPk(id);
 
     if (!contestant) {
-      throw new Error('Thí sinh không tồn tại');
+      throw new Error("Thí sinh không tồn tại");
     }
 
     // Kiểm tra trạng thái hợp lệ
-    const validStatuses = ['not_started', 'in_progress', 'eliminated', 'pending_revival'];
+    const validStatuses = [
+      "not_started",
+      "in_progress",
+      "eliminated",
+      "pending_revival",
+    ];
     if (!validStatuses.includes(status)) {
-      throw new Error('Trạng thái không hợp lệ');
+      throw new Error("Trạng thái không hợp lệ");
     }
 
     await contestant.update({ status });
@@ -115,11 +120,14 @@ class ContestantService {
     const contestant = await Contestant.findByPk(id);
 
     if (!contestant) {
-      throw new Error('Thí sinh không tồn tại');
+      throw new Error("Thí sinh không tồn tại");
     }
 
     await contestant.destroy();
-    return { message: 'Đã xóa thí sinh thành công' };
+    return { message: "Đã xóa thí sinh thành công" };
+  }
+  static async getListStatus() {
+    return Object.values(Contestant.getAttributes().status.values);
   }
 }
 

@@ -75,9 +75,9 @@ exports.getMatchByIdRounds = async (req, res) => {
   }
 };
 
-exports.getListSatatus = async (req, res) => {
+exports.getListStatus = async (req, res) => {
   try {
-    const listStatus = await MatchService.getListSatatus();
+    const listStatus = await MatchService.getListStatus();
     res.json({ listStatus: listStatus });
   } catch (error) {
     res.status(400).json({ error: error.message });
