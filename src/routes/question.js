@@ -8,7 +8,14 @@ const validate = require("../middleware/validate");
 router.get("/list/dificultys", QuestionController.getListDificulty);
 router.get("/list/question_type", QuestionController.getListQuestionType);
 router.get("/", QuestionController.getQuestions);
+
+// lấy danh sách câu hỏi theo trận đấu
 router.get("/match/:id", QuestionController.getQuestionsByMatch);
+// lấy chi tiết câu hỏi theo trận đấu
+router.get("/:question_order/match/:match_id", QuestionController.getQuestionByMatch);
+// gọi emit socket để gửi câu hỏi cho màn hình trình chiếu
+router.get("/emit/:question_order/match/:match_id", QuestionController.emitQuestionByMatch);
+
 router.get("/:id", QuestionController.getQuestionById);
 router.use(auth);
 router.post(

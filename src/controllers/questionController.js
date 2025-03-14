@@ -1,4 +1,5 @@
 const QuestionService = require("../services/questionService");
+const { emitQuestion } = require("../socketEmitters/questionEmitter");
 
 // Tạo câu hỏi
 exports.createQuestion = async (req, res) => {
@@ -85,10 +86,43 @@ exports.getListQuestionType = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Lấy danh sách câu hỏi theo trận đấu
 exports.getQuestionsByMatch = async (req, res) => {
   try {
     const quesion = await QuestionService.getQuestionsByMatch(req.params.id);
     res.json(quesion);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Lấy chi tiết câu hỏi theo trận đấu
+exports.getQuestionByMatch = async (req, res) => {
+  try {
+    const question = await QuestionService.getQuestionByMatch(
+      req.params.question_order,
+      req.params.match_id
+    );
+    res.json(question);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// gọi emit socket để gửi câu hỏi cho màn hình trình chiếu
+exports.emitQuestionByMatch = async (req, res) => {
+  try {
+    const question_order = req.params.question_order;
+    const match_id = req.params.match_id;
+    // lấy câu hỏi theo trận đấu và thứ tự câu hỏi
+    const question = await QuestionService.getQuestionByMatch(
+      question_order,
+      match_id
+    );
+    // gọi emit socket để gửi câu hỏi
+    emitQuestion(match_id, question_order, question);
+    res.json(question);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

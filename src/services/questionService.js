@@ -50,9 +50,25 @@ module.exports = {
   async getListQuestionType() {
     return Object.values(Question.getAttributes().question_type.values);
   },
+
+  // lấy danh sách câu hỏi theo trận đấu
   async getQuestionsByMatch(match_id) {
     return Question.findAll({
       where: { match_id },
+      include: [
+        {
+          model: Match,
+          as: "match",
+          attributes: ["match_name"],
+        },
+      ],
+    });
+  },
+
+  // lấy chi tiết câu hỏi theo trận đấu
+  async getQuestionByMatch(match_id, question_order) {
+    return Question.findOne({
+      where: { match_id, question_order },
       include: [
         {
           model: Match,
