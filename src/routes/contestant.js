@@ -29,6 +29,7 @@ router.post("/upload", upload.single("file"), (req, res) => {
 
   res.json({ message: "File processed successfully!", data });
 });
+
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 
@@ -40,7 +41,15 @@ router.get("/list/status", ContestantController.getListStatus);
 
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
-// Các route dưới đây cần xác thực
+
+// lấy danh sách thí sinh theo judge_id và match_id (lấy tên group, tên trận đấu)
+router.get("/judge-match/:judge_id/:match_id", ContestantController.getContestantByJudgeAndMatch);
+
+
+
+/**
+ * Các route dưới đây cần xác thực
+ *  */ 
 router.use(auth);
 
 // Tạo thí sinh mới (admin)
@@ -64,5 +73,6 @@ router.patch("/:id/status", ContestantController.updateContestantStatus);
 
 // Xóa thí sinh (admin)
 router.delete("/:id", role("admin"), ContestantController.deleteContestant);
+
 
 module.exports = router;

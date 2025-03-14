@@ -1,5 +1,6 @@
-const { Contestant, Group, Score_log, Answer } = require("../models");
-const { Op, Sequelize } = require("sequelize");
+const { Contestant, Group, Score_log, Answer, Match } = require("../models");
+const { Op, where, Sequelize } = require("sequelize");
+
 class ContestantService {
   // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
   static async getContestants(filters = {}, page = 1, limit = 20) {
@@ -125,9 +126,14 @@ class ContestantService {
     await contestant.destroy();
     return { message: "Đã xóa thí sinh thành công" };
   }
+
+
+  // lấy ds trạng thái thí sinh
   static async getListStatus() {
     return Object.values(Contestant.getAttributes().status.values);
   }
+
+  // lấy ds lớp thí sinh
   static async getListClass() {
     return Contestant.findAll({
       attributes: [
@@ -135,6 +141,47 @@ class ContestantService {
       ],
       raw: true,
     });
+  }
+
+  // Lấy danh sách thí sinh theo judge_id và match_id (lấy tên group, tên trận đấu)
+  static async getContestantByJudgeAndMatch(judge_id, match_id) {
+    const contestants = await Contestant.findAll({
+      include: [
+        {
+          model: Group,
+          as: "group",
+          where: { 
+            judge_id,
+            match_id 
+          },
+          include: [
+            {
+              model: Match,
+              as: "match",
+            },
+          ],
+        },
+      ],
+    });
+
+    return contestants;
+  }
+
+  // lấy group_id, group_name, match_id, match_name dựa vào judge_id, match_id
+  static async getGroupAndMatch(judge_id, match_id) {
+    const groupAndMatch = await Group.findOne({
+      where: { judge_id, match_id },
+      attributes: ['id', 'group_name'],
+      include: [
+      {
+        model: Match,
+        as: "match",
+        attributes: ['id', 'match_name']
+      },
+      ],
+    });
+
+    return groupAndMatch;
   }
 }
 
