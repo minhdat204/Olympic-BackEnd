@@ -1,4 +1,4 @@
-const { Contestant, Group, Score_log, Answer, Match } = require("../models");
+const { Contestant, Group, Score_log, Answer, Match, User } = require("../models");
 const { Op, where, Sequelize } = require("sequelize");
 
 class ContestantService {
@@ -143,7 +143,7 @@ class ContestantService {
     });
   }
 
-  // Lấy danh sách thí sinh theo judge_id và match_id (lấy tên group, tên trận đấu)
+  // lấy danh sách thí sinh dựa vào judge_id, match_id (kết bảng với groups, contestants, matches)
   static async getContestantByJudgeAndMatch(judge_id, match_id) {
     const contestants = await Contestant.findAll({
       include: [
@@ -167,17 +167,22 @@ class ContestantService {
     return contestants;
   }
 
-  // lấy group_id, group_name, match_id, match_name dựa vào judge_id, match_id
+  // lấy group_id, group_name, match_id, match_name, judge_id, username dựa vào judge_id, match_id (GROUPS)
   static async getGroupAndMatch(judge_id, match_id) {
     const groupAndMatch = await Group.findOne({
       where: { judge_id, match_id },
-      attributes: ['id', 'group_name'],
+      attributes: ['id', 'group_name', 'judge_id'],
       include: [
       {
         model: Match,
         as: "match",
         attributes: ['id', 'match_name']
       },
+      {
+        model: User,
+        as: "judge",
+        attributes: ['username']
+      }
       ],
     });
 

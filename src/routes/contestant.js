@@ -42,7 +42,7 @@ router.get("/list/status", ContestantController.getListStatus);
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
 
-// lấy danh sách thí sinh theo judge_id và match_id (lấy tên group, tên trận đấu)
+// lấy danh sách thí sinh theo judge_id và match_id (lấy tên group, tên trận đấu...)
 router.get("/judge-match/:judge_id/:match_id", ContestantController.getContestantByJudgeAndMatch);
 
 

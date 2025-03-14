@@ -174,22 +174,24 @@ class ContestantController {
     try {
       const { judge_id, match_id } = req.params;
 
-      // lấy danh sách thí sinh dựa vào judge_id, match_id
+      // lấy danh sách thí sinh dựa vào judge_id, match_id (kết bảng với groups, contestants, matches)
       const contestants = await ContestantService.getContestantByJudgeAndMatch(
         judge_id,
         match_id
       );
-      
-      // lấy group_id, group_name, match_id, match_name dựa vào judge_id, match_id
+
+      // lấy group_id, group_name, match_id, match_name, judge_id, username dựa vào judge_id, match_id (GROUPS)
       const GroupAndMatch = await ContestantService.getGroupAndMatch(judge_id, match_id);
 
       res.status(200).json({
         status: "success",
         message: "Lấy danh sách thí sinh thành công",
-        groupId: GroupAndMatch.id,
-        groupName: GroupAndMatch.group_name,
         matchId: GroupAndMatch.match.id,
         matchName: GroupAndMatch.match.match_name,
+        judgeId: GroupAndMatch.judge_id,
+        judgeUserName: GroupAndMatch.judge.username,
+        groupId: GroupAndMatch.id,
+        groupName: GroupAndMatch.group_name,
         listContestants: contestants,
       });
     } catch (error) {
