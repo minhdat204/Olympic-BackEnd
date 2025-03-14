@@ -1,6 +1,5 @@
 const { Contestant, Group, Score_log, Answer } = require("../models");
-const { Op } = require("sequelize");
-
+const { Op, Sequelize } = require("sequelize");
 class ContestantService {
   // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
   static async getContestants(filters = {}, page = 1, limit = 20) {
@@ -128,6 +127,14 @@ class ContestantService {
   }
   static async getListStatus() {
     return Object.values(Contestant.getAttributes().status.values);
+  }
+  static async getListClass() {
+    return Contestant.findAll({
+      attributes: [
+        [Sequelize.fn("DISTINCT", Sequelize.col("class")), "class"], // Lấy giá trị duy nhất
+      ],
+      raw: true,
+    });
   }
 }
 

@@ -180,6 +180,16 @@ class ContestantController {
       });
     }
   }
+
+  // lấy ds lớp học
+  static async getListClass(req, res) {
+    try {
+      const listClass = await ContestantService.getListClass();
+      res.json({ listClass: listClass });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = ContestantController;
