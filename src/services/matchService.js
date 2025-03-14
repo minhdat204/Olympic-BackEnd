@@ -58,7 +58,7 @@ module.exports = {
     return match;
   },
   async updateMatchBy(id, data) {
-    const match = await Match.findByPk();
+    const match = await Match.findByPk(id);
     if (!match) throw new Error(`Không tìm thấy trận đấu`);
     match.set(data);
     await match.save();
