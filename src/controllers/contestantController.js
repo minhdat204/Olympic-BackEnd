@@ -158,6 +158,28 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  // lấy danh sách thí sinh theo judge_id và match_id (lấy tên group, tên trận đấu)
+  static async getContestantByJudgeAndMatch(req, res) {
+    try {
+      const { judge_id, match_id } = req.params;
+      const contestants = await ContestantService.getContestantByJudgeAndMatch(
+        judge_id,
+        match_id
+      );
+
+      res.status(200).json({
+        status: "success",
+        message: "Lấy danh sách thí sinh thành công",
+        data: contestants,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message || "Đã có lỗi xảy ra",
+      });
+    }
+  }
 }
 
 module.exports = ContestantController;
