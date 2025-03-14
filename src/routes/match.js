@@ -10,7 +10,7 @@ const { matchSchema } = require("../schemas/matchSchema");
 router.get("/", MatchController.getMatches);
 router.get("/list/rounds", MatchController.getListRounds);
 router.get("/list/match/:round_name", MatchController.getMatchByIdRounds);
-router.get("/list/status", MatchController.getListSatatus);
+router.get("/list/status", MatchController.getListStatus);
 router.get("/:id", MatchController.getMatchById);
 router.use(auth);
 router.post(
