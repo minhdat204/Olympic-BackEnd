@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM("Trắc Nghiệm", "Hình Ảnh", "Âm Thanh", "Video", "Tự Luận"),
       allowNull: false
     },
-    media_url: DataTypes.STRING,
+    media_url: DataTypes.JSON,
     correct_answer: DataTypes.TEXT,
     options: DataTypes.JSON,
     question_order: DataTypes.TINYINT,

@@ -47,7 +47,7 @@ module.exports = {
         question_explanation:
           "Logo này thuộc về một ngôn ngữ lập trình nổi tiếng.",
         question_type: "Hình Ảnh",
-        media_url: "https://example.com/python-logo.png",
+        media_url: null,
         correct_answer: "Python",
         options: JSON.stringify(["Python", "Java", "C#", "Ruby"]),
         question_order: 3,
@@ -66,7 +66,7 @@ module.exports = {
         question_explanation:
           "Âm thanh này rất quen thuộc với người dùng máy tính.",
         question_type: "Âm Thanh",
-        media_url: "https://example.com/windows-startup.mp3",
+        media_url: null,
         correct_answer: "Windows XP",
         options: JSON.stringify(["Windows XP", "Windows 7", "macOS", "Linux"]),
         question_order: 4,
@@ -103,7 +103,7 @@ module.exports = {
         question_topic: "Công nghệ",
         question_explanation: "Công nghệ này là nền tảng của tiền mã hóa.",
         question_type: "Hình Ảnh",
-        media_url: "https://example.com/blockchain.png",
+        media_url: null,
         correct_answer: "Blockchain",
         options: JSON.stringify(["Blockchain", "IoT", "5G", "Big Data"]),
         question_order: 6,
@@ -120,7 +120,7 @@ module.exports = {
         question_topic: "Âm thanh",
         question_explanation: "Âm thanh này xuất hiện khi có thông báo mới.",
         question_type: "Âm Thanh",
-        media_url: "https://example.com/notification-sound.mp3",
+        media_url: null,
         correct_answer: "Facebook Messenger",
         options: JSON.stringify([
           "Facebook Messenger",
@@ -142,7 +142,7 @@ module.exports = {
         question_topic: "Công nghệ",
         question_explanation: "Công nghệ này đang thay đổi ngành tài chính.",
         question_type: "Video",
-        media_url: "https://example.com/crypto-video.mp4",
+        media_url: null,
         correct_answer: "Cryptocurrency",
         options: JSON.stringify([
           "Cryptocurrency",
@@ -184,7 +184,7 @@ module.exports = {
         question_topic: "Thuật toán",
         question_explanation: "Thuật toán này được dùng để sắp xếp dữ liệu.",
         question_type: "Hình Ảnh",
-        media_url: "https://example.com/sorting-algorithm.png",
+        media_url: null,
         correct_answer: "Quick Sort",
         options: JSON.stringify([
           "Quick Sort",

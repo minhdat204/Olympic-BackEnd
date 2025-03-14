@@ -32,7 +32,7 @@ module.exports = {
         allowNull: false,
       },
       media_url: {
-        type: Sequelize.STRING,
+        type: Sequelize.JSON,
       },
       correct_answer: {
         type: Sequelize.TEXT,
