@@ -1,4 +1,6 @@
 const express = require("express");
+const multer = require("multer");
+const xlsx = require("xlsx");
 const router = express.Router();
 const ContestantController = require("../controllers/contestantController");
 const auth = require("../middleware/auth");
@@ -8,7 +10,25 @@ const {
   createContestantSchema,
   updateContestantSchema,
 } = require("../schemas/contestantSchema");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
+router.post("/upload", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    res.status(400).json({ msg: "Vui lòng nhập file" });
+  }
+  console.log("Đã nhập được file");
+  const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+  const sheetName = workbook.SheetNames[0]; // Lấy tên sheet đầu tiên
+  const sheet = workbook.Sheets[sheetName];
+
+  // Chuyển sheet thành JSON
+  const data = xlsx.utils.sheet_to_json(sheet);
+
+  console.log("📄 Dữ liệu trong file Excel:", data); // In ra console
+
+  res.json({ message: "File processed successfully!", data });
+});
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 
@@ -18,6 +38,8 @@ router.get("/:id", ContestantController.getContestantById);
 // Lay danh sach trang thai
 router.get("/list/status", ContestantController.getListStatus);
 
+// Lay danh sach lop
+router.get("/list/class", ContestantController.getListClass);
 // Các route dưới đây cần xác thực
 router.use(auth);
 
