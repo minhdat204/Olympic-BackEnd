@@ -51,8 +51,8 @@ router.post(
   ContestantController.createContestant
 );
 
-// Cập nhật thí sinh (admin)
-router.put(
+// Cập nhật thí sinh (admin) - chỉ cập nhật những trường được gửi lên
+router.patch(
   "/:id",
   role("admin"),
   validate(updateContestantSchema),
