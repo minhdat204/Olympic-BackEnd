@@ -77,7 +77,7 @@ module.exports = {
       where: { round_name },
     });
   },
-  async getListSatatus() {
+  async getListStatus() {
     return Object.values(Match.getAttributes().status.values);
   },
 };
