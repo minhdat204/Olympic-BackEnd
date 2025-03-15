@@ -56,8 +56,12 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: -1,
     },
     group_id: DataTypes.SMALLINT,
+    round_name: {
+      type: DataTypes.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
+      allowNull: false,
+    },
     status: {
-      type: DataTypes.ENUM("Chưa thi", "Đang thi", "Bị loại", "Chờ cứu"),
+      type: DataTypes.ENUM("Chưa thi", "Đang thi", "Xác nhận 1", "Chờ cứu", "Bị loại"),
       defaultValue: 'Chưa thi',
     },
   }, {
