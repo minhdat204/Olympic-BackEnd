@@ -19,7 +19,11 @@ const handleQuestionSockets = (io, socket) => {
 const matchTimers = new Map();
 // Xử lý các sự kiện liên quan đến thời gian
 const handleTimerSockets = (io, socket) => {
-    // Lắng nghe sự kiện từ màn hình điều khiển
+    /** 
+     * Lắng nghe sự kiện từ màn hình điều khiển
+     * */ 
+
+    // Sự kiện bắt đầu hoặc tạm dừng timer
     socket.on('start_pause_timer', (matchId, timeRemaining, currentQuestionId) => {
         // lấsy hoặc tạo thông tin timer cho trận đấu
         if (!matchTimers.has(matchId)) {
