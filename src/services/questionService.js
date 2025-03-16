@@ -25,7 +25,7 @@ module.exports = {
     return Question.findByPk(QuestionsId);
   },
 
-  // cập nhật trạng thái trận đấu
+  // cập nhật trạng thái câu hỏi
   async updateQuestion(QuestionsId, data) {
     const question = await Question.findByPk(QuestionsId);
     if (!question) throw new Error("Không tìm thấy câu hỏi");
@@ -33,6 +33,8 @@ module.exports = {
     await question.save();
     return question;
   },
+
+  //cập nhật 1 phần của caua hỏi
   async updateQuestionBy(QuestionsId, data) {
     const question = await Question.findByPk(QuestionsId);
     if (!question) throw new Error("Không tìm thấy câu hỏi");
@@ -40,13 +42,19 @@ module.exports = {
     await question.save();
     return question;
   },
+
+  // xóa trận đấu
   async deteleQuestion(id) {
     const question = await Question.findByPk(id);
     return question.destroy();
   },
+
+  // lấy ds độ khó
   async getListDificulty() {
     return Object.values(Question.getAttributes().dificulty.values);
   },
+
+  // lấy ds loại câu hỏi
   async getListQuestionType() {
     return Object.values(Question.getAttributes().question_type.values);
   },
@@ -66,7 +74,7 @@ module.exports = {
   },
 
   // lấy chi tiết câu hỏi theo trận đấu
-  async getQuestionByMatch(match_id, question_order) {
+  async getQuestionByMatch(question_order, match_id) {
     return Question.findOne({
       where: { match_id, question_order },
       include: [
@@ -78,4 +86,18 @@ module.exports = {
       ],
     });
   },
+
+  // lấy câu hỏi hiện tại
+  async getCurrentQuestion(match_id) {
+    //truy vấn kiểu như này: tôi có bảng matches có cột current_question_id và khi nhập url có param là match_id thì trước tiên sẽ truy vấn ra trận đấu sau đó lấy current_question_id để tiếp tục truy vấn tới question để lấy câu hỏi.
+    const match = await Match.findOne({
+        where: { id: match_id },
+        include: {
+            model: Question,
+            as: 'current_question',
+        }
+    });
+    if (!match || !match.current_question_id) throw new Error("Trận đấu hoặc câu hỏi không tồn tại");
+    return match.current_question;
+  }
 };

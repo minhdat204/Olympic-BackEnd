@@ -11,9 +11,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'match_id',
         as: 'match'
       });
-      Question.hasMany(models.Match, {
+      Question.hasOne(models.Match, {
         foreignKey: 'current_question_id',
-        as: 'current_in_matches'
+        as: 'match_for_question'
       });
     }
   }

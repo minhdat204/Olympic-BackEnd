@@ -15,6 +15,8 @@ router.get("/match/:id", QuestionController.getQuestionsByMatch);
 router.get("/:question_order/match/:match_id", QuestionController.getQuestionByMatch);
 // gọi emit socket để gửi câu hỏi cho màn hình trình chiếu
 router.get("/emit/:question_order/match/:match_id", QuestionController.emitQuestionByMatch);
+// current question
+router.get("/current/:match_id", QuestionController.getCurrentQuestion);
 
 router.get("/:id", QuestionController.getQuestionById);
 router.use(auth);
