@@ -87,7 +87,7 @@ module.exports = {
     });
   },
 
-  // lấy câu hỏi hiện tại
+  // lấy câu hỏi hiện tại để load lại
   async getCurrentQuestion(match_id) {
     //truy vấn kiểu như này: tôi có bảng matches có cột current_question_id và khi nhập url có param là match_id thì trước tiên sẽ truy vấn ra trận đấu sau đó lấy current_question_id để tiếp tục truy vấn tới question để lấy câu hỏi.
     const match = await Match.findOne({
@@ -99,5 +99,17 @@ module.exports = {
     });
     if (!match || !match.current_question_id) throw new Error("Trận đấu hoặc câu hỏi không tồn tại");
     return match.current_question;
+  },
+
+  // Cập nhật cột time_left thành giá trị của cột timer trong bảng question
+  async updateQuestionTimeLeft(question_id) {
+    const [updated] = await Question.update(
+      { time_left: Sequelize.literal("timer") }, // Gán time_left = timer
+      { where: { id: question_id } }
+    );
+  
+    if (!updated) throw new Error("Không tìm thấy câu hỏi");
+  
+    return { success: true, message: "Cập nhật time_left thành công!" };
   }
 };

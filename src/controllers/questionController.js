@@ -139,3 +139,15 @@ exports.getCurrentQuestion = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+
+// Cập nhật cột time_left thành giá trị của cột timer trong bảng question
+exports.updateQuestionTimeLeft = async (req, res) => {
+  try {
+    const question_id = req.params.id;
+    const result = await QuestionService.updateQuestionTimeLeft(question_id);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
