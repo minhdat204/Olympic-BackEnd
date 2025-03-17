@@ -11,4 +11,13 @@ const emitQuestion = async (matchId, question_order, question) => {
   });
 };
 
-export { emitQuestion };
+// gửi time_left qua màn hình chiếu
+const emitTimeLeft = async (matchId, timeLeft) => {
+  const io = getIO();
+  io.to(`match_${matchId}`).emit('time_left_reset', {
+    matchId,
+    timeLeft
+  });
+};
+
+export { emitQuestion, emitTimeLeft };

@@ -1,6 +1,7 @@
 const { getQuestions } = require("../controllers/questionController");
 const { Question, Match } = require("../models");
 const { error } = require("../schemas/questionSchema");
+const { Sequelize } = require("sequelize");
 module.exports = {
   // tạo trận đấu mới
   async createQuestion(QuestionsData) {
@@ -103,13 +104,19 @@ module.exports = {
 
   // Cập nhật cột time_left thành giá trị của cột timer trong bảng question
   async updateQuestionTimeLeft(question_id) {
-    const [updated] = await Question.update(
+    await Question.update(
       { time_left: Sequelize.literal("timer") }, // Gán time_left = timer
       { where: { id: question_id } }
     );
   
-    if (!updated) throw new Error("Không tìm thấy câu hỏi");
+    // Lấy giá trị time_left sau khi cập nhật
+    const result = await Question.findOne({
+      attributes: ["time_left"], // Chỉ lấy cột time_left
+      where: { id: question_id },
+    });
   
-    return { success: true, message: "Cập nhật time_left thành công!" };
+    if (!result) throw new Error("Không tìm thấy câu hỏi");
+  
+    return result.time_left; // Trả về giá trị time_left
   }
 };
