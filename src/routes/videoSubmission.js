@@ -18,6 +18,7 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
+    //xử lý uniqueFile
     const uniqueName = `${Date.now()}-${file.originalname}`;
     cb(null, uniqueName);
   },

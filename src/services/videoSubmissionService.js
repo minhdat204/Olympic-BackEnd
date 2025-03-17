@@ -67,7 +67,7 @@ class VideoSubmissionService {
     if (type) updateData.type = type;
     if (file) {
       // Xóa file cũ
-      const oldFilePath = path.join(__dirname, '..', video.video_url);
+      const oldFilePath = path.join(__dirname, '..', '..', video.video_url);
       if (fs.existsSync(oldFilePath)) {
         fs.unlinkSync(oldFilePath);
       }
@@ -85,7 +85,8 @@ class VideoSubmissionService {
     }
 
     // Xóa file trên server
-    const filePath = path.join(__dirname, '..', video.video_url);
+    const filePath = path.join(__dirname, '..', '..', video.video_url);
+    console.log(filePath);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
