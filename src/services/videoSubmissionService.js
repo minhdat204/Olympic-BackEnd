@@ -4,7 +4,9 @@ const fs = require('fs');
 const path = require('path');
 
 class VideoSubmissionService {
-  static async getVideoSubmissions(filters = {}, page = 1, limit = 20) {
+
+  // lấy danh sách video phân trang
+  static async getVideoSubmissionsPaginate(filters = {}, page = 1, limit = 20) {
     const options = {
       where: {},
       order: [['id', 'ASC']],
@@ -25,6 +27,22 @@ class VideoSubmissionService {
       currentPage: page,
       videos: rows
     };
+  }
+
+  // lấy danh sách video không phân trang
+  static async getVideoSubmissions(filters = {}) {
+    const options = {
+      where: {},
+      order: [['id', 'ASC']]
+    };
+
+    if (filters.type) options.where.type = filters.type;
+    if (filters.search) {
+      options.where.name = { [Op.like]: `%${filters.search}%` };
+    }
+
+    const videos = await VideoSubmission.findAll(options);
+    return videos;
   }
 
   static async getVideoSubmissionById(id) {
@@ -67,7 +85,7 @@ class VideoSubmissionService {
     if (type) updateData.type = type;
     if (file) {
       // Xóa file cũ
-      const oldFilePath = path.join(__dirname, '..', video.video_url);
+      const oldFilePath = path.join(__dirname, '..','..', video.video_url);
       if (fs.existsSync(oldFilePath)) {
         fs.unlinkSync(oldFilePath);
       }
@@ -85,7 +103,7 @@ class VideoSubmissionService {
     }
 
     // Xóa file trên server
-    const filePath = path.join(__dirname, '..', video.video_url);
+    const filePath = path.join(__dirname,'..','..', video.video_url);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
