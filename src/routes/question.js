@@ -17,6 +17,8 @@ router.get("/:question_order/match/:match_id", QuestionController.getQuestionByM
 router.get("/emit/:question_order/match/:match_id", QuestionController.emitQuestionByMatch);
 // current question để load
 router.get("/current/:match_id", QuestionController.getCurrentQuestion);
+//  Cập nhật cột time_left thành giá trị của cột timer trong bảng question
+router.get("/update-time-left/:question_id", QuestionController.updateQuestionTimeLeft);
 
 router.get("/:id", QuestionController.getQuestionById);
 router.use(auth);
@@ -35,7 +37,6 @@ router.put(
 );
 router.delete("/:id", role("admin"), QuestionController.deleteQuestion);
 
-//  Cập nhật cột time_left thành giá trị của cột timer trong bảng question
-router.patch("/update-time-left/:question_id", QuestionController.updateQuestionTimeLeft);
+
 
 module.exports = router;

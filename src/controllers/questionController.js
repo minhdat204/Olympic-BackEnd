@@ -1,5 +1,5 @@
 const QuestionService = require("../services/questionService");
-const { emitQuestion } = require("../socketEmitters/questionEmitter");
+const { emitQuestion, emitTimeLeft } = require("../socketEmitters/questionEmitter");
 
 // Tạo câu hỏi
 exports.createQuestion = async (req, res) => {
@@ -144,8 +144,9 @@ exports.getCurrentQuestion = async (req, res) => {
 // Cập nhật cột time_left thành giá trị của cột timer trong bảng question
 exports.updateQuestionTimeLeft = async (req, res) => {
   try {
-    const question_id = req.params.id;
+    const question_id = req.params.question_id;
     const result = await QuestionService.updateQuestionTimeLeft(question_id);
+    emitTimeLeft(question_id, result);
     res.json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
