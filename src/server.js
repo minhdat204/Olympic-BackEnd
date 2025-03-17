@@ -3,9 +3,9 @@ const express = require('express');
 const { sequelize } = require('./models');
 const socketIo = require('socket.io');
 const { initializeSocket } = require('./socketManager');
-const cors = require('cors'); // Import thư viện cors
+const cors = require('cors');
 const authRoutes = require('./routes/auth');
-const matchRoutes = require('./routes/match'); 
+const matchRoutes = require('./routes/match');
 const contestantRoutes = require('./routes/contestant');
 const groupRoutes = require('./routes/group');
 const scoreLogRoutes = require('./routes/scoreLog');
@@ -14,14 +14,18 @@ const answerRoutes = require('./routes/answer');
 const questionRoutes = require('./routes/question');
 
 const http = require('http');
+const path = require('path');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "*", // Cho phép kết nối từ bất kỳ frontend nào (hoặc sửa thành domain cụ thể)
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
+
+// Phục vụ file tĩnh từ thư mục uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use(cors());
 app.use(express.json());

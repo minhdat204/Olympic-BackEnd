@@ -1,8 +1,9 @@
 const { VideoSubmission } = require('../models');
 const { Op } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
 
 class VideoSubmissionService {
-  // Lấy danh sách video (có hỗ trợ lọc và phân trang)
   static async getVideoSubmissions(filters = {}, page = 1, limit = 20) {
     const options = {
       where: {},
@@ -11,14 +12,13 @@ class VideoSubmissionService {
       limit
     };
 
-    // Xử lý các bộ lọc
     if (filters.type) options.where.type = filters.type;
     if (filters.search) {
       options.where.name = { [Op.like]: `%${filters.search}%` };
     }
 
     const { count, rows } = await VideoSubmission.findAndCountAll(options);
-    
+
     return {
       total: count,
       totalPages: Math.ceil(count / limit),
@@ -27,53 +27,78 @@ class VideoSubmissionService {
     };
   }
 
-  // Lấy chi tiết của một video
   static async getVideoSubmissionById(id) {
     const video = await VideoSubmission.findByPk(id);
-
     if (!video) {
       throw new Error('Video không tồn tại');
     }
-
     return video;
   }
 
-  // Tạo video mới
-  static async createVideoSubmission(videoData) {
+  static async createVideoSubmission(req) {
+    const { name, type } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      throw new Error('Vui lòng upload file video');
+    }
+
+    const videoUrl = `/uploads/videos/${file.filename}`;
+    const videoData = {
+      name,
+      video_url: videoUrl,
+      type
+    };
+
     return await VideoSubmission.create(videoData);
   }
 
-  // Cập nhật thông tin video
-  static async updateVideoSubmission(id, videoData) {
+  static async updateVideoSubmission(id, req) {
     const video = await VideoSubmission.findByPk(id);
-
     if (!video) {
       throw new Error('Video không tồn tại');
     }
 
-    await video.update(videoData);
+    const { name, type } = req.body;
+    const file = req.file;
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (type) updateData.type = type;
+    if (file) {
+      // Xóa file cũ
+      const oldFilePath = path.join(__dirname, '..', video.video_url);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+      updateData.video_url = `/uploads/videos/${file.filename}`;
+    }
+
+    await video.update(updateData);
     return video;
   }
 
-  // Xóa video
   static async deleteVideoSubmission(id) {
     const video = await VideoSubmission.findByPk(id);
-
     if (!video) {
       throw new Error('Video không tồn tại');
+    }
+
+    // Xóa file trên server
+    const filePath = path.join(__dirname, '..', video.video_url);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
 
     await video.destroy();
     return { message: 'Đã xóa video thành công' };
   }
 
-  // Lấy video theo loại
   static async getVideoSubmissionsByType(type) {
     const videos = await VideoSubmission.findAll({
       where: { type },
       order: [['created_at', 'DESC']]
     });
-    
     return videos;
   }
 }
