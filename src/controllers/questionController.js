@@ -115,6 +115,7 @@ exports.emitQuestionByMatch = async (req, res) => {
   try {
     const question_order = req.params.question_order;
     const match_id = req.params.match_id;
+    console.log(question_order, match_id);
     // lấy câu hỏi theo trận đấu và thứ tự câu hỏi
     const question = await QuestionService.getQuestionByMatch(
       question_order,
@@ -123,6 +124,29 @@ exports.emitQuestionByMatch = async (req, res) => {
     // gọi emit socket để gửi câu hỏi
     emitQuestion(match_id, question_order, question);
     res.json(question);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// lấy câu hỏi hiện tại
+exports.getCurrentQuestion = async (req, res) => {
+  try {
+    const match_id = req.params.match_id;
+    const question = await QuestionService.getCurrentQuestion(match_id);
+    res.json(question);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+// Cập nhật cột time_left thành giá trị của cột timer trong bảng question
+exports.updateQuestionTimeLeft = async (req, res) => {
+  try {
+    const question_id = req.params.id;
+    const result = await QuestionService.updateQuestionTimeLeft(question_id);
+    res.json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
