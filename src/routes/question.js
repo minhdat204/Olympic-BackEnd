@@ -15,6 +15,8 @@ router.get("/match/:id", QuestionController.getQuestionsByMatch);
 router.get("/:question_order/match/:match_id", QuestionController.getQuestionByMatch);
 // gọi emit socket để gửi câu hỏi cho màn hình trình chiếu
 router.get("/emit/:question_order/match/:match_id", QuestionController.emitQuestionByMatch);
+// current question để load
+router.get("/current/:match_id", QuestionController.getCurrentQuestion);
 
 router.get("/:id", QuestionController.getQuestionById);
 router.use(auth);
@@ -32,4 +34,8 @@ router.put(
   QuestionController.updateQuestions
 );
 router.delete("/:id", role("admin"), QuestionController.deleteQuestion);
+
+//  Cập nhật cột time_left thành giá trị của cột timer trong bảng question
+router.patch("/update-time-left/:question_id", QuestionController.updateQuestionTimeLeft);
+
 module.exports = router;

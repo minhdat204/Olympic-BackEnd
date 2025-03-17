@@ -101,12 +101,7 @@ class ContestantService {
     }
 
     // Kiểm tra trạng thái hợp lệ
-    const validStatuses = [
-      "not_started",
-      "in_progress",
-      "eliminated",
-      "pending_revival",
-    ];
+    const validStatuses = ["Chưa thi", "Đang thi", "Xác nhận 1", "Chờ cứu", "Bị loại"];
     if (!validStatuses.includes(status)) {
       throw new Error("Trạng thái không hợp lệ");
     }
