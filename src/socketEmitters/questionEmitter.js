@@ -20,4 +20,15 @@ const emitTimeLeft = async (matchId, timeLeft) => {
   });
 };
 
+// gửi dữ liệu question sau khi cập nhật question
+const emitUpdatedQuestion = async (matchId, question_order, question) => {
+  const io = getIO();
+  io.to(`match_${matchId}`).emit('question_updated', {
+    matchId,
+    question_order,
+    question
+  });
+}
+
+
 export { emitQuestion, emitTimeLeft };
