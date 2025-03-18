@@ -13,23 +13,8 @@ const {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-router.post("/upload", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    res.status(400).json({ msg: "Vui lòng nhập file" });
-  }
-  console.log("Đã nhập được file");
-  const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
-  const sheetName = workbook.SheetNames[0]; // Lấy tên sheet đầu tiên
-  const sheet = workbook.Sheets[sheetName];
-
-  // Chuyển sheet thành JSON
-  const data = xlsx.utils.sheet_to_json(sheet);
-
-  console.log("📄 Dữ liệu trong file Excel:", data); // In ra console
-
-  res.json({ message: "File processed successfully!", data });
-});
-
+// Lấy danh sách thí sinh theo class ,class_year, status ,
+router.get("/list", ContestantController.getListContestants);
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 
@@ -42,14 +27,25 @@ router.get("/list/status", ContestantController.getListStatus);
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
 
-
-
+router.get("/download/excel", ContestantController.downloadExcel);
 /**
  * Các route dưới đây cần xác thực
- *  */ 
+ *  */
 router.use(auth);
 
 // Tạo thí sinh mới (admin)
+router.post(
+  "/upload/excel",
+  upload.single("file"),
+  role("admin"),
+  ContestantController.uploadExcel
+);
+
+router.patch(
+  "/update/group",
+  role("admin"),
+  ContestantController.updateContestantGroup
+);
 router.post(
   "/",
   role("admin"),
@@ -72,7 +68,10 @@ router.patch("/:id/status", ContestantController.updateContestantStatus);
 router.delete("/:id", role("admin"), ContestantController.deleteContestant);
 
 // lấy danh sách thí sinh theo group dựa vào judge_id và match_id (lấy tên group, tên trận đấu...)
-router.get("/judge-match/:judge_id/:match_id", role("judge"), ContestantController.getContestantByJudgeAndMatch);
-
+router.get(
+  "/judge-match/:judge_id/:match_id",
+  role("judge"),
+  ContestantController.getContestantByJudgeAndMatch
+);
 
 module.exports = router;
