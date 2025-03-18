@@ -299,6 +299,14 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+  static async getListClass_Year(req, res) {
+    try {
+      const list = await ContestantService.getListClass_Year();
+      res.json({ list: list });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = ContestantController;

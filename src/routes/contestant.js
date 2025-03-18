@@ -28,19 +28,22 @@ router.get("/list/status", ContestantController.getListStatus);
 router.get("/list/class", ContestantController.getListClass);
 // download file mẫu
 router.get("/download/excel", ContestantController.downloadExcel);
+// Lấy danh sách khoa
+router.get("/list/class_year", ContestantController.getListClass_Year);
 // Lấy danh sachs lớp thí sinh theo khóa
 router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 
 // Câp nhật group thí sinh , theo lớp m ,match
-router.patch(
-  "/update/class/match",
-  ContestantController.updateContestantGroupByClass
-);
+
 /**
  * Các route dưới đây cần xác thực
  *  */
 router.use(auth);
-
+// Chi danh sách thí sinh theo classclass
+router.patch(
+  "/update/class/match",
+  ContestantController.updateContestantGroupByClass
+);
 // Tạo thí sinh mới (admin)
 router.post(
   "/upload/excel",

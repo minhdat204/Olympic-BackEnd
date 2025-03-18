@@ -221,6 +221,7 @@ class ContestantService {
     });
     return contestants;
   }
+  //Cập nhât group thí sinh
   static async updateContestantGroup(data) {
     //Lấy danh sach group theo trận đấu
     const listgroup = await Group.findAll({
@@ -265,6 +266,7 @@ class ContestantService {
     }
     return "Chia Nhóm Thí Sinh Thành Công";
   }
+  // Upload danh sách thí sinh excel
   static async uploadExcel(data) {
     const email = Array.from(new Map(data.map((c) => [c.email, c])).values());
     const unq = await Contestant.findAll({
@@ -366,6 +368,15 @@ class ContestantService {
       }
     }
     return "Chia danh sách thành công ";
+  }
+  // lấy danh sách khóa sinh viên
+  static async getListClass_Year() {
+    return Contestant.findAll({
+      attributes: [
+        [Sequelize.fn("DISTINCT", Sequelize.col("class_year")), "class_year"], // Lấy giá trị duy nhất
+      ],
+      raw: true,
+    });
   }
 }
 module.exports = ContestantService;
