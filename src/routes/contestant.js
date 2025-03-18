@@ -30,8 +30,8 @@ router.get("/list/class", ContestantController.getListClass);
 // download file mẫu
 router.get("/download/excel", ContestantController.downloadExcel);
 
-//API lấy total thí sinh và thí sinh còn lại (status = đang thi)
-router.get("/total", ContestantController.getTotalContestants);
+// API cập nhật thí sinh + gửi emit total thí sinh, thí sinh còn lại lên màn hình chiếu + emit dữ liệu thí sinh (status) lên màn hình điều khiển)
+router.patch("/emit/match/:match_id/contestant-status", ContestantController.updateContestantStatusAndEmit);
 
 // Lấy danh sách khoa
 router.get("/list/class_year", ContestantController.getListClass_Year);
