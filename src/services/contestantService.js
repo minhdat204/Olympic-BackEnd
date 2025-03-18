@@ -6,7 +6,7 @@ const {
   Match,
   User,
 } = require("../models");
-
+const xlsx = require("xlsx");
 const { Op, where, Sequelize } = require("sequelize");
 
 class ContestantService {
@@ -221,6 +221,7 @@ class ContestantService {
     });
     return contestants;
   }
+  //Cập nhât group thí sinh
   static async updateContestantGroup(data) {
     //Lấy danh sach group theo trận đấu
     const listgroup = await Group.findAll({
@@ -265,6 +266,7 @@ class ContestantService {
     }
     return "Chia Nhóm Thí Sinh Thành Công";
   }
+  // Upload danh sách thí sinh excel
   static async uploadExcel(data) {
     const email = Array.from(new Map(data.map((c) => [c.email, c])).values());
     const unq = await Contestant.findAll({
@@ -282,6 +284,99 @@ class ContestantService {
         inserted: newContestant.length,
       };
     }
+  }
+  // donwload file theo
+  static async downloadExcel(data) {
+    const workbook = xlsx.utils.book_new();
+    const worksheet = xlsx.utils.json_to_sheet(data);
+    xlsx.utils.book_append_sheet(workbook, worksheet, "Thí Sinh");
+    const buffer = xlsx.write(workbook, { bookType: "xlsx", type: "buffer" });
+    return buffer;
+  }
+  static async getClassByClass_Year(class_year) {
+    return Contestant.findAll({
+      attributes: [
+        [Sequelize.fn("DISTINCT", Sequelize.col("class")), "class"], // Lấy giá trị duy nhất
+      ],
+      where: { class_year: class_year },
+      raw: true,
+    });
+  }
+  // Lấy danh sách thí sinh theo lớp
+  static async getListContestantsByClass(
+    classes,
+    status = "Chưa thi",
+    round_name = "Vòng loại",
+    limit = 60
+  ) {
+    const contestants = await Contestant.findAll({
+      where: {
+        class: { [Op.in]: classes },
+        round_name: round_name,
+        status: status,
+      },
+      order: Sequelize.literal("RAND()"),
+      limit: parseInt(limit),
+      raw: true,
+    });
+    return contestants;
+  }
+  static async updateContestantGroupByClass(
+    match_id,
+    classes,
+    status,
+    round_name,
+    limit
+  ) {
+    const groups = await Group.findAll({
+      attributes: ["id"],
+      where: { match_id: match_id },
+      raw: true,
+    });
+    if (groups.length <= 0) return "Trận đáu hiện tại chưa có group";
+    const round = await Match.findByPk(match_id, {
+      attributes: ["round_name"],
+      raw: true,
+    });
+    console.log(groups);
+    const contestants = await ContestantService.getListContestantsByClass(
+      classes,
+      status,
+      round_name,
+      limit
+    );
+
+    if (contestants.length <= 0) return "Không có thí sinh để chia ";
+
+    const k = Math.floor(contestants.length / groups.length);
+    const r = contestants.length % groups.length;
+    let index = 0;
+    for (let i = 0; i < contestants.length; i++) {
+      console.log(i + 1, round.round_name, groups[index].id);
+      await Contestant.update(
+        {
+          registration_number: i + 1,
+          round_name: round.round_name,
+          group_id: groups[index].id,
+          status: "Đang thi",
+        },
+        { where: { id: contestants[i].id } }
+      );
+      let maxgroup = k + (index < r ? 1 : 0);
+      if ((i + 1) % maxgroup === 0) {
+        index++;
+      }
+    }
+    return "Chia danh sách thành công ";
+  }
+  // lấy danh sách khóa sinh viên
+  static async getListClass_Year() {
+    return Contestant.findAll({
+      attributes: [
+        [Sequelize.fn("DISTINCT", Sequelize.col("class_year")), "class_year"], // Lấy giá trị duy nhất
+      ],
+      raw: true,
+    });
   }
 }
 module.exports = ContestantService;
