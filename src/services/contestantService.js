@@ -1,4 +1,12 @@
-const { Contestant, Group, Score_log, Answer, Match, User } = require("../models");
+const {
+  Contestant,
+  Group,
+  Score_log,
+  Answer,
+  Match,
+  User,
+} = require("../models");
+
 const { Op, where, Sequelize } = require("sequelize");
 
 class ContestantService {
@@ -101,7 +109,13 @@ class ContestantService {
     }
 
     // Kiểm tra trạng thái hợp lệ
-    const validStatuses = ["Chưa thi", "Đang thi", "Xác nhận 1", "Chờ cứu", "Bị loại"];
+    const validStatuses = [
+      "Chưa thi",
+      "Đang thi",
+      "Xác nhận 1",
+      "Chờ cứu",
+      "Bị loại",
+    ];
     if (!validStatuses.includes(status)) {
       throw new Error("Trạng thái không hợp lệ");
     }
@@ -121,7 +135,6 @@ class ContestantService {
     await contestant.destroy();
     return { message: "Đã xóa thí sinh thành công" };
   }
-
 
   // lấy ds trạng thái thí sinh
   static async getListStatus() {
@@ -145,9 +158,9 @@ class ContestantService {
         {
           model: Group,
           as: "group",
-          where: { 
+          where: {
             judge_id,
-            match_id 
+            match_id,
           },
           include: [
             {
@@ -166,23 +179,109 @@ class ContestantService {
   static async getGroupAndMatch(judge_id, match_id) {
     const groupAndMatch = await Group.findOne({
       where: { judge_id, match_id },
-      attributes: ['id', 'group_name', 'judge_id'],
+      attributes: ["id", "group_name", "judge_id"],
       include: [
-      {
-        model: Match,
-        as: "match",
-        attributes: ['id', 'match_name']
-      },
-      {
-        model: User,
-        as: "judge",
-        attributes: ['username']
-      }
+        {
+          model: Match,
+          as: "match",
+          attributes: ["id", "match_name"],
+        },
+        {
+          model: User,
+          as: "judge",
+          attributes: ["username"],
+        },
       ],
     });
 
     return groupAndMatch;
   }
-}
+  // Lấy thí sinh theo match trạng thái và khóa
+  static async getListContestants(
+    className = null,
+    class_year = null,
+    status = "Chưa thi",
+    limit = 60,
+    round_name = null
+  ) {
+    console.log(limit);
+    let whereCondition = {
+      status,
+    };
 
+    limit = parseInt(limit) || 60;
+    if (className) whereCondition.class = className;
+    if (class_year) whereCondition.class_year = parseInt(class_year);
+    if (round_name) whereCondition.round_name = round_name;
+    const contestants = await Contestant.findAll({
+      where: whereCondition,
+      order: Sequelize.literal("RAND()"),
+      limit: limit,
+      raw: true,
+    });
+    return contestants;
+  }
+  static async updateContestantGroup(data) {
+    //Lấy danh sach group theo trận đấu
+    const listgroup = await Group.findAll({
+      attributes: ["id"],
+      where: { match_id: data.match_id },
+      raw: true,
+    });
+
+    if (listgroup.length <= 0) return "Trận đấu hiện tại chưa có group";
+    console.log(data);
+    const listContestants = await ContestantService.getListContestants(
+      data.className,
+      data.class_year,
+      data.status,
+      data.limit,
+      data.round_name
+    );
+
+    if (listContestants.length <= 0) return "Không có thí sinh để chia ";
+    const round_name = await Match.findByPk(data.match_id, {
+      attributes: ["round_name"],
+      raw: true,
+    });
+    const k = Math.floor(listContestants.length / listgroup.length);
+    const r = listContestants.length % listgroup.length;
+
+    let index = 0;
+    for (let i = 0; i < listContestants.length; i++) {
+      await Contestant.update(
+        {
+          registration_number: i + 1,
+          round_name: round_name.round_name,
+          group_id: listgroup[index].id,
+          status: "Đang thi",
+        },
+        { where: { id: listContestants[i].id } }
+      );
+      let maxgroup = k + (index < r ? 1 : 0);
+      if ((i + 1) % maxgroup === 0) {
+        index++;
+      }
+    }
+    return "Chia Nhóm Thí Sinh Thành Công";
+  }
+  static async uploadExcel(data) {
+    const email = Array.from(new Map(data.map((c) => [c.email, c])).values());
+    const unq = await Contestant.findAll({
+      attributes: ["email"],
+      where: { email: email.map((c) => c.email) },
+    });
+    const emailSet = new Set(unq.map((e) => e.email));
+    const newContestant = email.filter((c) => !emailSet.has(c.email));
+    if (newContestant.length == 0) {
+      return "Không có thí sinh mới để thêm";
+    } else {
+      await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
+      return {
+        msg: "Thêm thí sinh thành công",
+        inserted: newContestant.length,
+      };
+    }
+  }
+}
 module.exports = ContestantService;

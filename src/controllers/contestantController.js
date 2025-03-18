@@ -1,7 +1,10 @@
 const ContestantService = require("../services/contestantService");
-
+const xlsx = require("xlsx");
+const path = require("path");
+const fs = require("fs");
 class ContestantController {
   // Lấy danh sách thí sinh
+
   static async getContestants(req, res) {
     try {
       const filters = {
@@ -181,7 +184,10 @@ class ContestantController {
       );
 
       // lấy group_id, group_name, match_id, match_name, judge_id, username dựa vào judge_id, match_id (GROUPS)
-      const GroupAndMatch = await ContestantService.getGroupAndMatch(judge_id, match_id);
+      const GroupAndMatch = await ContestantService.getGroupAndMatch(
+        judge_id,
+        match_id
+      );
 
       res.status(200).json({
         status: "success",
@@ -200,6 +206,61 @@ class ContestantController {
         message: error.message || "Đã có lỗi xảy ra",
       });
     }
+  }
+  static async getListContestants(req, res) {
+    try {
+      const { className, class_year, limit, status, round_name } = req.query;
+      const listContestants = await ContestantService.getListContestants(
+        className,
+        class_year,
+        limit,
+        status,
+        round_name
+      );
+      res.json({ listContestants: listContestants });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async updateContestantGroup(req, res) {
+    try {
+      const status = await ContestantService.updateContestantGroup(req.body);
+      res.json({ status: status });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async uploadExcel(req, res) {
+    if (!req.file) {
+      res.status(400).json("Vui lòng nhập file");
+    }
+    const fie = req.file.originalname.split(".").pop();
+    if (!["xls", "xlsx"].includes(fie)) {
+      res.status(400).json("Vui lòng nhập đúng định dạng file .xls .xlsx ");
+    }
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0]; // Lấy tên sheet đầu tiên
+    const sheet = workbook.Sheets[sheetName];
+    // Chuyển sheet thành JSON
+    const data = xlsx.utils.sheet_to_json(sheet);
+    const list = await ContestantService.uploadExcel(data);
+
+    res.json(list);
+  }
+  static async downloadExcel(req, res) {
+    const filePath = path.join(__dirname, "../../uploads/xlsx/thisinh.xlsx"); // Đường dẫn tương đối
+
+    // Kiểm tra file có tồn tại không
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ msg: "File không tồn tại" });
+    }
+
+    res.download(filePath, "thisinh.xlsx", (err) => {
+      if (err) {
+        console.error("❌ Lỗi khi tải file:", err);
+        res.status(500).json({ msg: "Lỗi khi tải file" });
+      }
+    });
   }
 }
 
