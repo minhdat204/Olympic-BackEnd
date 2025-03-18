@@ -28,6 +28,10 @@ router.get("/list/status", ContestantController.getListStatus);
 router.get("/list/class", ContestantController.getListClass);
 
 router.get("/download/excel", ContestantController.downloadExcel);
+
+//API lấy total thí sinh và thí sinh còn lại (status = đang thi)
+router.get("/total", ContestantController.getTotalContestants);
+
 /**
  * Các route dưới đây cần xác thực
  *  */

@@ -124,6 +124,39 @@ class ContestantService {
     return contestant;
   }
 
+    // Cập nhật trạng thái của thí sinh bằng truy vấn thuần
+    static async updateContestantStatus(id, status) {
+      // Kiểm tra trạng thái hợp lệ
+      const validStatuses = [
+        "Chưa thi",
+        "Đang thi",
+        "Xác nhận 1",
+        "Chờ cứu",
+        "Bị loại",
+      ];
+      
+      if (!validStatuses.includes(status)) {
+        throw new Error("Trạng thái không hợp lệ");
+      }
+  
+      // Kiểm tra thí sinh tồn tại
+      const contestant = await Contestant.findByPk(id);
+      if (!contestant) {
+        throw new Error("Thí sinh không tồn tại");
+      }
+  
+      // Sử dụng truy vấn thuần để cập nhật
+      await Sequelize.query(
+        `UPDATE contestants SET status = :status, updated_at = NOW() WHERE id = :id`,
+        {
+          replacements: { status, id },
+          type: Sequelize.QueryTypes.UPDATE,
+        }
+      );
+  
+      return { message: "Cập nhật trạng thái thí sinh thành công" };
+    }
+  
   // Xóa thí sinh
   static async deleteContestant(id) {
     const contestant = await Contestant.findByPk(id);
@@ -282,6 +315,23 @@ class ContestantService {
         inserted: newContestant.length,
       };
     }
+  }
+
+  // API lấy total thí sinh và thí sinh còn lại (status = đang thi)
+  static async getContestantTotal() {
+    // lấy số thí sinh đang thi
+    const total = await Contestant.count({ where: { status: "Đang thi" } });
+    //lấy số thí sinh còn lại status = chờ cứu
+    const remaining = await Contestant.count({ where: { status: "Chờ cứu" } });
+    return { total, remaining };
+  }
+
+  // API lấy thí sinh theo trạng thái
+  static async getContestantsWithStatus(data) {
+    const contestants = await Contestant.findAll({
+      where: { status : data.status },
+    });
+    return contestants;
   }
 }
 module.exports = ContestantService;

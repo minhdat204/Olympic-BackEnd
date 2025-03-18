@@ -2,6 +2,8 @@ const ContestantService = require("../services/contestantService");
 const xlsx = require("xlsx");
 const path = require("path");
 const fs = require("fs");
+const { emit } = require("process");
+const {emitTotalContestants, emitContestants} = require("../socketEmitters/contestantEmitter");
 class ContestantController {
   // Lấy danh sách thí sinh
 
@@ -262,6 +264,56 @@ class ContestantController {
       }
     });
   }
+
+  /**
+   * TRÊN MÀN HÌNH ĐIỀU KHIỂN
+   * 
+   */
+  // API lấy danh sách thí sinh theo trạng thái (status = đang thi)
+  static async getContestantsWithStatus(req, res) {
+    try {
+      //lấy danh sách thí sinh trạng thái đang thi
+      const contestants = await ContestantService.getContestantsWithStatus({ status: "Đang thi" });
+      res.json({ contestants: contestants});
+    }
+    catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  /**
+   * MÀN HÌNH TRỌNG TÀI cập nhật status thí sinh
+   * gửi API lấy total thí sinh và thí sinh còn lại (status = đang thi) cho màn hình chiếu
+   * gửi API lấy danh sách thí sinh theo trạng thái cho màn hình điều khiển
+   * 
+   */
+  // API cập nhật thí sinh + gửi emit total thí sinh, thí sinh còn lại lên màn hình chiếu + emit dữ liệu thí sinh (status) lên màn hình điều khiển)
+  static async updateContestantStatusAndEmit(req, res) {
+    try {
+      //lấy id trận đấu hiện tại
+      const matchId = req.params.match_id;
+      // lấy trạng thái thí sinh hiện tại
+      const contestantId = req.body.contestant_id;
+      const contestantStatus = req.body.status;
+
+      //cập nhật trạng thái thí sinh
+      await ContestantService.updateContestantStatus(contestantId, contestantStatus);
+      //lấy total thí sinh và thí sinh còn lại trong trận
+      const contestantTotal = await ContestantService.getContestantTotal();
+      //lấy danh sách thí sinh trạng thái đang thi
+      const contestants = await ContestantService.getContestantsWithStatus({ status: "Đang thi" });
+
+      //emitTotalContestants
+      emitTotalContestants(matchId, contestantTotal.total, contestantTotal.remaining);
+      //emitContestants
+      emitContestants(matchId, contestants);
+      //trả về kết quả ở màn hình trọng tài
+      res.json({ total: contestantTotal.total, remaining: contestantTotal.remaining, message: "Cập nhật trạng thái thí sinh thành công" });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  
 }
 
 module.exports = ContestantController;
