@@ -339,7 +339,7 @@ class ContestantController {
       //lấy id trận đấu hiện tại
       const matchId = req.params.match_id;
       // lấy trạng thái thí sinh hiện tại
-      const contestantId = req.body.contestant_id;
+      const contestantId = req.body.contestantId;
       const contestantStatus = req.body.status;
 
       //cập nhật trạng thái thí sinh
