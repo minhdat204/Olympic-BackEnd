@@ -1,3 +1,4 @@
+const { date } = require("joi");
 const ContestantService = require("../services/contestantService");
 const xlsx = require("xlsx");
 const path = require("path");
@@ -250,19 +251,64 @@ class ContestantController {
     res.json(list);
   }
   static async downloadExcel(req, res) {
-    const filePath = path.join(__dirname, "../../uploads/xlsx/thisinh.xlsx"); // Đường dẫn tương đối
-
-    // Kiểm tra file có tồn tại không
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ msg: "File không tồn tại" });
+    const contestants = [
+      {
+        fullname: "Phan Thành Long",
+        email: "long@example.com",
+        class: "CD TH 22 WebB",
+        class_year: 22,
+        qualifying_score: 50,
+      },
+      {
+        fullname: "Nguyễn Văn A",
+        email: "nguyenvana@example.com",
+        class: "CD TH 22 WebB",
+        class_year: 22,
+        qualifying_score: 50,
+      },
+    ];
+    const buffer = await ContestantService.downloadExcel(contestants);
+    res.setHeader("Content-Disposition", 'attachment; filename="thisinh.xlsx"');
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.send(buffer);
+  }
+  static async getClassByClass_Year(req, res) {
+    try {
+      const class_year = parseInt(req.params.class_year);
+      const listClass = await ContestantService.getClassByClass_Year(
+        class_year
+      );
+      console.log(listClass);
+      res.json({ listClass: listClass });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
-
-    res.download(filePath, "thisinh.xlsx", (err) => {
-      if (err) {
-        console.error("❌ Lỗi khi tải file:", err);
-        res.status(500).json({ msg: "Lỗi khi tải file" });
-      }
-    });
+  }
+  static async updateContestantGroupByClass(req, res) {
+    try {
+      const { match_id, classes, status, round_name, limit } = req.body;
+      const result = await ContestantService.updateContestantGroupByClass(
+        match_id,
+        classes,
+        status,
+        round_name,
+        limit
+      );
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async getListClass_Year(req, res) {
+    try {
+      const list = await ContestantService.getListClass_Year();
+      res.json({ list: list });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
   }
 
   /**

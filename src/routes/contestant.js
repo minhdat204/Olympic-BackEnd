@@ -27,16 +27,28 @@ router.get("/list/status", ContestantController.getListStatus);
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
 
+// download file mẫu
 router.get("/download/excel", ContestantController.downloadExcel);
 
 //API lấy total thí sinh và thí sinh còn lại (status = đang thi)
 router.get("/total", ContestantController.getTotalContestants);
 
+// Lấy danh sách khoa
+router.get("/list/class_year", ContestantController.getListClass_Year);
+// Lấy danh sachs lớp thí sinh theo khóa
+router.get("/class/:class_year", ContestantController.getClassByClass_Year);
+
+// Câp nhật group thí sinh , theo lớp m ,match
+
 /**
  * Các route dưới đây cần xác thực
  *  */
 router.use(auth);
-
+// Chi danh sách thí sinh theo classclass
+router.patch(
+  "/update/class/match",
+  ContestantController.updateContestantGroupByClass
+);
 // Tạo thí sinh mới (admin)
 router.post(
   "/upload/excel",
@@ -44,7 +56,7 @@ router.post(
   role("admin"),
   ContestantController.uploadExcel
 );
-
+// cập nhât group thí sinh theo match
 router.patch(
   "/update/group",
   role("admin"),
