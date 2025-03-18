@@ -5,6 +5,14 @@ const auth = require("../middleware/auth");
 const role = require("../middleware/role");
 const { questionSchema } = require("../schemas/questionSchema");
 const validate = require("../middleware/validate");
+const fileUpload = require('express-fileupload');
+
+// Middleware cho upload file
+router.use(fileUpload({
+  limits: { fileSize: 500 * 1024 * 1024 },
+  createParentPath: true
+}));
+
 router.get("/list/dificultys", QuestionController.getListDificulty);
 router.get("/list/question_type", QuestionController.getListQuestionType);
 router.get("/", QuestionController.getQuestions);
@@ -25,18 +33,16 @@ router.use(auth);
 router.post(
   "/",
   role("admin"), // role("admin") middleware
-  validate(questionSchema), // validate middleware
+  // Không validate ở đây để cho phép FormData với files
   QuestionController.createQuestion
 );
 router.patch("/:id", role("admin"), QuestionController.updateQuestions);
 router.put(
   "/:id",
   role("admin"),
-  validate(questionSchema),
+  // Không validate ở đây để cho phép FormData với files
   QuestionController.updateQuestions
 );
 router.delete("/:id", role("admin"), QuestionController.deleteQuestion);
-
-
 
 module.exports = router;
