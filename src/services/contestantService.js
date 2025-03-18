@@ -123,39 +123,6 @@ class ContestantService {
     await contestant.update({ status });
     return contestant;
   }
-
-    // Cập nhật trạng thái của thí sinh bằng truy vấn thuần
-    static async updateContestantStatus(id, status) {
-      // Kiểm tra trạng thái hợp lệ
-      const validStatuses = [
-        "Chưa thi",
-        "Đang thi",
-        "Xác nhận 1",
-        "Chờ cứu",
-        "Bị loại",
-      ];
-      
-      if (!validStatuses.includes(status)) {
-        throw new Error("Trạng thái không hợp lệ");
-      }
-  
-      // Kiểm tra thí sinh tồn tại
-      const contestant = await Contestant.findByPk(id);
-      if (!contestant) {
-        throw new Error("Thí sinh không tồn tại");
-      }
-  
-      // Sử dụng truy vấn thuần để cập nhật
-      await Sequelize.query(
-        `UPDATE contestants SET status = :status, updated_at = NOW() WHERE id = :id`,
-        {
-          replacements: { status, id },
-          type: Sequelize.QueryTypes.UPDATE,
-        }
-      );
-  
-      return { message: "Cập nhật trạng thái thí sinh thành công" };
-    }
   
   // Xóa thí sinh
   static async deleteContestant(id) {
