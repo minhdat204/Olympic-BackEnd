@@ -32,9 +32,27 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM("Trắc Nghiệm", "Hình Ảnh", "Âm Thanh", "Video", "Tự Luận"),
       allowNull: false
     },
-    media_url: DataTypes.JSON,
+    media_url: {
+      type: DataTypes.JSON,
+      get() {
+        const value = this.getDataValue('media_url');
+        return value ? (typeof value === 'string' ? JSON.parse(value) : value) : [];
+      },
+      set(value) {
+        this.setDataValue('media_url', value ? (typeof value === 'string' ? value : JSON.stringify(value)) : null);
+      }
+    },
     correct_answer: DataTypes.TEXT,
-    options: DataTypes.JSON,
+    options: {
+      type: DataTypes.JSON,
+      get() {
+        const value = this.getDataValue('options');
+        return value ? (typeof value === 'string' ? JSON.parse(value) : value) : [];
+      },
+      set(value) {
+        this.setDataValue('options', value ? (typeof value === 'string' ? value : JSON.stringify(value)) : null);
+      }
+    },
     question_order: DataTypes.TINYINT,
     timer: {
       type: DataTypes.SMALLINT,
