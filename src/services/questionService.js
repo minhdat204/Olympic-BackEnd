@@ -89,25 +89,36 @@ module.exports = {
             const question = await Question.findByPk(questionId);
             if (!question) throw new Error("Không tìm thấy câu hỏi");
 
-            // Xử lý media hiện có
-            let currentMediaUrls = question.media_url || [];
+            // Xử lý files media nếu có
+            const mediaUrls = [];
 
-            // Xử lý media giữ lại
-            let keepMediaUrls = [];
+            // Lấy các media URL hiện tại mà người dùng muốn giữ lại
             if (data.existing_media) {
                 try {
-                    keepMediaUrls = typeof data.existing_media === 'string'
+                    const keepMediaUrls = typeof data.existing_media === 'string'
                         ? JSON.parse(data.existing_media)
                         : data.existing_media;
+                    mediaUrls.push(...keepMediaUrls);
                 } catch (e) {
-                    keepMediaUrls = [];
+                    console.error('Lỗi khi parse existing_media:', e);
                 }
                 // Xóa existing_media khỏi data vì nó không phải là trường của model
                 delete data.existing_media;
             }
 
+            // Chuẩn hóa media_url hiện tại
+            let currentMediaUrls = question.media_url || [];
+            if (typeof currentMediaUrls === 'string') {
+                try {
+                    currentMediaUrls = JSON.parse(currentMediaUrls.replace(/'/g, '"'));
+                } catch (parseError) {
+                    console.error('Lỗi khi parse media_url:', parseError);
+                    currentMediaUrls = [];
+                }
+            }
+
             // Xác định các file cần xóa
-            const filesToDelete = currentMediaUrls.filter(url => !keepMediaUrls.includes(url));
+            const filesToDelete = currentMediaUrls.filter(url => !mediaUrls.includes(url));
 
             // Xóa các file không còn sử dụng
             for (const url of filesToDelete) {
@@ -122,9 +133,8 @@ module.exports = {
             }
 
             // Xử lý các file media mới
-            const newMediaUrls = [];
-
             if (files) {
+                // Duyệt qua các file được upload
                 for (let i = 0; i < 10; i++) { // Giả sử tối đa 10 file
                     const fieldName = `media_${i}`;
                     if (files[fieldName]) {
@@ -134,36 +144,25 @@ module.exports = {
 
                         // Lưu file vào thư mục uploads
                         await file.mv(filePath);
-                        newMediaUrls.push(`/uploads/questions/${fileName}`);
+                        mediaUrls.push(`/uploads/questions/${fileName}`);
                     }
                 }
             }
 
-            // Kết hợp media giữ lại và media mới
-            const updatedMediaUrls = [...keepMediaUrls, ...newMediaUrls];
-
-            // Cập nhật media_url trong data nếu có thay đổi
-            if (updatedMediaUrls.length > 0) {
-                data.media_url = updatedMediaUrls;
+            // Thêm mediaUrls vào data nếu có
+            if (mediaUrls.length > 0) {
+                data.media_url = mediaUrls;
+            } else {
+                data.media_url = null; // Nếu không có media nào, đặt là null
             }
 
             // Cập nhật câu hỏi
-            question.set(data);
-            await question.save();
+            await question.update(data);
             return question;
         } catch (error) {
-            // Nếu có lỗi, xử lý dọn dẹp
+            console.error('Lỗi khi cập nhật câu hỏi:', error);
             throw error;
         }
-    },
-
-    //cập nhật 1 phần của câu hỏi
-    async updateQuestionBy(questionId, data) {
-        const question = await Question.findByPk(questionId);
-        if (!question) throw new Error("Không tìm thấy câu hỏi");
-        question.set(data);
-        await question.save();
-        return question;
     },
 
     // xóa câu hỏi và các file media liên quan
