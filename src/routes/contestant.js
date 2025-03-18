@@ -26,8 +26,16 @@ router.get("/list/status", ContestantController.getListStatus);
 
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
-
+// download file mẫu
 router.get("/download/excel", ContestantController.downloadExcel);
+// Lấy danh sachs lớp thí sinh theo khóa
+router.get("/class/:class_year", ContestantController.getClassByClass_Year);
+
+// Câp nhật group thí sinh , theo lớp m ,match
+router.patch(
+  "/update/class/match",
+  ContestantController.updateContestantGroupByClass
+);
 /**
  * Các route dưới đây cần xác thực
  *  */
@@ -40,7 +48,7 @@ router.post(
   role("admin"),
   ContestantController.uploadExcel
 );
-
+// cập nhât group thí sinh theo match
 router.patch(
   "/update/group",
   role("admin"),
