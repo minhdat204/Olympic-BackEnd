@@ -49,3 +49,6 @@ desktop.ini
 
 # Redis
 dump.rdb
+
+# uploads
+uploads/

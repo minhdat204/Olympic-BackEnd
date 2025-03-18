@@ -43,10 +43,16 @@ module.exports = {
       },
       round_name: {
         type: Sequelize.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
-        allowNull: false,
+        defaultValue: "Vòng loại",
       },
       status: {
-        type: Sequelize.ENUM("Chưa thi", "Đang thi", "Xác nhận 1", "Chờ cứu", "Bị loại"),
+        type: Sequelize.ENUM(
+          "Chưa thi",
+          "Đang thi",
+          "Xác nhận 1",
+          "Chờ cứu",
+          "Bị loại"
+        ),
         defaultValue: "Chưa thi",
       },
       created_at: {
