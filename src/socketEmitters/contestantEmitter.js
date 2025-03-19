@@ -1,3 +1,4 @@
+const { getIO } = require('../socketManager');
 //gửi API lấy total thí sinh và thí sinh còn lại (status = đang thi)
 const emitTotalContestants = async (matchId, totalContestants, remainingContestants) => {
     const io = getIO();
@@ -17,4 +18,7 @@ const emitContestants = async (matchId, contestants) => {
     });
 }
 
-export { emitTotalContestants, emitContestants };
+module.exports = {
+    emitTotalContestants,
+    emitContestants
+};

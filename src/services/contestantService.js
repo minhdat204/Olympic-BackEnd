@@ -123,7 +123,7 @@ class ContestantService {
     await contestant.update({ status });
     return contestant;
   }
-  
+
   // Xóa thí sinh
   static async deleteContestant(id) {
     const contestant = await Contestant.findByPk(id);
@@ -379,7 +379,7 @@ class ContestantService {
     });
   }
 
-  // API lấy total thí sinh và thí sinh còn lại (status = đang thi)
+  // API lấy total thí sinh và thí sinh còn lại
   static async getContestantTotal() {
     // lấy số thí sinh đang thi
     const total = await Contestant.count({ where: { status: "Đang thi" } });
