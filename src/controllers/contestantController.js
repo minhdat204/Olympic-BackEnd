@@ -1,7 +1,10 @@
+const { date } = require("joi");
 const ContestantService = require("../services/contestantService");
 const xlsx = require("xlsx");
 const path = require("path");
 const fs = require("fs");
+const { emit } = require("process");
+const {emitTotalContestants, emitContestants} = require("../socketEmitters/contestantEmitter");
 class ContestantController {
   // Lấy danh sách thí sinh
 
@@ -248,20 +251,115 @@ class ContestantController {
     res.json(list);
   }
   static async downloadExcel(req, res) {
-    const filePath = path.join(__dirname, "../../uploads/xlsx/thisinh.xlsx"); // Đường dẫn tương đối
-
-    // Kiểm tra file có tồn tại không
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ msg: "File không tồn tại" });
-    }
-
-    res.download(filePath, "thisinh.xlsx", (err) => {
-      if (err) {
-        console.error("❌ Lỗi khi tải file:", err);
-        res.status(500).json({ msg: "Lỗi khi tải file" });
-      }
-    });
+    const contestants = [
+      {
+        fullname: "Phan Thành Long",
+        email: "long@example.com",
+        class: "CD TH 22 WebB",
+        class_year: 22,
+        qualifying_score: 50,
+      },
+      {
+        fullname: "Nguyễn Văn A",
+        email: "nguyenvana@example.com",
+        class: "CD TH 22 WebB",
+        class_year: 22,
+        qualifying_score: 50,
+      },
+    ];
+    const buffer = await ContestantService.downloadExcel(contestants);
+    res.setHeader("Content-Disposition", 'attachment; filename="thisinh.xlsx"');
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.send(buffer);
   }
+  static async getClassByClass_Year(req, res) {
+    try {
+      const class_year = parseInt(req.params.class_year);
+      const listClass = await ContestantService.getClassByClass_Year(
+        class_year
+      );
+      console.log(listClass);
+      res.json({ listClass: listClass });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async updateContestantGroupByClass(req, res) {
+    try {
+      const { match_id, classes, status, round_name, limit } = req.body;
+      const result = await ContestantService.updateContestantGroupByClass(
+        match_id,
+        classes,
+        status,
+        round_name,
+        limit
+      );
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async getListClass_Year(req, res) {
+    try {
+      const list = await ContestantService.getListClass_Year();
+      res.json({ list: list });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  /**
+   * TRÊN MÀN HÌNH ĐIỀU KHIỂN
+   * 
+   */
+  // API lấy danh sách thí sinh theo trạng thái (status = đang thi)
+  static async getContestantsWithStatus(req, res) {
+    try {
+      //lấy danh sách thí sinh trạng thái đang thi
+      const contestants = await ContestantService.getContestantsWithStatus({ status: "Đang thi" });
+      res.json({ contestants: contestants});
+    }
+    catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  /**
+   * MÀN HÌNH TRỌNG TÀI cập nhật status thí sinh
+   * gửi API lấy total thí sinh và thí sinh còn lại (status = đang thi) cho màn hình chiếu
+   * gửi API lấy danh sách thí sinh theo trạng thái cho màn hình điều khiển
+   * 
+   */
+  // API cập nhật thí sinh + gửi emit total thí sinh, thí sinh còn lại lên màn hình chiếu + emit dữ liệu thí sinh (status) lên màn hình điều khiển)
+  static async updateContestantStatusAndEmit(req, res) {
+    try {
+      //lấy id trận đấu hiện tại
+      const matchId = req.params.match_id;
+      // lấy trạng thái thí sinh hiện tại
+      const contestantId = req.body.contestantId;
+      const contestantStatus = req.body.status;
+
+      //cập nhật trạng thái thí sinh
+      await ContestantService.updateContestantStatus(contestantId, contestantStatus);
+      //lấy total thí sinh và thí sinh còn lại trong trận
+      const contestantTotal = await ContestantService.getContestantTotal();
+      //lấy danh sách thí sinh trạng thái đang thi
+      const contestants = await ContestantService.getContestantsWithStatus({ status: "Đang thi" });
+
+      //emitTotalContestants
+      emitTotalContestants(matchId, contestantTotal.total, contestantTotal.remaining);
+      //emitContestants
+      emitContestants(matchId, contestants);
+      //trả về kết quả ở màn hình trọng tài
+      res.json({ total: contestantTotal.total, remaining: contestantTotal.remaining, message: "Cập nhật trạng thái thí sinh thành công" });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  
 }
 
 module.exports = ContestantController;

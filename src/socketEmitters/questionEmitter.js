@@ -1,5 +1,5 @@
 // questionEmitter.js
-import { getIO } from '../socketManager.js';
+const { getIO } = require('../socketManager');
 
 const emitQuestion = async (matchId, question_order, question) => {
   const io = getIO();
@@ -20,4 +20,19 @@ const emitTimeLeft = async (matchId, timeLeft) => {
   });
 };
 
-export { emitQuestion, emitTimeLeft };
+// gửi dữ liệu question sau khi cập nhật question
+const emitUpdatedQuestion = async (matchId, question_order, question) => {
+  const io = getIO();
+  io.to(`match_${matchId}`).emit('question_updated', {
+    matchId,
+    question_order,
+    question
+  });
+}
+
+
+module.exports = {
+  emitQuestion,
+  emitTimeLeft,
+  emitUpdatedQuestion
+};

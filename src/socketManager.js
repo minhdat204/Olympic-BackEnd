@@ -1,5 +1,6 @@
-import handleMatchSockets from './socketHandlers/matchHandler.js';
-import { handleQuestionSockets, handleTimerSockets } from './socketHandlers/questionHandler.js';
+const handleMatchSockets = require('./socketHandlers/matchHandler');
+const { handleQuestionSockets } = require('./socketHandlers/questionHandler');
+const { handleTimerSockets } = require('./socketHandlers/timerHandler');
 
 let ioInstance = null;
 
@@ -26,4 +27,4 @@ function getIO() {
   return ioInstance;
 }
 
-export { initializeSocket, getIO };
+module.exports = { initializeSocket, getIO };
