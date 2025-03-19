@@ -31,22 +31,55 @@ exports.getMatchById = async (req, res) => {
 };
 
 // cập nhật trạng thái trận đấu
-exports.updateMatchStatus = async (req, res) => {
+exports.updateMatch = async (req, res) => {
   try {
-    const match = await MatchService.updateStatus(
-      req.params.id,
-      req.body.status
-    );
+    const match = await MatchService.updateMatch(req.params.id, req.body);
     res.json(match);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
-  exports.deleteMatches = async (req, res) => {
-    try {
-      const match = await MatchService.deleteMatch(req.params.id);
-      res.json("Xóa trận đấu thành công ");
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  };
+};
+exports.deleteMatch = async (req, res) => {
+  try {
+    const match = await MatchService.deteleMatch(req.params.id);
+    res.json("Xóa trận đấu thành công");
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.updateMatchBy = async (req, res) => {
+  try {
+    const match = await MatchService.updateMatchBy(req.params.id, req.body);
+    res.json(match);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.getListRounds = async (req, res) => {
+  try {
+    const listRounds = await MatchService.getListRounds();
+    console.log(listRounds);
+    res.json({ listRounds: listRounds });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.getMatchByIdRounds = async (req, res) => {
+  try {
+    const listMatchByIdRounds = await MatchService.getMatchByIdRounds(
+      req.params.round_name
+    );
+    res.json({ listMatch: listMatchByIdRounds });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getListStatus = async (req, res) => {
+  try {
+    const listStatus = await MatchService.getListStatus();
+    res.json({ listStatus: listStatus });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };

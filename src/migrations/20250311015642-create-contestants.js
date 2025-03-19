@@ -19,7 +19,6 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       class: {
         type: Sequelize.STRING(20),
@@ -42,9 +41,19 @@ module.exports = {
       group_id: {
         type: Sequelize.SMALLINT,
       },
+      round_name: {
+        type: Sequelize.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
+        defaultValue: "Vòng loại",
+      },
       status: {
-        type: Sequelize.ENUM("not_started", "in_progress", "eliminated", "pending_revival"),
-        defaultValue: "not_started",
+        type: Sequelize.ENUM(
+          "Chưa thi",
+          "Đang thi",
+          "Xác nhận 1",
+          "Chờ cứu",
+          "Bị loại"
+        ),
+        defaultValue: "Chưa thi",
       },
       created_at: {
         allowNull: true,

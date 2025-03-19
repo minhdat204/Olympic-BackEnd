@@ -37,7 +37,9 @@ module.exports = (sequelize, DataTypes) => {
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        name: 'contestants_email_unique'
+      },
     },
     class: {
       type: DataTypes.STRING(20),
@@ -54,9 +56,13 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: -1,
     },
     group_id: DataTypes.SMALLINT,
+    round_name: {
+      type: DataTypes.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
+      allowNull: false,
+    },
     status: {
-      type: DataTypes.ENUM("not_started", "in_progress", "eliminated", "pending_revival"),
-      defaultValue: 'not_started',
+      type: DataTypes.ENUM("Chưa thi", "Đang thi", "Xác nhận 1", "Chờ cứu", "Bị loại"),
+      defaultValue: 'Chưa thi',
     },
   }, {
     sequelize,

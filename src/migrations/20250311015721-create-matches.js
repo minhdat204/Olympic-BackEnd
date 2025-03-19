@@ -23,10 +23,13 @@ module.exports = {
         type: Sequelize.DATE,
       },
       status: {
-        type: Sequelize.ENUM("UpComing", "Ongoing", "Finished"),
+        type: Sequelize.ENUM("Chưa diễn ra", "Đang diễn ra", "Đã kết thúc"),
+        defaultValue: "Chưa diễn ra",
       },
       current_question_id: {
         type: Sequelize.SMALLINT,
+        allowNull: true,
+        defaultValue: null,
       },
       rescue_1: {
         type: Sequelize.TINYINT,
@@ -54,6 +57,8 @@ module.exports = {
       },
       gold_winner_id: {
         type: Sequelize.SMALLINT,
+        allowNull: true,
+        defaultValue: null,
       },
       created_at: {
         allowNull: true,

@@ -4,12 +4,8 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     let contestants = [];
-    const statusList = [
-      "not_started",
-      "in_progress",
-      "eliminated",
-      "pending_revival",
-    ];
+    const statusList = ["Chưa thi", "Đang thi", "Xác nhận 1", "Chờ cứu", "Bị loại"];
+    const roundNameList = ["Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"];
     const classList = ["10A1", "10A2", "10A3", "10A4", "10A5", "10A6"];
     const classYearList = [22, 23, 24];
 
@@ -23,6 +19,7 @@ module.exports = {
         registration_number: i,
         qualifying_score: Math.floor(Math.random() * 100) + 1, // Random từ 1 - 100
         current_question: -1,
+        round_name: roundNameList[Math.floor(Math.random() * roundNameList.length)], // Chọn random round name
         status: statusList[Math.floor(Math.random() * statusList.length)], // Chọn random status
         group_id: Math.floor(i / 10) + 1,
         created_at: new Date(),

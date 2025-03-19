@@ -1,4 +1,4 @@
-const { io } = require('../socketManager');
+const { getIO } = require('../socketManager');
 
 // các hàm emit event
 const emitMatchStatusUpdate = async (matchId, newStatus) => {

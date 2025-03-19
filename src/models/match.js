@@ -1,88 +1,96 @@
-'use strict';
-const { Model } = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Match extends Model {
     static associate(models) {
       Match.belongsTo(models.Question, {
-        foreignKey: 'current_question_id',
-        as: 'current_question'
+        foreignKey: "current_question_id",
+        as: "current_question",
       });
       Match.belongsTo(models.Contestant, {
-        foreignKey: 'gold_winner_id',
-        as: 'gold_winner'
+        foreignKey: "gold_winner_id",
+        as: "gold_winner",
       });
       Match.hasMany(models.Group, {
-        foreignKey: 'match_id',
-        as: 'groups'
+        foreignKey: "match_id",
+        as: "groups",
       });
       Match.hasMany(models.Question, {
-        foreignKey: 'match_id',
-        as: 'questions'
+        foreignKey: "match_id",
+        as: "questions",
       });
       Match.hasMany(models.Score_log, {
-        foreignKey: 'match_id',
-        as: 'score_logs'
+        foreignKey: "match_id",
+        as: "score_logs",
       });
       Match.hasMany(models.Answer, {
-        foreignKey: 'match_id',
-        as: 'answers'
+        foreignKey: "match_id",
+        as: "answers",
       });
     }
   }
-  Match.init({
-    id: {
-      type: DataTypes.SMALLINT,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false
+  Match.init(
+    {
+      id: {
+        type: DataTypes.SMALLINT,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      match_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      start_time: DataTypes.DATE,
+      end_time: DataTypes.DATE,
+      status: {
+        type: DataTypes.ENUM("Chưa diễn ra", "Đang diễn ra", "Đã kết thúc"),
+        defaultValue: "Chưa diễn ra",
+      },
+      current_question_id: {
+        type: DataTypes.SMALLINT,
+        allowNull: true,
+        defaultValue: null,
+      },
+      rescue_1: {
+        type: DataTypes.TINYINT,
+        defaultValue: -1,
+      },
+      rescue_2: {
+        type: DataTypes.TINYINT,
+        defaultValue: -1,
+      },
+      plane: {
+        type: DataTypes.TINYINT,
+        defaultValue: -1,
+      },
+      rescued_count_1: {
+        type: DataTypes.TINYINT,
+        defaultValue: -1,
+      },
+      rescued_count_2: {
+        type: DataTypes.TINYINT,
+        defaultValue: -1,
+      },
+      round_name: {
+        type: DataTypes.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
+        allowNull: false,
+      },
+      gold_winner_id: {
+        type: DataTypes.SMALLINT,
+        allowNull: true,
+        defaultValue: null,
+      },
     },
-    match_name: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    start_time: DataTypes.DATE,
-    end_time: DataTypes.DATE,
-    status: DataTypes.ENUM("UpComing", "Ongoing", "Finished"),
-    current_question_id: {
-      type: DataTypes.SMALLINT,
-      defaultValue: -1
-    },
-    rescue_1: {
-      type: DataTypes.TINYINT,
-      defaultValue: -1
-    },
-    rescue_2: {
-      type: DataTypes.TINYINT,
-      defaultValue: -1
-    },
-    plane: {
-      type: DataTypes.TINYINT,
-      defaultValue: -1
-    },
-    rescued_count_1: {
-      type: DataTypes.TINYINT,
-      defaultValue: -1
-    },
-    rescued_count_2: {
-      type: DataTypes.TINYINT,
-      defaultValue: -1
-    },
-    round_name: {
-      type: DataTypes.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
-      allowNull: false
-    },
-    gold_winner_id: {
-      type: DataTypes.SMALLINT,
-      defaultValue: -1
+    {
+      sequelize,
+      modelName: "Match",
+      tableName: "matches",
+      timestamps: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      underscored: true,
     }
-  }, {
-    sequelize,
-    modelName: 'Match',
-    tableName: 'matches',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    underscored: true
-  });
+  );
   return Match;
 };

@@ -1,4 +1,5 @@
 const handleMatchSockets = (io, socket) => {
+    // Khi client tham gia vào một trận đấu
     socket.on('join_match', (matchId) => {
         console.log(`📢 Client ${socket.id} joined match_${matchId}`);
 
@@ -10,6 +11,12 @@ const handleMatchSockets = (io, socket) => {
         });
 
         socket.join(`match_${matchId}`);
+    });
+
+    // Khi client rời khỏi một trận đấu
+    socket.on('leave_match', (matchId) => {
+        console.log(`📢 Client ${socket.id} left match_${matchId}`);
+        socket.leave(`match_${matchId}`);
     });
 };
 

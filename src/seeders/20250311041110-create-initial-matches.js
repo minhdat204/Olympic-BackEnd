@@ -11,7 +11,7 @@ module.exports = {
         {
           match_name: "Trận đấu bán kết khóa 23",
           start_time: new Date(),
-          status: "Ongoing",
+          status: "Chưa diễn ra",
           rescue_1: 3,
           rescue_2: 6,
           Plane: true,
