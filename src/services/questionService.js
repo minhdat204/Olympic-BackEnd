@@ -18,7 +18,9 @@ module.exports = {
         try {
             // Xử lý files media nếu có
             const mediaUrls = [];
+            let correctAnswerUrl = null;
 
+            // Xử lý media cho câu hỏi (media_url)
             if (files) {
                 // Duyệt qua các file được upload
                 for (let i = 0; i < 10; i++) { // Giả sử tối đa 10 file
@@ -34,12 +36,28 @@ module.exports = {
                     }
                 }
             }
+            // Xử lý file cho correct_answer_media (nếu có)
+            if (files.correct_answer_media) {
+                const file = files.correct_answer_media;
+                const fileName = `${Date.now}_${file.name.replace(/\s+/g, '_')}`;
+                const filePath = path.join(UPLOAD_DIR, fileName);
+                await file.mv(filePath);
+                correctAnswerUrl = `/uploads/questions/${fileName}`;
+                questionsData.correct_answer = correctAnswerUrl;
 
+                // Xác định loại media dựa trên MIME type
+                if (file.mimetype.startsWidth("image/")) {
+                    questionsData.correct_answer_type = "Image";
+                } else if (file.mimetype.startsWidth("audio/")) {
+                    questionsData.correct_answer_type = "Audio";
+                } else if (file.mimetype.startsWidth("video/")) {
+                    questionsData.correct_answer_type = "Video;"
+                }
+            }
             // Thêm mediaUrls vào data nếu có
             if (mediaUrls.length > 0) {
                 questionsData.media_url = mediaUrls;
             }
-
             // Tạo câu hỏi mới
             return Question.create(questionsData);
         } catch (error) {
@@ -51,6 +69,10 @@ module.exports = {
                         fs.unlinkSync(filePath);
                     }
                 }
+            }
+            if (correctAnswerUrl) {
+                const filePath = path.join(__dirname, '../..', correctAnswerUrl);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
             }
             throw error;
         }
@@ -84,83 +106,121 @@ module.exports = {
     },
 
     // cập nhật câu hỏi với xử lý file media
-    async updateQuestion(questionId, data, files) {
+    async createQuestion(questionsData, files) {
         try {
-            const question = await Question.findByPk(questionId);
-            if (!question) throw new Error("Không tìm thấy câu hỏi");
-
-            // Xử lý files media nếu có
             const mediaUrls = [];
+            let correctAnswerUrl = null;
 
-            // Lấy các media URL hiện tại mà người dùng muốn giữ lại
-            if (data.existing_media) {
-                try {
-                    const keepMediaUrls = typeof data.existing_media === 'string'
-                        ? JSON.parse(data.existing_media)
-                        : data.existing_media;
-                    mediaUrls.push(...keepMediaUrls);
-                } catch (e) {
-                    console.error('Lỗi khi parse existing_media:', e);
-                }
-                // Xóa existing_media khỏi data vì nó không phải là trường của model
-                delete data.existing_media;
-            }
-
-            // Chuẩn hóa media_url hiện tại
-            let currentMediaUrls = question.media_url || [];
-            if (typeof currentMediaUrls === 'string') {
-                try {
-                    currentMediaUrls = JSON.parse(currentMediaUrls.replace(/'/g, '"'));
-                } catch (parseError) {
-                    console.error('Lỗi khi parse media_url:', parseError);
-                    currentMediaUrls = [];
-                }
-            }
-
-            // Xác định các file cần xóa
-            const filesToDelete = currentMediaUrls.filter(url => !mediaUrls.includes(url));
-
-            // Xóa các file không còn sử dụng
-            for (const url of filesToDelete) {
-                try {
-                    const filePath = path.join(__dirname, '../..', url);
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                    }
-                } catch (error) {
-                    console.error(`Không thể xóa file ${url}:`, error);
-                }
-            }
-
-            // Xử lý các file media mới
             if (files) {
-                // Duyệt qua các file được upload
-                for (let i = 0; i < 10; i++) { // Giả sử tối đa 10 file
+                // Xử lý media cho câu hỏi (media_url)
+                for (let i = 0; i < 10; i++) {
                     const fieldName = `media_${i}`;
                     if (files[fieldName]) {
                         const file = files[fieldName];
                         const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
                         const filePath = path.join(UPLOAD_DIR, fileName);
-
-                        // Lưu file vào thư mục uploads
                         await file.mv(filePath);
                         mediaUrls.push(`/uploads/questions/${fileName}`);
                     }
                 }
+
+                // Xử lý file cho correct_answer (nếu có)
+                if (files.correct_answer_media) {
+                    const file = files.correct_answer_media;
+                    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                    const filePath = path.join(UPLOAD_DIR, fileName);
+                    await file.mv(filePath);
+                    correctAnswerUrl = `/uploads/questions/${fileName}`;
+                    questionsData.correct_answer = correctAnswerUrl;
+                    // Xác định loại media dựa trên MIME type
+                    if (file.mimetype.startsWith("image/")) {
+                        questionsData.correct_answer_type = "Image";
+                    } else if (file.mimetype.startsWith("audio/")) {
+                        questionsData.correct_answer_type = "Audio";
+                    } else if (file.mimetype.startsWith("video/")) {
+                        questionsData.correct_answer_type = "Video";
+                    }
+                }
             }
 
-            // Thêm mediaUrls vào data nếu có
             if (mediaUrls.length > 0) {
-                data.media_url = mediaUrls;
-            } else {
-                data.media_url = null; // Nếu không có media nào, đặt là null
+                questionsData.media_url = mediaUrls;
             }
 
-            // Cập nhật câu hỏi
+            return Question.create(questionsData);
+        } catch (error) {
+            // Xóa file nếu có lỗi
+            if (correctAnswerUrl) {
+                const filePath = path.join(__dirname, '../..', correctAnswerUrl);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            }
+            throw error;
+        }
+    },
+
+    async updateQuestion(questionId, data, files) {
+        try {
+            const question = await Question.findByPk(questionId);
+            if (!question) throw new Error("Không tìm thấy câu hỏi");
+
+            const mediaUrls = [];
+            let correctAnswerUrl = null;
+
+            // Giữ media hiện có
+            if (data.existing_media) {
+                const keepMediaUrls = typeof data.existing_media === 'string' ? JSON.parse(data.existing_media) : data.existing_media;
+                mediaUrls.push(...keepMediaUrls);
+                delete data.existing_media;
+            }
+
+            // Xóa media cũ không còn sử dụng
+            let currentMediaUrls = question.media_url || [];
+            if (typeof currentMediaUrls === 'string') currentMediaUrls = JSON.parse(currentMediaUrls.replace(/'/g, '"'));
+            const filesToDelete = currentMediaUrls.filter(url => !mediaUrls.includes(url));
+            for (const url of filesToDelete) {
+                const filePath = path.join(__dirname, '../..', url);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            }
+
+            // Xử lý file mới cho media_url
+            if (files) {
+                for (let i = 0; i < 10; i++) {
+                    const fieldName = `media_${i}`;
+                    if (files[fieldName]) {
+                        const file = files[fieldName];
+                        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                        const filePath = path.join(UPLOAD_DIR, fileName);
+                        await file.mv(filePath);
+                        mediaUrls.push(`/uploads/questions/${fileName}`);
+                    }
+                }
+
+                // Xử lý file mới cho correct_answer
+                if (files.correct_answer_media) {
+                    const file = files.correct_answer_media;
+                    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                    const filePath = path.join(UPLOAD_DIR, fileName);
+                    await file.mv(filePath);
+                    correctAnswerUrl = `/uploads/questions/${fileName}`;
+                    data.correct_answer = correctAnswerUrl;
+                    if (file.mimetype.startsWith("image/")) {
+                        data.correct_answer_type = "Image";
+                    } else if (file.mimetype.startsWith("audio/")) {
+                        data.correct_answer_type = "Audio";
+                    } else if (file.mimetype.startsWith("video/")) {
+                        data.correct_answer_type = "Video";
+                    }
+                }
+            }
+
+            data.media_url = mediaUrls.length > 0 ? mediaUrls : null;
             await question.update(data);
             return question;
         } catch (error) {
-            console.error('Lỗi khi cập nhật câu hỏi:', error);
+            if (correctAnswerUrl) {
+                const filePath = path.join(__dirname, '../..', correctAnswerUrl);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            }
             throw error;
         }
     },

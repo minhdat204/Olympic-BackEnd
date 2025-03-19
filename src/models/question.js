@@ -43,6 +43,11 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     correct_answer: DataTypes.TEXT,
+    correct_answer_type: {
+      type: DataTypes.ENUM("Text", "Image", "Audio", "Video"),
+      allowNull: false,
+      defaultValue: "Text"
+    },
     options: {
       type: DataTypes.JSON,
       get() {
