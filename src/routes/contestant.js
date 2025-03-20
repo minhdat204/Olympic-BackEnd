@@ -41,7 +41,7 @@ router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 // Câp nhật group thí sinh , theo lớp m ,match
 
 /**
- * Các route dưới đây cần xác thực
+ * Các route dưới đây cần xác thựccontestants
  *  */
 router.use(auth);
 // Chi danh sách thí sinh theo classclass
