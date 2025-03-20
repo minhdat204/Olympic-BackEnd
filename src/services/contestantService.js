@@ -276,12 +276,15 @@ class ContestantService {
     const emailSet = new Set(unq.map((e) => e.email));
     const newContestant = email.filter((c) => !emailSet.has(c.email));
     if (newContestant.length == 0) {
-      return "Không có thí sinh mới để thêm";
+      return {
+        status: "error",
+        msg: "Không có thí sinh mới để thêm"
+      };
     } else {
       await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
       return {
-        msg: "Thêm thí sinh thành công",
-        inserted: newContestant.length,
+        status: "success",
+        msg: `Thêm thành công +${newContestant.length} thí sinh`,
       };
     }
   }
@@ -391,7 +394,7 @@ class ContestantService {
   // API lấy thí sinh theo trạng thái
   static async getContestantsWithStatus(data) {
     const contestants = await Contestant.findAll({
-      where: { status : data.status },
+      where: { status: data.status },
     });
     return contestants;
   }
