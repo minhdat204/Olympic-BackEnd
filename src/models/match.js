@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
   class Match extends Model {
     static associate(models) {
@@ -7,28 +8,42 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "current_question_id",
         as: "current_question",
       });
+
       Match.belongsTo(models.Contestant, {
         foreignKey: "gold_winner_id",
         as: "gold_winner",
       });
+
       Match.hasMany(models.Group, {
         foreignKey: "match_id",
         as: "groups",
       });
+
       Match.hasMany(models.Question, {
         foreignKey: "match_id",
         as: "questions",
       });
+
       Match.hasMany(models.Score_log, {
         foreignKey: "match_id",
         as: "score_logs",
       });
+
       Match.hasMany(models.Answer, {
         foreignKey: "match_id",
         as: "answers",
       });
+
+      // Quan hệ nhiều - nhiều với Contestant qua bảng MatchContestant
+      Match.belongsToMany(models.Contestant, {
+        through: models.MatchContestant, // Bảng trung gian
+        foreignKey: "match_id",
+        otherKey: "contestant_id",
+        as: "contestants",
+      });
     }
   }
+
   Match.init(
     {
       id: {
@@ -92,5 +107,6 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
     }
   );
+
   return Match;
 };

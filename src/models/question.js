@@ -11,10 +11,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'match_id',
         as: 'match'
       });
-      Question.hasOne(models.Match, {
-        foreignKey: 'current_question_id',
-        as: 'match_for_question'
-      });
     }
   }
   Question.init({
