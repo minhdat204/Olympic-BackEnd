@@ -37,12 +37,12 @@ module.exports = {
         type: Sequelize.SMALLINT,
         allowNull: false,
       },
-      createdAt: {
-        allowNull: false,
+      created_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      updatedAt: {
-        allowNull: false,
+      updated_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
     });
