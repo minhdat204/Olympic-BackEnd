@@ -2,36 +2,47 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("answers", {
+    await queryInterface.createTable("match_contestants", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.SMALLINT,
+        type: Sequelize.INTEGER,
       },
-      score: {
+      registration_number: {
         type: Sequelize.TINYINT,
-        defaultValue: 1,
+        allowNull: true,
       },
-      is_correct: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true,
+      status: {
+        type: Sequelize.ENUM(
+          "Chưa thi",
+          "Đang thi",
+          "Xác nhận 1",
+          "Xác nhận 2",
+          "Bị loại",
+          "Cấm thi",
+          "Qua Vòng"
+        ),
+        defaultValue: "Chưa thi",
       },
-      contestant_id: {
-        type: Sequelize.SMALLINT,
-      },
-      question_id: {
-        type: Sequelize.SMALLINT,
+      eliminated_at_question_order: {
+        type: Sequelize.TINYINT,
+        defaultValue: null,
       },
       match_id: {
         type: Sequelize.SMALLINT,
+        allowNull: false,
       },
-      created_at: {
-        allowNull: true,
+      contestant_id: {
+        type: Sequelize.SMALLINT,
+        allowNull: false,
+      },
+      createdAt: {
+        allowNull: false,
         type: Sequelize.DATE,
       },
-      updated_at: {
-        allowNull: true,
+      updatedAt: {
+        allowNull: false,
         type: Sequelize.DATE,
       },
     });
@@ -42,7 +53,7 @@ module.exports = {
       await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
 
       // Xóa bảng
-      await queryInterface.dropTable("answers");
+      await queryInterface.dropTable("match_contestants");
     } finally {
       // Bật lại kiểm tra khóa ngoại
       await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");

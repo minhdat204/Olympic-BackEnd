@@ -2,36 +2,37 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("answers", {
+    await queryInterface.createTable("awards", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.SMALLINT,
+        type: Sequelize.INTEGER,
       },
-      score: {
-        type: Sequelize.TINYINT,
-        defaultValue: 1,
-      },
-      is_correct: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true,
+      awards_name: {
+        type: Sequelize.ENUM(
+          "Giải nhất",
+          "Giải nhì",
+          "Giải ba",
+          "Giải video ấn tượng",
+          "Giải Gold"
+        ),
+        allowNull: false,
       },
       contestant_id: {
         type: Sequelize.SMALLINT,
+        defaultValue: null,
       },
-      question_id: {
+      video_submission_id: {
         type: Sequelize.SMALLINT,
+        defaultValue: null,
       },
-      match_id: {
-        type: Sequelize.SMALLINT,
-      },
-      created_at: {
-        allowNull: true,
+      createdAt: {
+        allowNull: false,
         type: Sequelize.DATE,
       },
-      updated_at: {
-        allowNull: true,
+      updatedAt: {
+        allowNull: false,
         type: Sequelize.DATE,
       },
     });
@@ -42,7 +43,7 @@ module.exports = {
       await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
 
       // Xóa bảng
-      await queryInterface.dropTable("answers");
+      await queryInterface.dropTable("awards");
     } finally {
       // Bật lại kiểm tra khóa ngoại
       await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
