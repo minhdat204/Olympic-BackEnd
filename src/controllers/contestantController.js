@@ -4,10 +4,9 @@ const xlsx = require("xlsx");
 const path = require("path");
 const fs = require("fs");
 const { emit } = require("process");
-const {emitTotalContestants, emitContestants} = require("../socketEmitters/contestantEmitter");
+const { emitTotalContestants, emitContestants } = require("../socketEmitters/contestantEmitter");
 class ContestantController {
   // Lấy danh sách thí sinh
-
   static async getContestants(req, res) {
     try {
       const filters = {
@@ -101,8 +100,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-          ? 409
-          : 500;
+            ? 409
+            : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -287,6 +286,8 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  // phương thưc này dùng để chia thí sinh theo lớp
   static async updateContestantGroupByClass(req, res) {
     try {
       const { match_id, classes, status, round_name, limit } = req.body;
@@ -320,7 +321,7 @@ class ContestantController {
     try {
       //lấy danh sách thí sinh trạng thái đang thi
       const contestants = await ContestantService.getContestantsWithStatus({ status: "Đang thi" });
-      res.json({ contestants: contestants});
+      res.json({ contestants: contestants });
     }
     catch (error) {
       res.status(400).json({ error: error.message });
@@ -359,7 +360,7 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
-  
+
 }
 
 module.exports = ContestantController;
