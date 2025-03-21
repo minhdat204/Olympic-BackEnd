@@ -28,7 +28,7 @@ class GroupController {
     }
   }
 
-  // Trong GroupController
+
   static async getGroupByMatchId(req, res) {
     try {
       const matchId = req.params.match_id;

@@ -12,27 +12,42 @@ const { Op, where, Sequelize } = require("sequelize");
 const group = require("../models/group");
 
 class ContestantService {
-  // Lấy danh sách thí sinh không cần phân trang
-  static async getContestants({ search, page, limit }) {
-    const offset = (page - 1) * limit;
-    const contestants = await Contestant.findAndCountAll({
-      where: {
-        [Op.or]: {
-          fullname: { [Op.like]: `%${search}%` },
-          email: { [Op.like]: `%${search}%` },
-        },
-      },
+
+  // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
+  static async getContestants(filters = {}, page = 1, limit = 20) {
+    const options = {
+      where: {},
       include: [
-        { model: Group, as: "group" },
-        { model: Answer, as: "answers" },
+        {
+          model: Group,
+          as: "group",
+        },
       ],
-      offset,
+      order: [["id", "ASC"]],
+      offset: (page - 1) * limit,
       limit,
-    });
+    };
 
-    return contestants;
+    // Xử lý các bộ lọc
+    if (filters.status) options.where.status = filters.status;
+    if (filters.group_id) options.where.group_id = filters.group_id;
+    if (filters.search) {
+      options.where[Op.or] = [
+        { fullname: { [Op.like]: `%${filters.search}%` } },
+        { email: { [Op.like]: `%${filters.search}%` } },
+        { class: { [Op.like]: `%${filters.search}%` } },
+      ];
+    }
+
+    const { count, rows } = await Contestant.findAndCountAll(options);
+
+    return {
+      total: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      contestants: rows,
+    };
   }
-
   // Lấy thông tin chi tiết của một thí sinh
   static async getContestantById(id) {
     const contestant = await Contestant.findByPk(id, {
