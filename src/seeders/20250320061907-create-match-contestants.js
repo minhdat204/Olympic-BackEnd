@@ -11,7 +11,7 @@ module.exports = {
       "Xác nhận 2",
       "Bị loại",
       "Cấm thi",
-      "Qua Vòng",
+      "Qua vòng",
     ];
 
     for (let i = 1; i <= 60; i++) {

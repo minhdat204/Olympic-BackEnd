@@ -5,45 +5,32 @@ const {
   Answer,
   Match,
   User,
+  MatchContestant,
 } = require("../models");
 const xlsx = require("xlsx");
 const { Op, where, Sequelize } = require("sequelize");
+const group = require("../models/group");
 
 class ContestantService {
-  // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
-  static async getContestants(filters = {}, page = 1, limit = 20) {
-    const options = {
-      where: {},
-      include: [
-        {
-          model: Group,
-          as: "group",
+  // Lấy danh sách thí sinh không cần phân trang
+  static async getContestants({ search, page, limit }) {
+    const offset = (page - 1) * limit;
+    const contestants = await Contestant.findAndCountAll({
+      where: {
+        [Op.or]: {
+          fullname: { [Op.like]: `%${search}%` },
+          email: { [Op.like]: `%${search}%` },
         },
+      },
+      include: [
+        { model: Group, as: "group" },
+        { model: Answer, as: "answers" },
       ],
-      order: [["id", "ASC"]],
-      offset: (page - 1) * limit,
+      offset,
       limit,
-    };
-
-    // Xử lý các bộ lọc
-    if (filters.status) options.where.status = filters.status;
-    if (filters.group_id) options.where.group_id = filters.group_id;
-    if (filters.search) {
-      options.where[Op.or] = [
-        { fullname: { [Op.like]: `%${filters.search}%` } },
-        { email: { [Op.like]: `%${filters.search}%` } },
-        { class: { [Op.like]: `%${filters.search}%` } },
-      ];
-    }
-
-    const { count, rows } = await Contestant.findAndCountAll(options);
-
-    return {
-      total: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-      contestants: rows,
-    };
+    });
+  
+    return contestants;
   }
 
   // Lấy thông tin chi tiết của một thí sinh
@@ -51,7 +38,6 @@ class ContestantService {
     const contestant = await Contestant.findByPk(id, {
       include: [
         { model: Group, as: "group" },
-        { model: Score_log, as: "score_logs" },
         { model: Answer, as: "answers" },
       ],
     });
@@ -100,29 +86,7 @@ class ContestantService {
     return contestant;
   }
 
-  // Cập nhật trạng thái của thí sinh
-  static async updateContestantStatus(id, status) {
-    const contestant = await Contestant.findByPk(id);
-
-    if (!contestant) {
-      throw new Error("Thí sinh không tồn tại");
-    }
-
-    // Kiểm tra trạng thái hợp lệ
-    const validStatuses = [
-      "Chưa thi",
-      "Đang thi",
-      "Xác nhận 1",
-      "Chờ cứu",
-      "Bị loại",
-    ];
-    if (!validStatuses.includes(status)) {
-      throw new Error("Trạng thái không hợp lệ");
-    }
-
-    await contestant.update({ status });
-    return contestant;
-  }
+  
 
   // Xóa thí sinh
   static async deleteContestant(id) {
@@ -134,11 +98,6 @@ class ContestantService {
 
     await contestant.destroy();
     return { message: "Đã xóa thí sinh thành công" };
-  }
-
-  // lấy ds trạng thái thí sinh
-  static async getListStatus() {
-    return Object.values(Contestant.getAttributes().status.values);
   }
 
   // lấy ds lớp thí sinh
@@ -162,13 +121,21 @@ class ContestantService {
             judge_id,
             match_id,
           },
-          include: [
-            {
-              model: Match,
-              as: "match",
-            },
-          ],
+          
+          // include: [
+          //   {
+          //     model: Match,
+          //     as: "match",
+          //   },
+          // ],
         },
+        {
+          model: Match,
+          as: "matches",
+          where: {
+            id: match_id,
+          },
+        }
       ],
     });
 
@@ -196,32 +163,6 @@ class ContestantService {
 
     return groupAndMatch;
   }
-  // Lấy thí sinh theo match trạng thái và khóa
-  static async getListContestants(
-    className = null,
-    class_year = null,
-    status = "Chưa thi",
-    limit = 60,
-    round_name = null
-  ) {
-    console.log(limit);
-    let whereCondition = {
-      status,
-    };
-
-    limit = parseInt(limit) || 60;
-    if (className) whereCondition.class = className;
-    if (class_year) whereCondition.class_year = parseInt(class_year);
-    if (round_name) whereCondition.round_name = round_name;
-    const contestants = await Contestant.findAll({
-      where: whereCondition,
-      order: Sequelize.literal("RAND()"),
-      limit: limit,
-      raw: true,
-    });
-    return contestants;
-  }
-  //Cập nhât group thí sinh
   static async updateContestantGroup(data) {
     //Lấy danh sach group theo trận đấu
     const listgroup = await Group.findAll({
@@ -278,7 +219,7 @@ class ContestantService {
     if (newContestant.length == 0) {
       return {
         status: "error",
-        msg: "Không có thí sinh mới để thêm"
+        msg: "Không có thí sinh mới để thêm",
       };
     } else {
       await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
@@ -306,71 +247,66 @@ class ContestantService {
     });
   }
   // Lấy danh sách thí sinh theo lớp
-  static async getListContestantsByClass(
-    classes,
-    status = "Chưa thi",
-    round_name = "Vòng loại",
-    limit = 60
-  ) {
+  static async getListContestantsByClass(classes) {
     const contestants = await Contestant.findAll({
       where: {
         class: { [Op.in]: classes },
-        round_name: round_name,
-        status: status,
+        group_id: null,
       },
+      limit: 60,
       order: Sequelize.literal("RAND()"),
-      limit: parseInt(limit),
       raw: true,
     });
     return contestants;
   }
-  static async updateContestantGroupByClass(
-    match_id,
-    classes,
-    status,
-    round_name,
-    limit
-  ) {
+
+  static async updateContestantGroupByClass(match_id, classes) {
     const groups = await Group.findAll({
       attributes: ["id"],
       where: { match_id: match_id },
       raw: true,
     });
-    if (groups.length <= 0) return "Trận đáu hiện tại chưa có group";
-    const round = await Match.findByPk(match_id, {
-      attributes: ["round_name"],
-      raw: true,
-    });
+    if (groups.length <= 0)
+      return { message: "Trận đấu hiện tại chưa có nhóm" };
     console.log(groups);
     const contestants = await ContestantService.getListContestantsByClass(
-      classes,
-      status,
-      round_name,
-      limit
+      classes
     );
-
-    if (contestants.length <= 0) return "Không có thí sinh để chia ";
-
+    if (contestants.length <= 0)
+      return { massage: "Không có thí sinh để chia" };
+    console.log(contestants.length, contestants);
+    await Match.update(
+      {
+        class_names: classes,
+      },
+      {
+        where: { id: match_id },
+      }
+    );
     const k = Math.floor(contestants.length / groups.length);
     const r = contestants.length % groups.length;
     let index = 0;
     for (let i = 0; i < contestants.length; i++) {
-      console.log(i + 1, round.round_name, groups[index].id);
       await Contestant.update(
         {
-          registration_number: i + 1,
-          round_name: round.round_name,
           group_id: groups[index].id,
-          status: "Đang thi",
         },
         { where: { id: contestants[i].id } }
       );
+      await MatchContestant.create({
+        registration_number: i + 1,
+        status: "Chưa thi",
+        match_id: match_id,
+        contestant_id: contestants[i].id,
+      });
       let maxgroup = k + (index < r ? 1 : 0);
       if ((i + 1) % maxgroup === 0) {
         index++;
       }
     }
-    return "Chia danh sách thành công ";
+    return {
+      massage: `Thêm ${contestants.length} thí sinh vào trận thành công `,
+    };
   }
   // lấy danh sách khóa sinh viên
   static async getListClass_Year() {
@@ -382,20 +318,206 @@ class ContestantService {
     });
   }
 
-  // API lấy total thí sinh và thí sinh còn lại
-  static async getContestantTotal() {
-    // lấy số thí sinh đang thi
-    const total = await Contestant.count({ where: { status: "Đang thi" } });
-    //lấy số thí sinh còn lại status = chờ cứu
-    const remaining = await Contestant.count({ where: { status: "Chờ cứu" } });
-    return { total, remaining };
-  }
-
-  // API lấy thí sinh theo trạng thái
+  // DAT: API lấy thí sinh theo trạng thái
   static async getContestantsWithStatus(data) {
     const contestants = await Contestant.findAll({
       where: { status: data.status },
     });
+    return contestants;
+  }
+
+  static async getGroupContestantByMatch(match_id) {
+    const list = await Group.findAll({
+      attributes: ["id", "group_name"],
+      include: [
+        {
+          model: Match,
+          as: "match",
+          attributes: ["id", "match_name"],
+          where: { id: match_id }, // ✅ Lọc match_id ở đây
+        },
+        {
+          model: Contestant,
+          as: "contestants",
+          attributes: ["id", "fullname"],
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants", // ✅ Đúng alias của hasMany
+              attributes: ["registration_number"],
+              where: { match_id }, // ✅ Lọc ở bảng trung gian
+            },
+          ],
+        },
+      ],
+    });
+
+    return list;
+  }
+
+  // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
+  static async getContestantTotal(matchId) {
+    // lấy số thí sinh đang thi trong trận đấu
+    const total = await MatchContestant.count({
+      where: { match_id: matchId, status: "Đang thi" },
+    });
+    //lấy tổng số thí sinh trong trận đấu
+    const remaining = await await MatchContestant.count({
+      where: { match_id: matchId },
+    });
+    return { total, remaining };
+  }
+
+  // DAT: API lấy ds thí sinh theo match_id
+  static async getContestantsByMatchId(matchId) {
+    const matchContestants = await MatchContestant.findAll({
+      where: { match_id: matchId },
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+        }
+      ],
+      order: [["registration_number", "ASC"]],
+    });
+    
+    // chuyển dữ liệu từ object sang json
+    const contestants = matchContestants.map(mc => {
+      const contestant = mc.contestant.toJSON();
+      contestant.registration_number = mc.registration_number;
+      contestant.match_status = mc.status;
+      contestant.eliminated_at_question_order = mc.eliminated_at_question_order;
+      return contestant;
+    });
+    
+    return contestants;
+  }
+
+  /**===========================================================
+   * DAT: PHẦN CỨU TRỢ THÍ SINH
+   * ===========================================================
+   */
+  // DAT: API lấy thí sinh bị loại theo câu hỏi
+  static async getEliminatedContestantsByQuestion(matchId, questionOrder) {
+    const eliminatedContestants = await MatchContestant.findAll({
+      where: { match_id: matchId, eliminated_at_question_order: questionOrder },
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+        }
+      ],
+    });
+
+     // chuyển dữ liệu từ object sang json
+     const contestants = eliminatedContestants.map(mc => {
+      const contestant = mc.contestant.toJSON();
+      contestant.registration_number = mc.registration_number;
+      contestant.match_status = mc.status;
+      contestant.eliminated_at_question_order = mc.eliminated_at_question_order;
+      return contestant;
+    });
+
+    return contestants;
+  }
+
+  //DAT: API lấy danh sách thí sinh bị loại (status = Xác nhận 2)
+  static async getEliminatedContestants(matchId) {
+    const contestants = await MatchContestant.findAll({
+      where: { match_id: matchId, status: "Xác nhận 2" },
+    });
+    return contestants;
+  }
+
+  // DAT: API lấy tổng số thí sinh theo trạng thái
+  static async getContestantTotalByStatus(matchId, status) {
+    const total = await MatchContestant.count({
+      where: { match_id: matchId, status: status },
+    });
+    return total;
+  }
+
+  // DAT: API lấy số thí sinh cần cứu với công thức [(điểm nhập vào / 100) * tổng thí sinh bị loại]
+  static async getRescueContestantTotal(matchId, rescuePoint) {
+    const eliminatedTotal = await this.getContestantTotalByStatus(matchId, "Xác nhận 2");
+    const total = Math.ceil((rescuePoint / 100) * eliminatedTotal);
+    return total;
+  }
+
+  //DAT: API cập nhật dữ liệu thí sinh
+  static async updateContestant(contestantId, data) {
+    const contestant = await MatchContestant.update({data},
+      {
+        where: { contestant_id: contestantId },
+      }
+    );
+
+    return contestant;
+  }
+
+  /**
+   * RESULT
+   * DAT: lấy danh sách thí sinh được cứu (status = "xác nhận 2")
+   */
+  static async getRescueContestants(matchId) {
+    /**
+       * 1. lấy danh sách thí sinh bị loại
+       */
+    const eliminatedContestants = await this.getEliminatedContestants(matchId);
+
+    /**
+     * 2. lấy số lượng thí sinh được cứu
+     */
+    let rescueContestant = await this.getRescueContestantTotal(matchId, 62);
+
+    /**
+     * 3. Nhóm thí sinh theo câu hỏi
+     */ 
+    const question = [];
+    eliminatedContestants.map((contestant) => {
+      const questionOrder = contestant.eliminated_at_question_order;
+      if(!question[questionOrder]) {
+        question[questionOrder] = [];
+      }
+      question[questionOrder].push(contestant);
+    });
+
+    /**
+     * 4. sắp xếp câu hỏi theo thứ tự giảm dần
+     */
+    const questionIndices = Object.keys(question)
+      .map(Number)
+      .filter(index => question[index] && question[index].length > 0)
+      .sort((a, b) => b - a); // Sort in descending order
+
+    /**
+     * 5. chọn thí sinh được cứu
+     */
+    const selectedContestants = [];
+    // duyệt từng thí sinh đã sắp xếp
+    for (const i of questionIndices) {
+      if(rescueContestant <= 0) {
+        break;
+      }
+      // số lượng thí sinh trong câu hỏi đó
+      const available = question[i].length; 
+
+      // nếu số thí sinh <= slot còn lại  (chọn hết)
+      if(available <= rescueContestant) {
+        selectedContestants.push(question[i]);
+        rescueContestant -= available;
+      }
+      // nếu số thí sinh > slot còn lại (chọn ngẫu nhiên) 
+      else {
+        //random thí sinh
+        const contestantRandom = question[i].sort(() => Math.random() - 0.5);
+        selectedContestants.push(contestantRandom.slice(0, rescueContestant));
+        rescueContestant = 0;
+      }
+    }
+
+    // chuyển mảng 2 chiều thành mảng 1 chiều
+    const contestants = selectedContestants.flat();
     return contestants;
   }
 }
