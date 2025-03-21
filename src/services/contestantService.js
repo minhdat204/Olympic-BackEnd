@@ -277,13 +277,11 @@ class ContestantService {
     const newContestant = email.filter((c) => !emailSet.has(c.email));
     if (newContestant.length == 0) {
       return {
-        status: "error",
         msg: "Không có thí sinh mới để thêm"
       };
     } else {
       await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
       return {
-        status: "success",
         msg: `Thêm thành công +${newContestant.length} thí sinh`,
       };
     }

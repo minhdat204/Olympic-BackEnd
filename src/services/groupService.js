@@ -31,7 +31,7 @@ class GroupService {
     }
 
     const { count, rows } = await Group.findAndCountAll(options);
-    
+
     return {
       total: count,
       totalPages: Math.ceil(count / limit),
@@ -146,6 +146,32 @@ class GroupService {
     });
 
     return contestants;
+  }
+
+
+  static async getGroupByMatchId(matchId) {
+    // Kiểm tra xem trận đấu có tồn tại không
+    const match = await Match.findByPk(matchId);
+    if (!match) {
+      throw new Error('Trận đấu không tồn tại');
+    }
+    // Lấy danh sách nhóm theo matchId với các trường cụ thể
+    const groups = await Group.findAll({
+      where: {
+        match_id: matchId
+      },
+      attributes: ['id', 'group_name', 'match_id', 'judge_id'], // Chỉ lấy các trường mong muốn từ Group
+      include: [
+        {
+          model: User,
+          as: 'judge',
+          attributes: ['id', 'username'] // Chỉ lấy id và username từ User
+        }
+      ],
+      order: [['id', 'ASC']]
+    });
+
+    return groups;
   }
 
   // Thêm thí sinh vào nhóm
