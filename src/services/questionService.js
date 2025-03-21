@@ -407,6 +407,13 @@ module.exports = {
         return match.current_question;
     },
 
+    // DAT: Cập nhật time_left của câu hỏi hiện tại
+    async updateQuestionBy(question_id, data) {
+        const question = await Question.findByPk(question_id);
+        if (!question) throw new Error("Không tìm thấy câu hỏi");
+        return question.update(data);
+    },
+
     // Cập nhật cột time_left thành giá trị của cột timer trong bảng question
     async updateQuestionTimeLeft(question_id) {
         await Question.update(
