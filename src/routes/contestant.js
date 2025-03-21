@@ -38,6 +38,18 @@ router.get("/list/class_year", ContestantController.getListClass_Year);
 // Lấy danh sachs lớp thí sinh theo khóa
 router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 
+// DAT: Lấy danh sách thí sinh theo match
+router.get("/matches/:match_id", ContestantController.getContestantsByMatchId);
+
+// DAT: lấy danh sách thí sinh được cứu (status = "xác nhân 2")
+router.get("/matches/:match_id/rescue", ContestantController.getRescueContestants);
+
+// DAT: Cập nhật trạng thái thí sinh được cứu hàng loạt
+router.patch("/matches/:match_id/rescue", ContestantController.updateRescueContestants);
+
+// DAT: Tính số lượng thí sinh cần được cứu
+router.get("/matches/:match_id/rescue/count", ContestantController.getRescueContestantTotal);
+
 // Câp nhật group thí sinh , theo lớp m ,match
 
 /**

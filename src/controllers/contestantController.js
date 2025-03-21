@@ -316,23 +316,27 @@ class ContestantController {
    * TRÊN MÀN HÌNH ĐIỀU KHIỂN
    * 
    */
-  // API lấy danh sách thí sinh theo trạng thái (status = đang thi)
-  static async getContestantsWithStatus(req, res) {
+  // API lấy danh sách thí sinh trong trận đấu
+  static async getContestantsByMatchId(req, res) {
     try {
-      //lấy danh sách thí sinh trạng thái đang thi
-      const contestants = await ContestantService.getContestantsWithStatus({ status: "Đang thi" });
-      res.json({ contestants: contestants });
+      const matchId = req.params.match_id;
+      //lấy danh sách thí sinh 
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      res.json({ 
+        message: "Lấy danh sách thí sinh trận đấu thành công",
+        contestants: contestants 
+      });
     }
     catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
 
-  /**
+  /**============================================================
    * MÀN HÌNH TRỌNG TÀI cập nhật status thí sinh
    * gửi API lấy total thí sinh và thí sinh còn lại (status = đang thi) cho màn hình chiếu
    * gửi API lấy danh sách thí sinh theo trạng thái cho màn hình điều khiển
-   * 
+   * ============================================================
    */
   // API cập nhật thí sinh + gửi emit total thí sinh, thí sinh còn lại lên màn hình chiếu + emit dữ liệu thí sinh (status) lên màn hình điều khiển)
   static async updateContestantStatusAndEmit(req, res) {
@@ -347,8 +351,8 @@ class ContestantController {
       await ContestantService.updateContestantStatus(contestantId, contestantStatus);
       //lấy total thí sinh và thí sinh còn lại trong trận
       const contestantTotal = await ContestantService.getContestantTotal();
-      //lấy danh sách thí sinh trạng thái đang thi
-      const contestants = await ContestantService.getContestantsWithStatus({ status: "Đang thi" });
+      //lấy danh sách thí sinh theo trận hiện tại
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
 
       //emitTotalContestants
       emitTotalContestants(matchId, contestantTotal.total, contestantTotal.remaining);
@@ -356,6 +360,50 @@ class ContestantController {
       emitContestants(matchId, contestants);
       //trả về kết quả ở màn hình trọng tài
       res.json({ total: contestantTotal.total, remaining: contestantTotal.remaining, message: "Cập nhật trạng thái thí sinh thành công" });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  /**===========================================================
+   * DAT: PHẦN CỨU TRỢ THÍ SINH
+   * ===========================================================
+   */
+  // lấy danh sách thí sinh được cứu (status = "xác nhận 2")
+  static async getRescueContestants(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      // const scrore = req.body.score;
+
+      //lấy danh sách thí sinh được cứu
+      const contestants = await ContestantService.getRescueContestants(matchId);
+
+      res.json({ 
+        message: "Lấy danh sách thí sinh được cứu thành công",
+        selectedContestants: contestants 
+      });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  // Cập nhật trạng thái thí sinh được cứu hàng loạt
+  static async updateRescueContestants(req, res) {
+    try {
+      const contestants = this.getRescueContestants(req, res);
+      await ContestantService.updateContestant(contestants, "Đang thi");
+      res.json({ message: "Cập nhật trạng thái thí sinh thành công" });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  // Tính số lượng thí sinh cần được cứu
+  static async getRescueContestantTotal(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const total = await ContestantService.getRescueContestantTotal(matchId);
+      res.json({ total: total });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
