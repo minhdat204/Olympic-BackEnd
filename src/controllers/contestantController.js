@@ -371,10 +371,10 @@ class ContestantController {
   static async getRescueContestants(req, res) {
     try {
       const matchId = req.params.match_id;
-      // const scrore = req.body.score;
+      const score = req.body.score;
 
       //lấy danh sách thí sinh được cứu
-      const contestants = await ContestantService.getRescueContestants(matchId);
+      const contestants = await ContestantService.getRescueContestants(matchId, score);
 
       res.json({ 
         message: "Lấy danh sách thí sinh được cứu thành công",
