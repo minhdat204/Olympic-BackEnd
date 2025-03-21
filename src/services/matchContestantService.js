@@ -22,8 +22,15 @@ class MatchContestantService {
         {
           model: Contestant,
           as: "contestant",
-          attributes: ["fullname"],
+          attributes: ["fullname", "group_id"],
           raw: true,
+          include: [
+            {
+              model: Group,
+              as: "group",
+              attributes: ["group_name"],
+            },
+          ],
         },
         { model: Match, as: "match", attributes: ["match_name"], raw: true },
       ],
