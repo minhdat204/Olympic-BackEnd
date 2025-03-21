@@ -99,11 +99,6 @@ class ContestantService {
     return { message: "Đã xóa thí sinh thành công" };
   }
 
-  // lấy ds trạng thái thí sinh
-  static async getListStatus() {
-    return Object.values(Contestant.getAttributes().status.values);
-  }
-
   // lấy ds lớp thí sinh
   static async getListClass() {
     return Contestant.findAll({
@@ -167,32 +162,6 @@ class ContestantService {
 
     return groupAndMatch;
   }
-  // Lấy thí sinh theo match trạng thái và khóa
-  static async getListContestants(
-    className = null,
-    class_year = null,
-    status = "Chưa thi",
-    limit = 60,
-    round_name = null
-  ) {
-    console.log(limit);
-    let whereCondition = {
-      status,
-    };
-
-    limit = parseInt(limit) || 60;
-    if (className) whereCondition.class = className;
-    if (class_year) whereCondition.class_year = parseInt(class_year);
-    if (round_name) whereCondition.round_name = round_name;
-    const contestants = await Contestant.findAll({
-      where: whereCondition,
-      order: Sequelize.literal("RAND()"),
-      limit: limit,
-      raw: true,
-    });
-    return contestants;
-  }
-  //Cập nhât group thí sinh
   static async updateContestantGroup(data) {
     //Lấy danh sach group theo trận đấu
     const listgroup = await Group.findAll({
@@ -249,7 +218,7 @@ class ContestantService {
     if (newContestant.length == 0) {
       return {
         status: "error",
-        msg: "Không có thí sinh mới để thêm"
+        msg: "Không có thí sinh mới để thêm",
       };
     } else {
       await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
@@ -277,71 +246,66 @@ class ContestantService {
     });
   }
   // Lấy danh sách thí sinh theo lớp
-  static async getListContestantsByClass(
-    classes,
-    status = "Chưa thi",
-    round_name = "Vòng loại",
-    limit = 60
-  ) {
+  static async getListContestantsByClass(classes) {
     const contestants = await Contestant.findAll({
       where: {
         class: { [Op.in]: classes },
-        round_name: round_name,
-        status: status,
+        group_id: null,
       },
+      limit: 60,
       order: Sequelize.literal("RAND()"),
-      limit: parseInt(limit),
       raw: true,
     });
     return contestants;
   }
-  static async updateContestantGroupByClass(
-    match_id,
-    classes,
-    status,
-    round_name,
-    limit
-  ) {
+
+  static async updateContestantGroupByClass(match_id, classes) {
     const groups = await Group.findAll({
       attributes: ["id"],
       where: { match_id: match_id },
       raw: true,
     });
-    if (groups.length <= 0) return "Trận đáu hiện tại chưa có group";
-    const round = await Match.findByPk(match_id, {
-      attributes: ["round_name"],
-      raw: true,
-    });
+    if (groups.length <= 0)
+      return { message: "Trận đấu hiện tại chưa có nhóm" };
     console.log(groups);
     const contestants = await ContestantService.getListContestantsByClass(
-      classes,
-      status,
-      round_name,
-      limit
+      classes
     );
-
-    if (contestants.length <= 0) return "Không có thí sinh để chia ";
-
+    if (contestants.length <= 0)
+      return { massage: "Không có thí sinh để chia" };
+    console.log(contestants.length, contestants);
+    await Match.update(
+      {
+        class_names: classes,
+      },
+      {
+        where: { id: match_id },
+      }
+    );
     const k = Math.floor(contestants.length / groups.length);
     const r = contestants.length % groups.length;
     let index = 0;
     for (let i = 0; i < contestants.length; i++) {
-      console.log(i + 1, round.round_name, groups[index].id);
       await Contestant.update(
         {
-          registration_number: i + 1,
-          round_name: round.round_name,
           group_id: groups[index].id,
-          status: "Đang thi",
         },
         { where: { id: contestants[i].id } }
       );
+      await MatchContestant.create({
+        registration_number: i + 1,
+        status: "Chưa thi",
+        match_id: match_id,
+        contestant_id: contestants[i].id,
+      });
       let maxgroup = k + (index < r ? 1 : 0);
       if ((i + 1) % maxgroup === 0) {
         index++;
       }
     }
-    return "Chia danh sách thành công ";
+    return {
+      massage: `Thêm ${contestants.length} thí sinh vào trận thành công `,
+    };
   }
   // lấy danh sách khóa sinh viên
   static async getListClass_Year() {

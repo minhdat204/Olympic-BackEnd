@@ -21,7 +21,7 @@ module.exports = {
           "Xác nhận 2",
           "Bị loại",
           "Cấm thi",
-          "Qua Vòng"
+          "Qua vòng"
         ),
         defaultValue: "Chưa thi",
       },

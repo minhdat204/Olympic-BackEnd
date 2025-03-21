@@ -4,7 +4,10 @@ const xlsx = require("xlsx");
 const path = require("path");
 const fs = require("fs");
 const { emit } = require("process");
-const { emitTotalContestants, emitContestants } = require("../socketEmitters/contestantEmitter");
+const {
+  emitTotalContestants,
+  emitContestants,
+} = require("../socketEmitters/contestantEmitter");
 class ContestantController {
   // Lấy danh sách thí sinh
   static async getContestants(req, res) {
@@ -100,8 +103,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-            ? 409
-            : 500;
+          ? 409
+          : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -154,16 +157,6 @@ class ContestantController {
     }
   }
 
-  //Danh Sach Status
-  static async getListStatus(req, res) {
-    try {
-      const list = await ContestantService.getListStatus();
-      res.json({ listSatus: list });
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
-
   // lấy ds lớp học
   static async getListClass(req, res) {
     try {
@@ -209,15 +202,12 @@ class ContestantController {
       });
     }
   }
-  static async getListContestants(req, res) {
+  // lấy danh sách thí sinh theo nhiều lớp
+  static async getListContestantsByClass(req, res) {
     try {
-      const { className, class_year, limit, status, round_name } = req.query;
-      const listContestants = await ContestantService.getListContestants(
-        className,
-        class_year,
-        limit,
-        status,
-        round_name
+      const { classes } = req.body;
+      const listContestants = await ContestantService.getListContestantsByClass(
+        classes
       );
       res.json({ listContestants: listContestants });
     } catch (error) {
@@ -290,13 +280,10 @@ class ContestantController {
   // phương thưc này dùng để chia thí sinh theo lớp
   static async updateContestantGroupByClass(req, res) {
     try {
-      const { match_id, classes, status, round_name, limit } = req.body;
+      const { match_id, classes } = req.body;
       const result = await ContestantService.updateContestantGroupByClass(
         match_id,
-        classes,
-        status,
-        round_name,
-        limit
+        classes
       );
       res.json(result);
     } catch (error) {
@@ -314,7 +301,7 @@ class ContestantController {
 
   /**
    * TRÊN MÀN HÌNH ĐIỀU KHIỂN
-   * 
+   *
    */
   // API lấy danh sách thí sinh trong trận đấu
   static async getContestantsByMatchId(req, res) {
@@ -348,18 +335,29 @@ class ContestantController {
       const contestantStatus = req.body.status;
 
       //cập nhật trạng thái thí sinh
-      await ContestantService.updateContestantStatus(contestantId, contestantStatus);
+      await ContestantService.updateContestantStatus(
+        contestantId,
+        contestantStatus
+      );
       //lấy total thí sinh và thí sinh còn lại trong trận
       const contestantTotal = await ContestantService.getContestantTotal();
       //lấy danh sách thí sinh theo trận hiện tại
       const contestants = await ContestantService.getContestantsByMatchId(matchId);
 
       //emitTotalContestants
-      emitTotalContestants(matchId, contestantTotal.total, contestantTotal.remaining);
+      emitTotalContestants(
+        matchId,
+        contestantTotal.total,
+        contestantTotal.remaining
+      );
       //emitContestants
       emitContestants(matchId, contestants);
       //trả về kết quả ở màn hình trọng tài
-      res.json({ total: contestantTotal.total, remaining: contestantTotal.remaining, message: "Cập nhật trạng thái thí sinh thành công" });
+      res.json({
+        total: contestantTotal.total,
+        remaining: contestantTotal.remaining,
+        message: "Cập nhật trạng thái thí sinh thành công",
+      });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
