@@ -87,6 +87,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TINYINT,
         defaultValue: -1,
       },
+      class_names: {
+        type: DataTypes.JSON,
+      },
       round_name: {
         type: DataTypes.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
         allowNull: false,
