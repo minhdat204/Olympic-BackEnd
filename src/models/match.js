@@ -36,10 +36,15 @@ module.exports = (sequelize, DataTypes) => {
 
       // Quan hệ nhiều - nhiều với Contestant qua bảng MatchContestant
       Match.belongsToMany(models.Contestant, {
-        through: models.MatchContestant, // Bảng trung gian
+        through: models.MatchContestant,
         foreignKey: "match_id",
         otherKey: "contestant_id",
-        as: "contestants",
+        as: "contestants", // ✅ Đặt alias duy nhất
+      });
+
+      Match.hasMany(models.MatchContestant, {
+        foreignKey: "match_id",
+        as: "matchContestants", // ✅ Đặt alias duy nhất
       });
     }
   }
