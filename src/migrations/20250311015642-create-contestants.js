@@ -28,32 +28,11 @@ module.exports = {
         type: Sequelize.TINYINT,
         allowNull: false,
       },
-      registration_number: {
-        type: Sequelize.SMALLINT,
-      },
       qualifying_score: {
         type: Sequelize.TINYINT,
       },
-      current_question: {
-        type: Sequelize.TINYINT,
-        defaultValue: -1,
-      },
       group_id: {
         type: Sequelize.SMALLINT,
-      },
-      round_name: {
-        type: Sequelize.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
-        defaultValue: "Vòng loại",
-      },
-      status: {
-        type: Sequelize.ENUM(
-          "Chưa thi",
-          "Đang thi",
-          "Xác nhận 1",
-          "Chờ cứu",
-          "Bị loại"
-        ),
-        defaultValue: "Chưa thi",
       },
       created_at: {
         allowNull: true,

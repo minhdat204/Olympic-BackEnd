@@ -11,10 +11,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'match_id',
         as: 'match'
       });
-      Question.hasOne(models.Match, {
-        foreignKey: 'current_question_id',
-        as: 'match_for_question'
-      });
     }
   }
   Question.init({
@@ -43,6 +39,11 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     correct_answer: DataTypes.TEXT,
+    correct_answer_type: {
+      type: DataTypes.ENUM("Text", "Image", "Audio", "Video"),
+      allowNull: false,
+      defaultValue: "Text"
+    },
     options: {
       type: DataTypes.JSON,
       get() {

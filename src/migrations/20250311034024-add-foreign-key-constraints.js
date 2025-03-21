@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Answers table
+    // Ràng buộc bảng answers
     await queryInterface.addConstraint("answers", {
       fields: ["question_id"],
       type: "foreign key",
@@ -40,7 +40,7 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
-    // Contestants table
+    // Ràng buộc bảng contestants
     await queryInterface.addConstraint("contestants", {
       fields: ["group_id"],
       type: "foreign key",
@@ -53,7 +53,7 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
-    // Groups table
+    // Ràng buộc bảng groups
     await queryInterface.addConstraint("groups", {
       fields: ["match_id"],
       type: "foreign key",
@@ -78,7 +78,7 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
-    // Matches table
+    // Ràng buộc bảng matches
     await queryInterface.addConstraint("matches", {
       fields: ["current_question_id"],
       type: "foreign key",
@@ -103,32 +103,7 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
-    // score_logs table
-    await queryInterface.addConstraint("score_logs", {
-      fields: ["contestant_id"],
-      type: "foreign key",
-      name: "fk_score_logs_contestant_id",
-      references: {
-        table: "contestants",
-        field: "id",
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
-
-    await queryInterface.addConstraint("score_logs", {
-      fields: ["match_id"],
-      type: "foreign key",
-      name: "fk_score_logs_match_id",
-      references: {
-        table: "matches",
-        field: "id",
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
-
-    // questions table
+    // Ràng buộc bảng questions
     await queryInterface.addConstraint("questions", {
       fields: ["match_id"],
       type: "foreign key",
@@ -141,37 +116,42 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
-    // Thêm ràng buộc UNIQUE cho Users table
-    await queryInterface.addConstraint("users", {
-      fields: ["username"],
-      type: "unique",
-      name: "users_username_unique",
+    // Ràng buộc bảng awards
+    await queryInterface.addConstraint("awards", {
+      fields: ["contestant_id"],
+      type: "foreign key",
+      name: "fk_awards_contestant_id",
+      references: {
+        table: "contestants",
+        field: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
-
-    await queryInterface.addConstraint("users", {
-      fields: ["email"],
-      type: "unique",
-      name: "users_email_unique",
-    });
-
-    await queryInterface.addConstraint("contestants", {
-      fields: ["email"],
-      type: "unique",
-      name: "contestants_email_unique",
+    await queryInterface.addConstraint("awards", {
+      fields: ["video_submission_id"],
+      type: "foreign key",
+      name: "fk_awards_video_submission_id",
+      references: {
+        table: "video_submissions",
+        field: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
   },
 
   async down(queryInterface, Sequelize) {
     try {
-      // Tạm thời tắt kiểm tra khóa ngoại
-      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
-
-      // Xóa ràng buộc UNIQUE users
+      // Xóa ràng buộc UNIQUE
       await queryInterface.removeConstraint("users", "users_username_unique");
       await queryInterface.removeConstraint("users", "users_email_unique");
-      await queryInterface.removeConstraint("contestants", "contestants_email_unique");
+      await queryInterface.removeConstraint(
+        "contestants",
+        "contestants_email_unique"
+      );
 
-      // Xóa các ràng buộc khóa ngoại
+      // Xóa các ràng buộc khóa ngoại từng dòng
       await queryInterface.removeConstraint(
         "answers",
         "fk_answers_question_id"
@@ -187,28 +167,29 @@ module.exports = {
       );
       await queryInterface.removeConstraint("groups", "fk_groups_match_id");
       await queryInterface.removeConstraint("groups", "fk_groups_judge_id");
-      await queryInterface.removeConstraint("matches", "fk_matches_round_id");
       await queryInterface.removeConstraint(
         "matches",
         "fk_matches_current_question_id"
       );
       await queryInterface.removeConstraint(
-        "score_logs",
-        "fk_score_logs_contestant_id"
+        "matches",
+        "fk_matches_gold_winner_id"
       );
-      await queryInterface.removeConstraint(
-        "score_logs",
-        "fk_score_logs_match_id"
-      );
+
       await queryInterface.removeConstraint(
         "questions",
         "fk_questions_match_id"
       );
+      await queryInterface.removeConstraint(
+        "awards",
+        "fk_awards_contestant_id"
+      );
+      await queryInterface.removeConstraint(
+        "awards",
+        "fk_awards_video_submission_id"
+      );
     } catch (error) {
-      console.log("Lỗi khi xóa ràng buộc:", error.message);
-    } finally {
-      // Bật lại kiểm tra khóa ngoại
-      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+      console.error("Lỗi khi xóa ràng buộc:", error.message);
     }
   },
 };

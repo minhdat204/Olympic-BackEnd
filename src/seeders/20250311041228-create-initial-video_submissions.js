@@ -3,21 +3,23 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    let video = [];
-    const type = ["Team", "Sponsor"];
-    for (let i = 0; i < 20; i++) {
-      video.push({
+    let videos = [];
+    const types = ["Team", "Sponsor"];
+
+    for (let i = 1; i <= 20; i++) {
+      videos.push({
         name: `Video ${i}`,
-        video_url: `url${i}`,
-        type: type[Math.floor(Math.random() * type.length)],
+        video_url: `https://example.com/video${i}.mp4`, // Giả lập URL hợp lệ
+        type: types[Math.floor(Math.random() * types.length)], // Chọn ngẫu nhiên
         created_at: new Date(),
         updated_at: new Date(),
       });
     }
-    await queryInterface.bulkInsert("video_submissions", video);
+
+    return await queryInterface.bulkInsert("video_submissions", videos);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("video_submissions", null, {});
+    return await queryInterface.bulkDelete("video_submissions", null, {});
   },
 };

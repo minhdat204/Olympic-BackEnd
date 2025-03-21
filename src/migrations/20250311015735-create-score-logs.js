@@ -35,13 +35,13 @@ module.exports = {
   async down(queryInterface, Sequelize) {
     try {
       // Tắt kiểm tra khóa ngoại
-      await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-      
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
+
       // Xóa bảng
       await queryInterface.dropTable("score_logs");
     } finally {
       // Bật lại kiểm tra khóa ngoại
-      await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+      await queryInterface.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
     }
   },
 };
