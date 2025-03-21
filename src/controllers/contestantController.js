@@ -362,7 +362,16 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
-
+  static async getGroupContestantByMatch(req, res) {
+    try {
+      const list = await ContestantService.getGroupContestantByMatch(
+        req.params.match_id
+      );
+      res.json(list);
+       } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
   /**===========================================================
    * DAT: PHẦN CỨU TRỢ THÍ SINH
    * ===========================================================
@@ -384,6 +393,7 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+
 
   // Cập nhật trạng thái thí sinh được cứu hàng loạt
   static async updateRescueContestants(req, res) {

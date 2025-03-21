@@ -29,13 +29,12 @@ module.exports = (sequelize, DataTypes) => {
         through: models.MatchContestant,
         foreignKey: "contestant_id",
         otherKey: "match_id",
-        as: "matches",
+        as: "matches", // ✅ Đặt alias duy nhất
       });
 
-      // Một Contestant có thể có nhiều Award
-      Contestant.hasMany(models.Award, {
+      Contestant.hasMany(models.MatchContestant, {
         foreignKey: "contestant_id",
-        as: "awards",
+        as: "matchContestants", // ✅ Đặt alias duy nhất
       });
     }
   }
