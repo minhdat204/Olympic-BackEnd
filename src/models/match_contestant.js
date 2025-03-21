@@ -6,12 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       MatchContestant.belongsTo(models.Match, {
         foreignKey: "match_id",
-        as: "match",
+        as: "match", // ✅ Đặt alias duy nhất
       });
 
       MatchContestant.belongsTo(models.Contestant, {
         foreignKey: "contestant_id",
-        as: "contestant",
+        as: "contestant", // ✅ Đặt alias duy nhất
       });
     }
   }

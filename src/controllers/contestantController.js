@@ -361,6 +361,16 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+  static async getGroupContestantByMatch(req, res) {
+    try {
+      const list = await ContestantService.getGroupContestantByMatch(
+        req.params.match_id
+      );
+      res.json(list);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = ContestantController;

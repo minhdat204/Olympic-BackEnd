@@ -9,6 +9,7 @@ const {
 } = require("../models");
 const xlsx = require("xlsx");
 const { Op, where, Sequelize } = require("sequelize");
+const group = require("../models/group");
 
 class ContestantService {
   // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
@@ -362,6 +363,34 @@ class ContestantService {
       where: { status: data.status },
     });
     return contestants;
+  }
+  static async getGroupContestantByMatch(match_id) {
+    const list = await Group.findAll({
+      attributes: ["id", "group_name"],
+      include: [
+        {
+          model: Match,
+          as: "match",
+          attributes: ["id", "match_name"],
+          where: { id: match_id }, // ✅ Lọc match_id ở đây
+        },
+        {
+          model: Contestant,
+          as: "contestants",
+          attributes: ["id", "fullname"],
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants", // ✅ Đúng alias của hasMany
+              attributes: ["registration_number"],
+              where: { match_id }, // ✅ Lọc ở bảng trung gian
+            },
+          ],
+        },
+      ],
+    });
+
+    return list;
   }
 }
 module.exports = ContestantService;

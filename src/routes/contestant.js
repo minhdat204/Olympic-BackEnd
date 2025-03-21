@@ -16,6 +16,10 @@ const upload = multer({ storage: storage });
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 
+router.get(
+  "/get-group-by-match-id/:match_id",
+  ContestantController.getGroupContestantByMatch
+);
 // Lấy chi tiết thí sinh (public)
 router.get("/:id", ContestantController.getContestantById);
 
