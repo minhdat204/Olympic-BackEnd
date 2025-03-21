@@ -65,3 +65,24 @@ exports.getListStatus = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+exports.getListContestantsByMatch = async (req, res) => {
+  try {
+    const list = await matchContestantService.getListContestantsByMatch(
+      req.body.matches
+    );
+    res.json({ list: list });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.updateContestantGroupByMatch = async (req, res) => {
+  try {
+    const status = await matchContestantService.updateContestantGroupByMatch(
+      req.body.match_id,
+      req.body.matches
+    );
+    res.json({ status: status });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};

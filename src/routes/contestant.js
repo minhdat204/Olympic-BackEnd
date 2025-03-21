@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const xlsx = require("xlsx");
+
 const router = express.Router();
 const ContestantController = require("../controllers/contestantController");
 const auth = require("../middleware/auth");
@@ -13,16 +13,11 @@ const {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Lấy danh sách thí sinh theo class ,class_year, status ,
-router.get("/list", ContestantController.getListContestants);
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 
 // Lấy chi tiết thí sinh (public)
 router.get("/:id", ContestantController.getContestantById);
-
-// Lay danh sach trang thai
-router.get("/list/status", ContestantController.getListStatus);
 
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
@@ -31,24 +26,30 @@ router.get("/list/class", ContestantController.getListClass);
 router.get("/download/excel", ContestantController.downloadExcel);
 
 // API cập nhật thí sinh + gửi emit total thí sinh, thí sinh còn lại lên màn hình chiếu + emit dữ liệu thí sinh (status) lên màn hình điều khiển)
-router.patch("/emit/match/:match_id/contestant-status", ContestantController.updateContestantStatusAndEmit);
+router.patch(
+  "/emit/match/:match_id/contestant-status",
+  ContestantController.updateContestantStatusAndEmit
+);
 
 // Lấy danh sách khoa
 router.get("/list/class_year", ContestantController.getListClass_Year);
 // Lấy danh sachs lớp thí sinh theo khóa
 router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 
-// Câp nhật group thí sinh , theo lớp m ,match
+// Lấy danh sách thí sinh theo nhiều lớp
 
+router.post("/list/classes", ContestantController.getListContestantsByClass);
+
+router.patch(
+  "/update/class/match",
+  ContestantController.updateContestantGroupByClass
+);
 /**
  * Các route dưới đây cần xác thựccontestants
  *  */
 router.use(auth);
 // Chi danh sách thí sinh theo classclass
-router.patch(
-  "/update/class/match",
-  ContestantController.updateContestantGroupByClass
-);
+
 // Tạo thí sinh mới (admin)
 router.post(
   "/upload/excel",

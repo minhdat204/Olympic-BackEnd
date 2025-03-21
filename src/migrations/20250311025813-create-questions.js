@@ -37,6 +37,11 @@ module.exports = {
       correct_answer: {
         type: Sequelize.TEXT,
       },
+      correct_answer_type: {
+        type: Sequelize.ENUM("Text", "Image", "Audio", "Video"),
+        allowNull: false,
+        defaultValue: "Text",
+      },
       options: {
         type: Sequelize.JSON,
       },
