@@ -3,29 +3,22 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-     */
     let groups = [];
-    for (let i = 2; i < 8; i++) {
+
+    for (let i = 1; i <= 6; i++) {
       groups.push({
-        group_name: `Nhóm ${i - 1}`,
+        group_name: `Nhóm ${i}`,
         match_id: 1,
-        judge_id: i,
+        judge_id: i + 1, // Bắt đầu từ 2 đến 7
         created_at: new Date(),
         updated_at: new Date(),
       });
     }
-    await queryInterface.bulkInsert("groups", groups);
+
+    return await queryInterface.bulkInsert("groups", groups);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("groups", null, {});
+    return await queryInterface.bulkDelete("groups", null, {});
   },
 };

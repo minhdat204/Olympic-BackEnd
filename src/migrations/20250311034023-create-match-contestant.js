@@ -21,7 +21,7 @@ module.exports = {
           "Xác nhận 2",
           "Bị loại",
           "Cấm thi",
-          "Qua Vòng"
+          "Qua vòng"
         ),
         defaultValue: "Chưa thi",
       },
@@ -37,12 +37,12 @@ module.exports = {
         type: Sequelize.SMALLINT,
         allowNull: false,
       },
-      createdAt: {
-        allowNull: false,
+      created_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      updatedAt: {
-        allowNull: false,
+      updated_at: {
+        allowNull: true,
         type: Sequelize.DATE,
       },
     });

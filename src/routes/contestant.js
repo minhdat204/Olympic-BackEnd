@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const xlsx = require("xlsx");
+
 const router = express.Router();
 const ContestantController = require("../controllers/contestantController");
 const auth = require("../middleware/auth");
@@ -13,16 +13,15 @@ const {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Lấy danh sách thí sinh theo class ,class_year, status ,
-router.get("/list", ContestantController.getListContestants);
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 
+router.get(
+  "/get-group-by-match-id/:match_id",
+  ContestantController.getGroupContestantByMatch
+);
 // Lấy chi tiết thí sinh (public)
 router.get("/:id", ContestantController.getContestantById);
-
-// Lay danh sach trang thai
-router.get("/list/status", ContestantController.getListStatus);
 
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
@@ -31,24 +30,42 @@ router.get("/list/class", ContestantController.getListClass);
 router.get("/download/excel", ContestantController.downloadExcel);
 
 // API cập nhật thí sinh + gửi emit total thí sinh, thí sinh còn lại lên màn hình chiếu + emit dữ liệu thí sinh (status) lên màn hình điều khiển)
-router.patch("/emit/match/:match_id/contestant-status", ContestantController.updateContestantStatusAndEmit);
+router.patch(
+  "/emit/match/:match_id/contestant-status",
+  ContestantController.updateContestantStatusAndEmit
+);
 
 // Lấy danh sách khoa
 router.get("/list/class_year", ContestantController.getListClass_Year);
 // Lấy danh sachs lớp thí sinh theo khóa
 router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 
+// DAT: Lấy danh sách thí sinh theo match
+router.get("/matches/:match_id", ContestantController.getContestantsByMatchId);
+
+// DAT: lấy danh sách thí sinh được cứu (status = "xác nhân 2")
+router.get("/matches/:match_id/rescue", ContestantController.getRescueContestants);
+
+// DAT: Cập nhật trạng thái thí sinh được cứu hàng loạt
+router.patch("/matches/:match_id/rescue", ContestantController.updateRescueContestants);
+
+// DAT: Tính số lượng thí sinh cần được cứu
+router.get("/matches/:match_id/rescue/count", ContestantController.getRescueContestantTotal);
+
 // Câp nhật group thí sinh , theo lớp m ,match
 
+router.post("/list/classes", ContestantController.getListContestantsByClass);
+
+router.patch(
+  "/update/class/match",
+  ContestantController.updateContestantGroupByClass
+);
 /**
  * Các route dưới đây cần xác thựccontestants
  *  */
 router.use(auth);
 // Chi danh sách thí sinh theo classclass
-router.patch(
-  "/update/class/match",
-  ContestantController.updateContestantGroupByClass
-);
+
 // Tạo thí sinh mới (admin)
 router.post(
   "/upload/excel",
