@@ -459,7 +459,7 @@ class ContestantService {
    * RESULT
    * DAT: lấy danh sách thí sinh được cứu (status = "xác nhận 2")
    */
-  static async getRescueContestants(matchId) {
+  static async getRescueContestants(matchId, score) {
     /**
        * 1. lấy danh sách thí sinh bị loại
        */
@@ -468,7 +468,7 @@ class ContestantService {
     /**
      * 2. lấy số lượng thí sinh được cứu
      */
-    let rescueContestant = await this.getRescueContestantTotal(matchId, 62);
+    let rescueContestant = await this.getRescueContestantTotal(matchId, score);
 
     /**
      * 3. Nhóm thí sinh theo câu hỏi

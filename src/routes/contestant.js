@@ -44,7 +44,7 @@ router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 router.get("/matches/:match_id", ContestantController.getContestantsByMatchId);
 
 // DAT: lấy danh sách thí sinh được cứu (status = "xác nhân 2")
-router.get("/matches/:match_id/rescue", ContestantController.getRescueContestants);
+router.post("/matches/:match_id/rescue", ContestantController.getRescueContestants);
 
 // DAT: Cập nhật trạng thái thí sinh được cứu hàng loạt
 router.patch("/matches/:match_id/rescue", ContestantController.updateRescueContestants);
