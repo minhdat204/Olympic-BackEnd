@@ -1,5 +1,8 @@
 const QuestionService = require("../services/questionService");
-const { emitQuestion, emitTimeLeft } = require("../socketEmitters/questionEmitter");
+const {
+  emitQuestion,
+  emitTimeLeft,
+} = require("../socketEmitters/questionEmitter");
 
 // Tạo câu hỏi
 exports.createQuestion = async (req, res) => {

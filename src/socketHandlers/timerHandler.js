@@ -59,7 +59,9 @@ const handleTimerSockets = (io, socket) => {
           }
 
           // Gửi cập nhật thời gian còn lại
-          io.to(`match_${matchId}`).emit("timer_update", { timeRemaining: timerData.time_remaining });
+          io.to(`match_${matchId}`).emit("timer_update", {
+            timeRemaining: timerData.time_remaining,
+          });
 
           // Dọn dẹp khi hết thời gian
           if (timerData.time_remaining === 0) {
