@@ -307,14 +307,15 @@ class ContestantController {
   static async getContestantsByMatchId(req, res) {
     try {
       const matchId = req.params.match_id;
-      //lấy danh sách thí sinh 
-      const contestants = await ContestantService.getContestantsByMatchId(matchId);
-      res.json({ 
+      //lấy danh sách thí sinh
+      const contestants = await ContestantService.getContestantsByMatchId(
+        matchId
+      );
+      res.json({
         message: "Lấy danh sách thí sinh trận đấu thành công",
-        contestants: contestants 
+        contestants: contestants,
       });
-    }
-    catch (error) {
+    } catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
@@ -342,7 +343,9 @@ class ContestantController {
       //lấy total thí sinh và thí sinh còn lại trong trận
       const contestantTotal = await ContestantService.getContestantTotal();
       //lấy danh sách thí sinh theo trận hiện tại
-      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      const contestants = await ContestantService.getContestantsByMatchId(
+        matchId
+      );
 
       //emitTotalContestants
       emitTotalContestants(
@@ -368,7 +371,7 @@ class ContestantController {
         req.params.match_id
       );
       res.json(list);
-       } catch (error) {
+    } catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
@@ -383,17 +386,19 @@ class ContestantController {
       const score = req.body.score;
 
       //lấy danh sách thí sinh được cứu
-      const contestants = await ContestantService.getRescueContestants(matchId, score);
+      const contestants = await ContestantService.getRescueContestants(
+        matchId,
+        score
+      );
 
-      res.json({ 
+      res.json({
         message: "Lấy danh sách thí sinh được cứu thành công",
-        selectedContestants: contestants 
+        selectedContestants: contestants,
       });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
-
 
   // Cập nhật trạng thái thí sinh được cứu hàng loạt
   static async updateRescueContestants(req, res) {
@@ -416,7 +421,17 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
-
+  //  Lấy thông tin thí sinh win gold
+  static async getContestantByGoldMatch(req, res) {
+    try {
+      const constestant = await ContestantService.getContestantByGoldMatch(
+        req.params.match_id
+      );
+      res.json({ constestant: constestant });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = ContestantController;

@@ -1,4 +1,4 @@
-const AnswerService = require('../services/answerService');
+const AnswerService = require("../services/answerService");
 
 class AnswerController {
   // Lấy danh sách câu trả lời
@@ -8,29 +8,33 @@ class AnswerController {
         contestant_id: req.query.contestant_id,
         question_id: req.query.question_id,
         match_id: req.query.match_id,
-        is_correct: req.query.is_correct === 'true' ? true :
-                   req.query.is_correct === 'false' ? false : undefined
+        is_correct:
+          req.query.is_correct === "true"
+            ? true
+            : req.query.is_correct === "false"
+            ? false
+            : undefined,
       };
-      
+
       // Loại bỏ các filter undefined
-      Object.keys(filters).forEach(key => 
-        filters[key] === undefined && delete filters[key]
+      Object.keys(filters).forEach(
+        (key) => filters[key] === undefined && delete filters[key]
       );
-      
+
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
-      
+
       const result = await AnswerService.getAnswers(filters, page, limit);
-      
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy danh sách câu trả lời thành công',
-        data: result
+        status: "success",
+        message: "Lấy danh sách câu trả lời thành công",
+        data: result,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message || 'Đã có lỗi xảy ra'
+        status: "error",
+        message: error.message || "Đã có lỗi xảy ra",
       });
     }
   }
@@ -40,17 +44,19 @@ class AnswerController {
     try {
       const answerId = req.params.id;
       const answer = await AnswerService.getAnswerById(answerId);
-      
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy thông tin câu trả lời thành công',
-        data: answer
+        status: "success",
+        message: "Lấy thông tin câu trả lời thành công",
+        data: answer,
       });
     } catch (error) {
-      res.status(error.message === 'Câu trả lời không tồn tại' ? 404 : 500).json({
-        status: 'error',
-        message: error.message
-      });
+      res
+        .status(error.message === "Câu trả lời không tồn tại" ? 404 : 500)
+        .json({
+          status: "error",
+          message: error.message,
+        });
     }
   }
 
@@ -59,20 +65,22 @@ class AnswerController {
     try {
       const answerData = req.body;
       const newAnswer = await AnswerService.createAnswer(answerData);
-      
+
       res.status(201).json({
-        status: 'success',
-        message: 'Tạo câu trả lời thành công',
-        data: newAnswer
+        status: "success",
+        message: "Tạo câu trả lời thành công",
+        data: newAnswer,
       });
     } catch (error) {
-      const statusCode = 
-        error.message.includes('không tồn tại') ? 404 :
-        error.message.includes('đã trả lời') ? 409 : 500;
-      
+      const statusCode = error.message.includes("không tồn tại")
+        ? 404
+        : error.message.includes("đã trả lời")
+        ? 409
+        : 500;
+
       res.status(statusCode).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -82,22 +90,28 @@ class AnswerController {
     try {
       const answerId = req.params.id;
       const answerData = req.body;
-      
-      const updatedAnswer = await AnswerService.updateAnswer(answerId, answerData);
-      
+
+      const updatedAnswer = await AnswerService.updateAnswer(
+        answerId,
+        answerData
+      );
+
       res.status(200).json({
-        status: 'success',
-        message: 'Cập nhật câu trả lời thành công',
-        data: updatedAnswer
+        status: "success",
+        message: "Cập nhật câu trả lời thành công",
+        data: updatedAnswer,
       });
     } catch (error) {
-      const statusCode = 
-        error.message === 'Câu trả lời không tồn tại' ? 404 :
-        error.message.includes('không tồn tại') ? 404 : 500;
-      
+      const statusCode =
+        error.message === "Câu trả lời không tồn tại"
+          ? 404
+          : error.message.includes("không tồn tại")
+          ? 404
+          : 500;
+
       res.status(statusCode).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -107,16 +121,18 @@ class AnswerController {
     try {
       const answerId = req.params.id;
       await AnswerService.deleteAnswer(answerId);
-      
+
       res.status(200).json({
-        status: 'success',
-        message: 'Xóa câu trả lời thành công'
+        status: "success",
+        message: "Xóa câu trả lời thành công",
       });
     } catch (error) {
-      res.status(error.message === 'Câu trả lời không tồn tại' ? 404 : 500).json({
-        status: 'error',
-        message: error.message
-      });
+      res
+        .status(error.message === "Câu trả lời không tồn tại" ? 404 : 500)
+        .json({
+          status: "error",
+          message: error.message,
+        });
     }
   }
 
@@ -124,17 +140,19 @@ class AnswerController {
   static async getAnswersByContestantId(req, res) {
     try {
       const contestantId = req.params.contestantId;
-      const answers = await AnswerService.getAnswersByContestantId(contestantId);
-      
+      const answers = await AnswerService.getAnswersByContestantId(
+        contestantId
+      );
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy câu trả lời của thí sinh thành công',
-        data: answers
+        status: "success",
+        message: "Lấy câu trả lời của thí sinh thành công",
+        data: answers,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -144,16 +162,16 @@ class AnswerController {
     try {
       const questionId = req.params.questionId;
       const answers = await AnswerService.getAnswersByQuestionId(questionId);
-      
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy câu trả lời của câu hỏi thành công',
-        data: answers
+        status: "success",
+        message: "Lấy câu trả lời của câu hỏi thành công",
+        data: answers,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -163,16 +181,16 @@ class AnswerController {
     try {
       const matchId = req.params.matchId;
       const answers = await AnswerService.getAnswersByMatchId(matchId);
-      
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy câu trả lời của trận đấu thành công',
-        data: answers
+        status: "success",
+        message: "Lấy câu trả lời của trận đấu thành công",
+        data: answers,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -182,16 +200,16 @@ class AnswerController {
     try {
       const questionId = req.params.questionId;
       const stats = await AnswerService.getCorrectRateByQuestionId(questionId);
-      
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy tỷ lệ trả lời đúng thành công',
-        data: stats
+        status: "success",
+        message: "Lấy tỷ lệ trả lời đúng thành công",
+        data: stats,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -200,17 +218,20 @@ class AnswerController {
   static async getCorrectRateByContestantId(req, res) {
     try {
       const { contestantId, matchId } = req.params;
-      const stats = await AnswerService.getCorrectRateByContestantId(contestantId, matchId);
-      
+      const stats = await AnswerService.getCorrectRateByContestantId(
+        contestantId,
+        matchId
+      );
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy tỷ lệ trả lời đúng thành công',
-        data: stats
+        status: "success",
+        message: "Lấy tỷ lệ trả lời đúng thành công",
+        data: stats,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -220,17 +241,35 @@ class AnswerController {
     try {
       const matchId = req.params.matchId;
       const stats = await AnswerService.getAnswersStatsByMatch(matchId);
-      
+
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy thống kê câu trả lời thành công',
-        data: stats
+        status: "success",
+        message: "Lấy thống kê câu trả lời thành công",
+        data: stats,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
+    }
+  }
+  static async getTop20byMatch(req, res) {
+    try {
+      const top20 = await AnswerService.getTop20byMatch(req.params.match_id);
+      res.json({ top20: top20 });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async getCorrectContestantsByQuestion(req, res) {
+    try {
+      const list = await AnswerService.getCorrectContestantsByQuestion(
+        req.params.match_id
+      );
+      res.json({ list: list });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
   }
 }
