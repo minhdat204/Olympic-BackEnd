@@ -1,5 +1,12 @@
-const { Answer, Contestant, Question, Match } = require('../models');
-const { Op } = require('sequelize');
+const {
+  Answer,
+  Contestant,
+  Question,
+  Match,
+  MatchContestant,
+} = require("../models");
+const { Op, Sequelize, where } = require("sequelize");
+const group = require("../models/group");
 
 class AnswerService {
   // Lấy danh sách câu trả lời (có hỗ trợ lọc và phân trang)
@@ -9,38 +16,45 @@ class AnswerService {
       include: [
         {
           model: Contestant,
-          as: 'contestant',
-          attributes: ['id', 'fullname', 'email', 'status']
+          as: "contestant",
+          attributes: ["id", "fullname", "email", "status"],
         },
         {
           model: Question,
-          as: 'question',
-          attributes: ['id', 'question_text', 'question_type', 'correct_answer']
+          as: "question",
+          attributes: [
+            "id",
+            "question_text",
+            "question_type",
+            "correct_answer",
+          ],
         },
         {
           model: Match,
-          as: 'match',
-          attributes: ['id', 'match_name', 'round_name', 'status']
-        }
+          as: "match",
+          attributes: ["id", "match_name", "round_name", "status"],
+        },
       ],
-      order: [['created_at', 'DESC']],
+      order: [["created_at", "DESC"]],
       offset: (page - 1) * limit,
-      limit
+      limit,
     };
 
     // Xử lý các bộ lọc
-    if (filters.contestant_id) options.where.contestant_id = filters.contestant_id;
+    if (filters.contestant_id)
+      options.where.contestant_id = filters.contestant_id;
     if (filters.question_id) options.where.question_id = filters.question_id;
     if (filters.match_id) options.where.match_id = filters.match_id;
-    if (filters.is_correct !== undefined) options.where.is_correct = filters.is_correct;
+    if (filters.is_correct !== undefined)
+      options.where.is_correct = filters.is_correct;
 
     const { count, rows } = await Answer.findAndCountAll(options);
-    
+
     return {
       total: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      answers: rows
+      answers: rows,
     };
   }
 
@@ -50,24 +64,29 @@ class AnswerService {
       include: [
         {
           model: Contestant,
-          as: 'contestant',
-          attributes: ['id', 'fullname', 'email', 'status']
+          as: "contestant",
+          attributes: ["id", "fullname", "email", "status"],
         },
         {
           model: Question,
-          as: 'question',
-          attributes: ['id', 'question_text', 'question_type', 'correct_answer']
+          as: "question",
+          attributes: [
+            "id",
+            "question_text",
+            "question_type",
+            "correct_answer",
+          ],
         },
         {
           model: Match,
-          as: 'match',
-          attributes: ['id', 'match_name', 'round_name', 'status']
-        }
-      ]
+          as: "match",
+          attributes: ["id", "match_name", "round_name", "status"],
+        },
+      ],
     });
 
     if (!answer) {
-      throw new Error('Câu trả lời không tồn tại');
+      throw new Error("Câu trả lời không tồn tại");
     }
 
     return answer;
@@ -78,19 +97,19 @@ class AnswerService {
     // Kiểm tra contestant_id có tồn tại
     const contestant = await Contestant.findByPk(answerData.contestant_id);
     if (!contestant) {
-      throw new Error('Thí sinh không tồn tại');
+      throw new Error("Thí sinh không tồn tại");
     }
 
     // Kiểm tra question_id có tồn tại
     const question = await Question.findByPk(answerData.question_id);
     if (!question) {
-      throw new Error('Câu hỏi không tồn tại');
+      throw new Error("Câu hỏi không tồn tại");
     }
 
     // Kiểm tra match_id có tồn tại
     const match = await Match.findByPk(answerData.match_id);
     if (!match) {
-      throw new Error('Trận đấu không tồn tại');
+      throw new Error("Trận đấu không tồn tại");
     }
 
     // Kiểm tra xem thí sinh đã trả lời câu hỏi này trong trận đấu chưa
@@ -98,12 +117,12 @@ class AnswerService {
       where: {
         contestant_id: answerData.contestant_id,
         question_id: answerData.question_id,
-        match_id: answerData.match_id
-      }
+        match_id: answerData.match_id,
+      },
     });
 
     if (existingAnswer) {
-      throw new Error('Thí sinh đã trả lời câu hỏi này trong trận đấu');
+      throw new Error("Thí sinh đã trả lời câu hỏi này trong trận đấu");
     }
 
     return await Answer.create(answerData);
@@ -114,28 +133,28 @@ class AnswerService {
     const answer = await Answer.findByPk(id);
 
     if (!answer) {
-      throw new Error('Câu trả lời không tồn tại');
+      throw new Error("Câu trả lời không tồn tại");
     }
 
     // Kiểm tra các khóa ngoại nếu được cập nhật
     if (answerData.contestant_id) {
       const contestant = await Contestant.findByPk(answerData.contestant_id);
       if (!contestant) {
-        throw new Error('Thí sinh không tồn tại');
+        throw new Error("Thí sinh không tồn tại");
       }
     }
 
     if (answerData.question_id) {
       const question = await Question.findByPk(answerData.question_id);
       if (!question) {
-        throw new Error('Câu hỏi không tồn tại');
+        throw new Error("Câu hỏi không tồn tại");
       }
     }
 
     if (answerData.match_id) {
       const match = await Match.findByPk(answerData.match_id);
       if (!match) {
-        throw new Error('Trận đấu không tồn tại');
+        throw new Error("Trận đấu không tồn tại");
       }
     }
 
@@ -148,11 +167,11 @@ class AnswerService {
     const answer = await Answer.findByPk(id);
 
     if (!answer) {
-      throw new Error('Câu trả lời không tồn tại');
+      throw new Error("Câu trả lời không tồn tại");
     }
 
     await answer.destroy();
-    return { message: 'Đã xóa câu trả lời thành công' };
+    return { message: "Đã xóa câu trả lời thành công" };
   }
 
   // Lấy tất cả câu trả lời của một thí sinh
@@ -162,16 +181,16 @@ class AnswerService {
       include: [
         {
           model: Question,
-          as: 'question',
-          attributes: ['id', 'question_text', 'question_type']
+          as: "question",
+          attributes: ["id", "question_text", "question_type"],
         },
         {
           model: Match,
-          as: 'match',
-          attributes: ['id', 'match_name', 'round_name']
-        }
+          as: "match",
+          attributes: ["id", "match_name", "round_name"],
+        },
       ],
-      order: [['created_at', 'DESC']]
+      order: [["created_at", "DESC"]],
     });
 
     return answers;
@@ -184,16 +203,16 @@ class AnswerService {
       include: [
         {
           model: Contestant,
-          as: 'contestant',
-          attributes: ['id', 'fullname', 'email']
+          as: "contestant",
+          attributes: ["id", "fullname", "email"],
         },
         {
           model: Match,
-          as: 'match',
-          attributes: ['id', 'match_name', 'round_name']
-        }
+          as: "match",
+          attributes: ["id", "match_name", "round_name"],
+        },
       ],
-      order: [['created_at', 'DESC']]
+      order: [["created_at", "DESC"]],
     });
 
     return answers;
@@ -206,16 +225,21 @@ class AnswerService {
       include: [
         {
           model: Contestant,
-          as: 'contestant',
-          attributes: ['id', 'fullname', 'email', 'group_id']
+          as: "contestant",
+          attributes: ["id", "fullname", "email", "group_id"],
         },
         {
           model: Question,
-          as: 'question',
-          attributes: ['id', 'question_text', 'question_type', 'question_order']
-        }
+          as: "question",
+          attributes: [
+            "id",
+            "question_text",
+            "question_type",
+            "question_order",
+          ],
+        },
       ],
-      order: [['created_at', 'DESC']]
+      order: [["created_at", "DESC"]],
     });
 
     return answers;
@@ -224,21 +248,24 @@ class AnswerService {
   // Tính tỷ lệ trả lời đúng cho một câu hỏi
   static async getCorrectRateByQuestionId(questionId) {
     const totalAnswers = await Answer.count({
-      where: { question_id: questionId }
+      where: { question_id: questionId },
     });
 
     const correctAnswers = await Answer.count({
-      where: { 
+      where: {
         question_id: questionId,
-        is_correct: true
-      }
+        is_correct: true,
+      },
     });
 
     return {
       question_id: questionId,
       total_answers: totalAnswers,
       correct_answers: correctAnswers,
-      correct_rate: totalAnswers > 0 ? (correctAnswers / totalAnswers * 100).toFixed(2) + '%' : '0%'
+      correct_rate:
+        totalAnswers > 0
+          ? ((correctAnswers / totalAnswers) * 100).toFixed(2) + "%"
+          : "0%",
     };
   }
 
@@ -248,14 +275,14 @@ class AnswerService {
     if (matchId) whereClause.match_id = matchId;
 
     const totalAnswers = await Answer.count({
-      where: whereClause
+      where: whereClause,
     });
 
     const correctAnswers = await Answer.count({
-      where: { 
+      where: {
         ...whereClause,
-        is_correct: true
-      }
+        is_correct: true,
+      },
     });
 
     return {
@@ -263,28 +290,31 @@ class AnswerService {
       match_id: matchId,
       total_answers: totalAnswers,
       correct_answers: correctAnswers,
-      correct_rate: totalAnswers > 0 ? (correctAnswers / totalAnswers * 100).toFixed(2) + '%' : '0%'
+      correct_rate:
+        totalAnswers > 0
+          ? ((correctAnswers / totalAnswers) * 100).toFixed(2) + "%"
+          : "0%",
     };
   }
 
   // Lấy thống kê câu trả lời theo trận đấu
   static async getAnswersStatsByMatch(matchId) {
     const totalAnswers = await Answer.count({
-      where: { match_id: matchId }
+      where: { match_id: matchId },
     });
 
     const correctAnswers = await Answer.count({
-      where: { 
+      where: {
         match_id: matchId,
-        is_correct: true
-      }
+        is_correct: true,
+      },
     });
 
     // Lấy số lượng các thí sinh đã trả lời
     const contestantCount = await Answer.count({
       distinct: true,
-      col: 'contestant_id',
-      where: { match_id: matchId }
+      col: "contestant_id",
+      where: { match_id: matchId },
     });
 
     return {
@@ -292,8 +322,76 @@ class AnswerService {
       total_answers: totalAnswers,
       correct_answers: correctAnswers,
       contestant_count: contestantCount,
-      correct_rate: totalAnswers > 0 ? (correctAnswers / totalAnswers * 100).toFixed(2) + '%' : '0%'
+      correct_rate:
+        totalAnswers > 0
+          ? ((correctAnswers / totalAnswers) * 100).toFixed(2) + "%"
+          : "0%",
     };
+  }
+  static async getTop20byMatch(match_id, limit = 20) {
+    return Answer.findAll({
+      attributes: [
+        "contestant_id",
+        [Sequelize.fn("SUM", Sequelize.col("Answer.score")), "total_score"],
+      ],
+      where: {
+        match_id: match_id,
+        is_correct: true,
+      },
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+          attributes: ["fullname", "class"],
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants",
+              attributes: ["registration_number"],
+              where: { match_id: match_id },
+            },
+          ],
+        },
+      ],
+      group: ["Answer.contestant_id"],
+      order: [[Sequelize.literal("total_score"), "DESC"]],
+      limit: limit,
+    });
+  }
+  static async getCorrectContestantsByQuestion(match_id) {
+    const list = await Answer.findAll({
+      attributes: ["score"],
+      where: { is_correct: true, match_id: match_id },
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+          attributes: ["fullname", "class", "id"],
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants",
+              attributes: ["registration_number"],
+            },
+          ],
+        },
+        {
+          model: Question,
+          as: "question",
+          attributes: ["question_order"],
+          where: { question_order: 12 },
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
+    return list.map((item) => ({
+      id: item.contestant.id,
+      fullname: item.contestant.fullname,
+      class: item.contestant.class,
+      question_order: item.question.question_order,
+      registration_number: item.contestant.matchContestants.registration_number,
+    }));
   }
 }
 

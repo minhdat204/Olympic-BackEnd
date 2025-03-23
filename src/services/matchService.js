@@ -80,4 +80,12 @@ module.exports = {
   async getListStatus() {
     return Object.values(Match.getAttributes().status.values);
   },
+  async UpdateWinGold(match_id, contestant_id) {
+    const contestant_win = Match.update(
+      { gold_winner_id: contestant_id },
+      { where: { id: match_id } }
+    );
+
+    return contestant_win;
+  },
 };

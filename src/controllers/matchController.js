@@ -1,5 +1,6 @@
 const MatchService = require("../services/matchService");
-
+const ContestantService = require("../services/contestantService");
+const { emitGoldWinUpdate } = require("../socketEmitters/matchEmitter");
 // tạo trận đấu
 exports.createMatch = async (req, res) => {
   try {
@@ -79,6 +80,18 @@ exports.getListStatus = async (req, res) => {
   try {
     const listStatus = await MatchService.getListStatus();
     res.json({ listStatus: listStatus });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+exports.UpdateWinGold = async (req, res) => {
+  try {
+    const { contestant_id } = req.body;
+    const { id } = req.params;
+    await MatchService.UpdateWinGold(id, contestant_id);
+    const info = await ContestantService.getContestantByGoldMatch(id);
+    emitGoldWinUpdate(id, info);
+    res.json({ info: info });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
