@@ -4,8 +4,10 @@ const {
   Contestant,
   MatchContestant,
   Group,
+  Answer,
 } = require("../models");
-const { Op, Sequelize } = require("sequelize");
+const { Op, Sequelize, where } = require("sequelize");
+const contestant = require("../models/contestant");
 
 class MatchContestantService {
   constructor() {}
@@ -49,6 +51,12 @@ class MatchContestantService {
     match.set(data);
     await match.save();
     return match;
+  }
+  async updateStatus(id, status) {
+    return MatchContestant.update(
+      { status: status },
+      { where: { contestant_id: id } }
+    );
   }
 
   // Xóa trận đấu
@@ -117,6 +125,8 @@ class MatchContestantService {
       message: `Thêm ${contestants.length} thí sinh vào trận thành công`,
     };
   }
+
+  //
 }
 
 // Xuất class để có thể sử dụng lại nhiều nơi
