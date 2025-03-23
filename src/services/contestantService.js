@@ -266,7 +266,7 @@ class ContestantService {
         class: { [Op.in]: classes },
         group_id: null,
       },
-      limit: 60,
+      // limit: 60,
       order: Sequelize.literal("RAND()"),
       raw: true,
     });
@@ -286,7 +286,7 @@ class ContestantService {
       classes
     );
     if (contestants.length <= 0)
-      return { massage: "Không có thí sinh để chia" };
+      return { message: "Không có thí sinh để chia" };
     console.log(contestants.length, contestants);
     await Match.update(
       {
@@ -318,7 +318,7 @@ class ContestantService {
       }
     }
     return {
-      massage: `Thêm ${contestants.length} thí sinh vào trận thành công `,
+      message: `Thêm ${contestants.length} thí sinh vào nhóm thành công `,
     };
   }
   // lấy danh sách khóa sinh viên
@@ -359,6 +359,7 @@ class ContestantService {
               as: "matchContestants", // ✅ Đúng alias của hasMany
               attributes: ["registration_number"],
               where: { match_id }, // ✅ Lọc ở bảng trung gian
+              order: ["registration_number"]
             },
           ],
         },
