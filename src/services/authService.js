@@ -45,6 +45,7 @@ class AuthService {
     });
     return user;
   }
+
   // Hàm logout
   static async logout(token) {
     if (token) {
@@ -64,6 +65,26 @@ class AuthService {
       user.set(data);
       await user.save();
       return user;
+    }
+  }
+  // Hàm xóa người dùng (trọng tài)
+  static async deleteUser(id) {
+    try {
+      const user = await User.findByPk(id);
+      if (!user) {
+        throw new Error("Không tìm thấy tài khoản để xóa");
+      }
+      await user.destroy();
+      return { message: "Xóa trọng tài thành công" };
+    } catch (error) {
+      // Kiểm tra nếu lỗi liên quan đến ràng buộc khóa ngoại
+      if (error.name === "SequelizeForeignKeyConstraintError") {
+        throw new Error(
+          "Không thể xóa trọng tài này vì trọng tài đang được tham chiếu trong các dữ liệu khác"
+        );
+      }
+      // Nếu là lỗi khác, ném lại lỗi gốc
+      throw new Error(error.message || "Xóa trọng tài thất bại");
     }
   }
 }
