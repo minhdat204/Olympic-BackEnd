@@ -12,27 +12,42 @@ const { Op, where, Sequelize } = require("sequelize");
 const group = require("../models/group");
 
 class ContestantService {
-  // Lấy danh sách thí sinh không cần phân trang
-  static async getContestants({ search, page, limit }) {
-    const offset = (page - 1) * limit;
-    const contestants = await Contestant.findAndCountAll({
-      where: {
-        [Op.or]: {
-          fullname: { [Op.like]: `%${search}%` },
-          email: { [Op.like]: `%${search}%` },
-        },
-      },
+
+  // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
+  static async getContestants(filters = {}, page = 1, limit = 20) {
+    const options = {
+      where: {},
       include: [
-        { model: Group, as: "group" },
-        { model: Answer, as: "answers" },
+        {
+          model: Group,
+          as: "group",
+        },
       ],
-      offset,
+      order: [["id", "ASC"]],
+      offset: (page - 1) * limit,
       limit,
-    });
+    };
 
-    return contestants;
+    // Xử lý các bộ lọc
+    if (filters.status) options.where.status = filters.status;
+    if (filters.group_id) options.where.group_id = filters.group_id;
+    if (filters.search) {
+      options.where[Op.or] = [
+        { fullname: { [Op.like]: `%${filters.search}%` } },
+        { email: { [Op.like]: `%${filters.search}%` } },
+        { class: { [Op.like]: `%${filters.search}%` } },
+      ];
+    }
+
+    const { count, rows } = await Contestant.findAndCountAll(options);
+
+    return {
+      total: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      contestants: rows,
+    };
   }
-
   // Lấy thông tin chi tiết của một thí sinh
   static async getContestantById(id) {
     const contestant = await Contestant.findByPk(id, {
@@ -216,13 +231,11 @@ class ContestantService {
     const newContestant = email.filter((c) => !emailSet.has(c.email));
     if (newContestant.length == 0) {
       return {
-        status: "error",
-        msg: "Không có thí sinh mới để thêm",
+        msg: "Không có thí sinh mới để thêm"
       };
     } else {
       await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
       return {
-        status: "success",
         msg: `Thêm thành công +${newContestant.length} thí sinh`,
       };
     }
@@ -251,7 +264,7 @@ class ContestantService {
         class: { [Op.in]: classes },
         group_id: null,
       },
-      limit: 60,
+      // limit: 60,
       order: Sequelize.literal("RAND()"),
       raw: true,
     });
@@ -271,7 +284,7 @@ class ContestantService {
       classes
     );
     if (contestants.length <= 0)
-      return { massage: "Không có thí sinh để chia" };
+      return { message: "Không có thí sinh để chia" };
     console.log(contestants.length, contestants);
     await Match.update(
       {
@@ -303,7 +316,7 @@ class ContestantService {
       }
     }
     return {
-      massage: `Thêm ${contestants.length} thí sinh vào trận thành công `,
+      message: `Thêm ${contestants.length} thí sinh vào nhóm thành công `,
     };
   }
   // lấy danh sách khóa sinh viên
@@ -344,6 +357,7 @@ class ContestantService {
               as: "matchContestants", // ✅ Đúng alias của hasMany
               attributes: ["registration_number"],
               where: { match_id }, // ✅ Lọc ở bảng trung gian
+              order: ["registration_number"]
             },
           ],
         },
@@ -408,7 +422,7 @@ class ContestantService {
     });
 
     // chuyển dữ liệu từ object sang json
-    const contestants = eliminatedContestants.map((mc) => {
+    const contestants = eliminatedContestants.map(mc => {
       const contestant = mc.contestant.toJSON();
       contestant.registration_number = mc.registration_number;
       contestant.match_status = mc.status;
@@ -447,8 +461,7 @@ class ContestantService {
 
   //DAT: API cập nhật dữ liệu thí sinh
   static async updateContestant(contestantId, data) {
-    const contestant = await MatchContestant.update(
-      { data },
+    const contestant = await MatchContestant.update({ data },
       {
         where: { contestant_id: contestantId },
       }

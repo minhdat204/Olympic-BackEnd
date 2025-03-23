@@ -52,7 +52,6 @@ class VideoSubmissionController {
   static async createVideoSubmission(req, res) {
     try {
       const newVideo = await VideoSubmissionService.createVideoSubmission(req);
-
       res.status(201).json({
         status: "success",
         message: "Tạo video thành công",

@@ -103,8 +103,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-          ? 409
-          : 500;
+            ? 409
+            : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -307,13 +307,12 @@ class ContestantController {
   static async getContestantsByMatchId(req, res) {
     try {
       const matchId = req.params.match_id;
-      //lấy danh sách thí sinh
-      const contestants = await ContestantService.getContestantsByMatchId(
-        matchId
-      );
+
+      //lấy danh sách thí sinh 
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
       res.json({
         message: "Lấy danh sách thí sinh trận đấu thành công",
-        contestants: contestants,
+        contestants: contestants
       });
     } catch (error) {
       res.status(400).json({ error: error.message });
