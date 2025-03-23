@@ -29,7 +29,7 @@ class ContestantService {
       offset,
       limit,
     });
-  
+
     return contestants;
   }
 
@@ -86,8 +86,6 @@ class ContestantService {
     return contestant;
   }
 
-  
-
   // Xóa thí sinh
   static async deleteContestant(id) {
     const contestant = await Contestant.findByPk(id);
@@ -121,7 +119,7 @@ class ContestantService {
             judge_id,
             match_id,
           },
-          
+
           // include: [
           //   {
           //     model: Match,
@@ -135,7 +133,7 @@ class ContestantService {
           where: {
             id: match_id,
           },
-        }
+        },
       ],
     });
 
@@ -376,20 +374,20 @@ class ContestantService {
         {
           model: Contestant,
           as: "contestant",
-        }
+        },
       ],
       order: [["registration_number", "ASC"]],
     });
-    
+
     // chuyển dữ liệu từ object sang json
-    const contestants = matchContestants.map(mc => {
+    const contestants = matchContestants.map((mc) => {
       const contestant = mc.contestant.toJSON();
       contestant.registration_number = mc.registration_number;
       contestant.match_status = mc.status;
       contestant.eliminated_at_question_order = mc.eliminated_at_question_order;
       return contestant;
     });
-    
+
     return contestants;
   }
 
@@ -405,12 +403,12 @@ class ContestantService {
         {
           model: Contestant,
           as: "contestant",
-        }
+        },
       ],
     });
 
-     // chuyển dữ liệu từ object sang json
-     const contestants = eliminatedContestants.map(mc => {
+    // chuyển dữ liệu từ object sang json
+    const contestants = eliminatedContestants.map((mc) => {
       const contestant = mc.contestant.toJSON();
       contestant.registration_number = mc.registration_number;
       contestant.match_status = mc.status;
@@ -439,14 +437,18 @@ class ContestantService {
 
   // DAT: API lấy số thí sinh cần cứu với công thức [(điểm nhập vào / 100) * tổng thí sinh bị loại]
   static async getRescueContestantTotal(matchId, rescuePoint) {
-    const eliminatedTotal = await this.getContestantTotalByStatus(matchId, "Xác nhận 2");
+    const eliminatedTotal = await this.getContestantTotalByStatus(
+      matchId,
+      "Xác nhận 2"
+    );
     const total = Math.ceil((rescuePoint / 100) * eliminatedTotal);
     return total;
   }
 
   //DAT: API cập nhật dữ liệu thí sinh
   static async updateContestant(contestantId, data) {
-    const contestant = await MatchContestant.update({data},
+    const contestant = await MatchContestant.update(
+      { data },
       {
         where: { contestant_id: contestantId },
       }
@@ -461,8 +463,8 @@ class ContestantService {
    */
   static async getRescueContestants(matchId, score) {
     /**
-       * 1. lấy danh sách thí sinh bị loại
-       */
+     * 1. lấy danh sách thí sinh bị loại
+     */
     const eliminatedContestants = await this.getEliminatedContestants(matchId);
 
     /**
@@ -472,11 +474,11 @@ class ContestantService {
 
     /**
      * 3. Nhóm thí sinh theo câu hỏi
-     */ 
+     */
     const question = [];
     eliminatedContestants.map((contestant) => {
       const questionOrder = contestant.eliminated_at_question_order;
-      if(!question[questionOrder]) {
+      if (!question[questionOrder]) {
         question[questionOrder] = [];
       }
       question[questionOrder].push(contestant);
@@ -487,7 +489,7 @@ class ContestantService {
      */
     const questionIndices = Object.keys(question)
       .map(Number)
-      .filter(index => question[index] && question[index].length > 0)
+      .filter((index) => question[index] && question[index].length > 0)
       .sort((a, b) => b - a); // Sort in descending order
 
     /**
@@ -496,18 +498,18 @@ class ContestantService {
     const selectedContestants = [];
     // duyệt từng thí sinh đã sắp xếp
     for (const i of questionIndices) {
-      if(rescueContestant <= 0) {
+      if (rescueContestant <= 0) {
         break;
       }
       // số lượng thí sinh trong câu hỏi đó
-      const available = question[i].length; 
+      const available = question[i].length;
 
       // nếu số thí sinh <= slot còn lại  (chọn hết)
-      if(available <= rescueContestant) {
+      if (available <= rescueContestant) {
         selectedContestants.push(question[i]);
         rescueContestant -= available;
       }
-      // nếu số thí sinh > slot còn lại (chọn ngẫu nhiên) 
+      // nếu số thí sinh > slot còn lại (chọn ngẫu nhiên)
       else {
         //random thí sinh
         const contestantRandom = question[i].sort(() => Math.random() - 0.5);
@@ -519,6 +521,25 @@ class ContestantService {
     // chuyển mảng 2 chiều thành mảng 1 chiều
     const contestants = selectedContestants.flat();
     return contestants;
+  }
+  static async getContestantByGoldMatch(match_id) {
+    const contestant = await Contestant.findOne({
+      attributes: ["fullname", ["id", "contestant_id"]],
+      include: {
+        model: Match,
+        as: "matches_won",
+        attributes: ["match_name"],
+        where: { id: match_id },
+      },
+      raw: true,
+      nest: true,
+    });
+    return contestant
+      ? {
+          fullname: contestant.fullname,
+          match_name: contestant.matches_won.match_name,
+        }
+      : null;
   }
 }
 module.exports = ContestantService;
