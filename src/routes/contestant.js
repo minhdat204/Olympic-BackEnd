@@ -10,12 +10,15 @@ const {
   createContestantSchema,
   updateContestantSchema,
 } = require("../schemas/contestantSchema");
+const { route } = require("./auth");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
-
+router.get("/check-regroup/:match_id",
+  ContestantController.checkRegroupPermission
+);
 router.get(
   "/get-group-by-match-id/:match_id",
   ContestantController.getGroupContestantByMatch

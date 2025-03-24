@@ -12,7 +12,7 @@ module.exports = {
         question_explanation:
           "Theo khảo sát của Stack Overflow, ngôn ngữ này được sử dụng nhiều nhất.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Python",
         options: JSON.stringify([
           { "text": "Python", "media_url": null },
@@ -34,7 +34,7 @@ module.exports = {
         question_topic: "Hệ điều hành",
         question_explanation: "Microsoft phát triển hệ điều hành phổ biến này.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Windows",
         options: JSON.stringify([
           { "text": "Windows", "media_url": null },
@@ -57,7 +57,7 @@ module.exports = {
         question_explanation:
           "Logo này thuộc về một ngôn ngữ lập trình nổi tiếng.",
         question_type: "Hình Ảnh",
-        media_url: JSON.stringify("/uploads/questions/python_logo.png"),
+        media_url: JSON.stringify(["/uploads/questions/python_logo.png"]), // Sửa thành mảng
         correct_answer: "Python",
         options: JSON.stringify([
           { "text": "Python", "media_url": null },
@@ -81,7 +81,7 @@ module.exports = {
         question_explanation:
           "Âm thanh này rất quen thuộc với người dùng máy tính.",
         question_type: "Âm Thanh",
-        media_url: JSON.stringify("/uploads/questions/windows_xp_startup.mp3"),
+        media_url: JSON.stringify(["/uploads/questions/windows_xp_startup.mp3"]), // Sửa thành mảng
         correct_answer: "Windows XP",
         options: JSON.stringify([
           { "text": "Windows XP", "media_url": null },
@@ -106,7 +106,7 @@ module.exports = {
         question_explanation:
           "Công nghệ này giúp bảo vệ dữ liệu trên internet.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "SSL/TLS",
         options: JSON.stringify([
           { "text": "SSL/TLS", "media_url": null },
@@ -128,7 +128,7 @@ module.exports = {
         question_topic: "Bảo mật",
         question_explanation: "Phương pháp này giúp dữ liệu an toàn hơn.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "AES",
         options: JSON.stringify([
           { "text": "AES", "media_url": null },
@@ -150,7 +150,7 @@ module.exports = {
         question_topic: "Phần mềm",
         question_explanation: "Phần mềm này giúp truy cập internet.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Google Chrome",
         options: JSON.stringify([
           { "text": "Google Chrome", "media_url": "/uploads/questions/chrome_logo.png" },
@@ -172,7 +172,7 @@ module.exports = {
         question_topic: "Cơ sở dữ liệu",
         question_explanation: "Hệ thống này được sử dụng phổ biến trên web.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "MySQL",
         options: JSON.stringify([
           { "text": "MySQL", "media_url": null },
@@ -197,7 +197,7 @@ module.exports = {
         question_explanation:
           "Giao thức này giúp truyền dữ liệu trên internet.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "HTTP",
         options: JSON.stringify([
           { "text": "HTTP", "media_url": null },
@@ -219,7 +219,7 @@ module.exports = {
         question_topic: "Lập trình",
         question_explanation: "Công cụ này giúp quản lý và theo dõi thay đổi.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Git",
         options: JSON.stringify([
           { "text": "Git", "media_url": null },
@@ -242,7 +242,7 @@ module.exports = {
         question_explanation:
           "Dịch vụ này của Google giúp lưu trữ và chia sẻ dữ liệu trực tuyến.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Google Drive",
         options: JSON.stringify([
           { "text": "Google Drive", "media_url": null },
@@ -265,7 +265,7 @@ module.exports = {
         question_explanation:
           "Dịch vụ này của Google giúp lưu trữ và chia sẻ dữ liệu trực tuyến.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Google Drive",
         options: JSON.stringify([
           { "text": "Google Drive", "media_url": null },
@@ -290,7 +290,7 @@ module.exports = {
         question_topic: "AI",
         question_explanation: "Công nghệ này giúp máy tính học hỏi từ dữ liệu.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Machine Learning",
         options: JSON.stringify([
           { "text": "Machine Learning", "media_url": null },

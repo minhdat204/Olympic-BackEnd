@@ -12,6 +12,18 @@ const { Op, where, Sequelize } = require("sequelize");
 const group = require("../models/group");
 
 class ContestantService {
+  // Kiểm tra quyền chia nhóm 
+  static async checkRegroupPermission(match_id) {
+    const match = await Match.findByPk(match_id, {
+      attributes: ["status", "round_name"],
+    });
+    if (!match) throw new Error("Trận đấu không tồn tại");
+    if (!["Tứ Kết", "Bán Kết", "Chung Kết"].includes(match.round_name)) {
+      throw new Error("Vòng đấu không hợp lệ");
+    }
+    return match;
+  }
+
   // Lấy danh sách thí sinh (có hỗ trợ lọc và phân trang)
   static async getContestants(filters = {}, page = 1, limit = 20) {
     const options = {
@@ -47,6 +59,7 @@ class ContestantService {
       contestants: rows,
     };
   }
+
   // Lấy thông tin chi tiết của một thí sinh
   static async getContestantById(id) {
     const contestant = await Contestant.findByPk(id, {
@@ -128,15 +141,19 @@ class ContestantService {
       attributes: ["group_name"],
       include: [
         {
-          model: Contestant,
-          as: "contestants",
-          include: [
-            {
-              model: MatchContestant,
-              as: "matchContestants",
-              attributes: ["registration_number", "status"],
-            },
-          ],
+          model: Group,
+          as: "group",
+          where: {
+            judge_id,
+            match_id,
+          },
+        },
+        {
+          model: Match,
+          as: "matches",
+          where: {
+            id: match_id,
+          },
         },
       ],
       where: { judge_id: judge_id, match_id: match_id },
@@ -173,50 +190,102 @@ class ContestantService {
 
     return groupAndMatch;
   }
+
+  // Phương thức updateContestantGroup đã sửa
   static async updateContestantGroup(data) {
-    //Lấy danh sach group theo trận đấu
+    // Kiểm tra dữ liệu đầu vào
+    if (!data.match_id) {
+      throw new Error("match_id là bắt buộc");
+    }
+    if (!data.className || !Array.isArray(data.className)) {
+      throw new Error("className phải là một mảng các lớp hợp lệ");
+    }
+
+    // Lấy danh sách nhóm theo trận đấu
     const listgroup = await Group.findAll({
       attributes: ["id"],
       where: { match_id: data.match_id },
       raw: true,
     });
 
-    if (listgroup.length <= 0) return "Trận đấu hiện tại chưa có group";
-    console.log(data);
-    const listContestants = await ContestantService.getListContestants(
-      data.className,
-      data.class_year,
-      data.status,
-      data.limit,
-      data.round_name
+    if (listgroup.length <= 0) {
+      return { message: "Trận đấu hiện tại chưa có nhóm" };
+    }
+
+    // Lấy thông tin vòng đấu
+    const match = await Match.findByPk(data.match_id, {
+      attributes: ["round_name", "class_names"],
+    });
+    if (!match) {
+      throw new Error("Trận đấu không tồn tại");
+    }
+
+    // Kiểm tra số lượng nhóm theo vòng đấu
+    const roundName = match.round_name;
+    const classYear = match.class_names && match.class_names.length > 0 ? match.class_names[0].year : null;
+    let expectedGroupCount = 2; // Mặc định 2 nhóm cho Tứ Kết và Bán Kết
+    let maxContestantsPerGroup = 20; // Mặc định 20 thí sinh mỗi nhóm
+    let totalContestants = 40; // Tổng số thí sinh mặc định
+
+    if (roundName === "Bán Kết" && classYear === 2022) {
+      expectedGroupCount = 3; // Bán Kết khóa 2022 có 3 nhóm
+      totalContestants = 60; // 60 thí sinh
+    }
+
+    if (listgroup.length !== expectedGroupCount) {
+      throw new Error(`Trận đấu cần có đúng ${expectedGroupCount} nhóm cho vòng ${roundName}`);
+    }
+
+    // Lấy danh sách thí sinh từ các lớp
+    const listContestants = await ContestantService.getListContestantsByClass(data.className);
+    if (listContestants.length <= 0) {
+      return { message: "Không có thí sinh để chia" };
+    }
+
+    // Giới hạn số lượng thí sinh theo vòng đấu
+    const contestants = listContestants.slice(0, totalContestants);
+
+    // Xóa các nhóm cũ
+    await MatchContestant.destroy({ where: { match_id: data.match_id } });
+    await Contestant.update(
+      { group_id: null },
+      { where: { group_id: listgroup.map((g) => g.id) } }
     );
 
-    if (listContestants.length <= 0) return "Không có thí sinh để chia ";
-    const round_name = await Match.findByPk(data.match_id, {
-      attributes: ["round_name"],
-      raw: true,
-    });
-    const k = Math.floor(listContestants.length / listgroup.length);
-    const r = listContestants.length % listgroup.length;
-
+    // Chia nhóm mới
+    const k = Math.floor(contestants.length / listgroup.length);
+    const r = contestants.length % listgroup.length;
     let index = 0;
-    for (let i = 0; i < listContestants.length; i++) {
+
+    for (let i = 0; i < contestants.length; i++) {
+      // Kiểm tra số lượng thí sinh mỗi nhóm
+      const currentGroupContestants = await Contestant.count({
+        where: { group_id: listgroup[index].id },
+      });
+      if (currentGroupContestants >= maxContestantsPerGroup) {
+        index++;
+        if (index >= listgroup.length) break; // Ngừng nếu không còn nhóm để gán
+      }
+
       await Contestant.update(
-        {
-          registration_number: i + 1,
-          round_name: round_name.round_name,
-          group_id: listgroup[index].id,
-          status: "Đang thi",
-        },
-        { where: { id: listContestants[i].id } }
+        { group_id: listgroup[index].id },
+        { where: { id: contestants[i].id } }
       );
+      await MatchContestant.create({
+        registration_number: i + 1,
+        status: "Chưa thi",
+        match_id: data.match_id,
+        contestant_id: contestants[i].id,
+      });
       let maxgroup = k + (index < r ? 1 : 0);
       if ((i + 1) % maxgroup === 0) {
         index++;
       }
     }
-    return "Chia Nhóm Thí Sinh Thành Công";
+
+    return { message: `Thêm ${contestants.length} thí sinh vào nhóm thành công` };
   }
+
   // Upload danh sách thí sinh excel
   static async uploadExcel(data) {
     const email = Array.from(new Map(data.map((c) => [c.email, c])).values());
@@ -237,6 +306,7 @@ class ContestantService {
       };
     }
   }
+
   // donwload file theo
   static async downloadExcel(data) {
     const workbook = xlsx.utils.book_new();
@@ -245,6 +315,7 @@ class ContestantService {
     const buffer = xlsx.write(workbook, { bookType: "xlsx", type: "buffer" });
     return buffer;
   }
+
   static async getClassByClass_Year(class_year) {
     return Contestant.findAll({
       attributes: [
@@ -254,6 +325,7 @@ class ContestantService {
       raw: true,
     });
   }
+
   // Lấy danh sách thí sinh theo lớp
   static async getListContestantsByClass(classes) {
     const contestants = await Contestant.findAll({
@@ -269,6 +341,7 @@ class ContestantService {
   }
 
   static async updateContestantGroupByClass(match_id, classes) {
+    // Kiểm tra số nhóm trong trận đấu
     const groups = await Group.findAll({
       attributes: ["id"],
       where: { match_id: match_id },
@@ -276,21 +349,22 @@ class ContestantService {
     });
     if (groups.length <= 0)
       return { message: "Trận đấu hiện tại chưa có nhóm" };
-    console.log(groups);
-    const contestants = await ContestantService.getListContestantsByClass(
+
+    // Lấy danh sách thí sinh từ các lớp
+    const contestants = await this.getListContestantsByClass(
       classes
     );
     if (contestants.length <= 0)
       return { message: "Không có thí sinh để chia" };
-    console.log(contestants.length, contestants);
-    await Match.update(
-      {
-        class_names: classes,
-      },
-      {
-        where: { id: match_id },
-      }
+
+    // Xoác các nhóm cũ 
+    await MatchContestant.destroy({ where: { match_id: match_id } });
+    await Contestant.update(
+      { group_id: null },
+      { where: { group_id: groups.map((g) => g.id) } }
     );
+
+    // Chia nhóm mới
     const k = Math.floor(contestants.length / groups.length);
     const r = contestants.length % groups.length;
     let index = 0;
@@ -316,6 +390,7 @@ class ContestantService {
       message: `Thêm ${contestants.length} thí sinh vào nhóm thành công `,
     };
   }
+
   // lấy danh sách khóa sinh viên
   static async getListClass_Year() {
     return Contestant.findAll({
@@ -456,16 +531,24 @@ class ContestantService {
     return total;
   }
 
-  //DAT: API cập nhật dữ liệu thí sinh
+  // Phương thức updateContestant đã sửa
   static async updateContestant(contestantId, data) {
-    const contestant = await MatchContestant.update(
-      { data },
-      {
-        where: { contestant_id: contestantId },
-      }
-    );
+    // Kiểm tra xem bản ghi có tồn tại không
+    const matchContestant = await MatchContestant.findOne({
+      where: { contestant_id: contestantId },
+    });
+    if (!matchContestant) {
+      throw new Error("Thí sinh không tồn tại trong trận đấu");
+    }
 
-    return contestant;
+    // Cập nhật dữ liệu
+    await matchContestant.update({
+      status: data.status,
+      eliminated_at_question_order: data.eliminated_at_question_order,
+      // Thêm các trường khác nếu cần
+    });
+
+    return matchContestant;
   }
 
   /**
@@ -533,6 +616,7 @@ class ContestantService {
     const contestants = selectedContestants.flat();
     return contestants;
   }
+
   static async getContestantByGoldMatch(match_id) {
     const contestant = await Contestant.findOne({
       attributes: ["fullname", ["id", "contestant_id"]],
@@ -547,10 +631,11 @@ class ContestantService {
     });
     return contestant
       ? {
-          fullname: contestant.fullname,
-          match_name: contestant.matches_won.match_name,
-        }
+        fullname: contestant.fullname,
+        match_name: contestant.matches_won.match_name,
+      }
       : null;
   }
 }
+
 module.exports = ContestantService;
