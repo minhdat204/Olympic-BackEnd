@@ -328,8 +328,8 @@ class AnswerService {
           : "0%",
     };
   }
-  static async getTop20byMatch(match_id, limit = 20) {
-    return Answer.findAll({
+  static async getTop20byMatch(match_id, limit) {
+    const top20 = await Answer.findAll({
       attributes: [
         "contestant_id",
         [Sequelize.fn("SUM", Sequelize.col("Answer.score")), "total_score"],
@@ -355,8 +355,16 @@ class AnswerService {
       ],
       group: ["Answer.contestant_id"],
       order: [[Sequelize.literal("total_score"), "DESC"]],
-      limit: limit,
+      limit: 20,
     });
+    return top20.map((item) => ({
+      id: item.contestant_id,
+      fullname: item.contestant.fullname,
+      class: item.contestant.class,
+      registration_number:
+        item.contestant.matchContestants?.[0]?.registration_number || "N/A",
+      total_score: item.dataValues.total_score,
+    }));
   }
   static async getCorrectContestantsByQuestion(match_id) {
     const list = await Answer.findAll({

@@ -86,3 +86,10 @@ exports.updateContestantGroupByMatch = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+exports.updateStatus = async (req, res) => {
+  try {
+    await matchContestantService.updateStatus(req.params.id, req.body.status);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
