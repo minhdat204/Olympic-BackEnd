@@ -55,7 +55,7 @@ module.exports = {
         type: Sequelize.JSON,
       },
       round_name: {
-        type: Sequelize.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
+        type: Sequelize.ENUM("Tứ Kết", "Bán Kết", "Chung Kết"),
         allowNull: false,
       },
       gold_winner_id: {

@@ -277,10 +277,16 @@ class ContestantController {
     }
   }
 
-  // phương thưc này dùng để chia thí sinh theo lớp
+  // API chia nhóm lại
   static async updateContestantGroupByClass(req, res) {
     try {
       const { match_id, classes } = req.body;
+      const match = await ContestantService.checkRegroupPermission(match_id);
+      if (match.status !== "Chưa diễn ra") {
+        throw new Error("Không thể chia nhóm lại vì trận đấu đã bắt đầu");
+      }
+
+      // Xóa các nhóm cũ và gán lại cho nhóm mới
       const result = await ContestantService.updateContestantGroupByClass(
         match_id,
         classes
@@ -370,6 +376,17 @@ class ContestantController {
         req.params.match_id
       );
       res.json(list);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  //API kiểm tra quyền chia nhóm lại
+  static async checkRegroupPermission(req, res) {
+    try {
+      const { match_id } = req.params;
+      const match = await ContestantService.checkRegroupPermission(match_id);
+      res.json({ canRegroup: match.status === "Chưa diễn ra" });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
