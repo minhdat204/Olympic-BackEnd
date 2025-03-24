@@ -103,8 +103,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-            ? 409
-            : 500;
+          ? 409
+          : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -177,24 +177,7 @@ class ContestantController {
         judge_id,
         match_id
       );
-
-      // lấy group_id, group_name, match_id, match_name, judge_id, username dựa vào judge_id, match_id (GROUPS)
-      const GroupAndMatch = await ContestantService.getGroupAndMatch(
-        judge_id,
-        match_id
-      );
-
-      res.status(200).json({
-        status: "success",
-        message: "Lấy danh sách thí sinh thành công",
-        matchId: GroupAndMatch.match.id,
-        matchName: GroupAndMatch.match.match_name,
-        judgeId: GroupAndMatch.judge_id,
-        judgeUserName: GroupAndMatch.judge.username,
-        groupId: GroupAndMatch.id,
-        groupName: GroupAndMatch.group_name,
-        listContestants: contestants,
-      });
+      res.json(contestants);
     } catch (error) {
       res.status(500).json({
         status: "error",
@@ -308,11 +291,13 @@ class ContestantController {
     try {
       const matchId = req.params.match_id;
 
-      //lấy danh sách thí sinh 
-      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      //lấy danh sách thí sinh
+      const contestants = await ContestantService.getContestantsByMatchId(
+        matchId
+      );
       res.json({
         message: "Lấy danh sách thí sinh trận đấu thành công",
-        contestants: contestants
+        contestants: contestants,
       });
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -390,13 +375,16 @@ class ContestantController {
         score
       );
 
-      const totalEliminated = await ContestantService.getContestantTotalByStatus(
-        matchId, "Xác nhận 2");
+      const totalEliminated =
+        await ContestantService.getContestantTotalByStatus(
+          matchId,
+          "Xác nhận 2"
+        );
 
       res.json({
         message: "Lấy danh sách thí sinh được cứu thành công",
         selectedContestants: contestants,
-        totalEliminated: totalEliminated
+        totalEliminated: totalEliminated,
       });
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -419,7 +407,10 @@ class ContestantController {
     try {
       const rescuePoint = req.body.rescuePoint;
       const matchId = req.params.match_id;
-      const total = await ContestantService.getRescueContestantTotal(matchId, rescuePoint);
+      const total = await ContestantService.getRescueContestantTotal(
+        matchId,
+        rescuePoint
+      );
       res.json({ total: total });
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -429,7 +420,10 @@ class ContestantController {
   static async getContestantTotalByStatus(req, res) {
     try {
       const matchId = req.params.match_id;
-      const total = await ContestantService.getContestantTotalByStatus(matchId, "Xác nhận 2");
+      const total = await ContestantService.getContestantTotalByStatus(
+        matchId,
+        "Xác nhận 2"
+      );
       res.json({ total: total });
     } catch (error) {
       res.status(400).json({ error: error.message });
