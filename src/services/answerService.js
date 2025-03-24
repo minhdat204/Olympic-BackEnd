@@ -328,6 +328,7 @@ class AnswerService {
           : "0%",
     };
   }
+
   static async getTop20byMatch(match_id, limit = 20) {
     // Bước 1: Lấy danh sách top 20 contestant_id có tổng điểm cao nhất
     const top20Scores = await Answer.findAll({
@@ -377,6 +378,14 @@ class AnswerService {
         total_score: item.total_score,
       };
     });
+    return top20.map((item) => ({
+      id: item.contestant_id,
+      fullname: item.contestant.fullname,
+      class: item.contestant.class,
+      registration_number:
+        item.contestant.matchContestants?.[0]?.registration_number || "N/A",
+      total_score: item.dataValues.total_score,
+    }));
   }
 
   static async getCorrectContestantsByQuestion(match_id) {
