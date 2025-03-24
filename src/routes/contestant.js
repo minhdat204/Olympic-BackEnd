@@ -81,6 +81,11 @@ router.patch(
 /**
  * Các route dưới đây cần xác thựccontestants
  *  */
+router.get(
+  "/judge-match/:judge_id/:match_id",
+  // role("judge"),
+  ContestantController.getContestantByJudgeAndMatch
+);
 router.use(auth);
 // Chi danh sách thí sinh theo classclass
 
@@ -119,10 +124,5 @@ router.patch("/:id/status", ContestantController.updateContestantStatus);
 router.delete("/:id", role("admin"), ContestantController.deleteContestant);
 
 // lấy danh sách thí sinh theo group dựa vào judge_id và match_id (lấy tên group, tên trận đấu...)
-router.get(
-  "/judge-match/:judge_id/:match_id",
-  role("judge"),
-  ContestantController.getContestantByJudgeAndMatch
-);
 
 module.exports = router;

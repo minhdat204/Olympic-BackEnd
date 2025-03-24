@@ -328,8 +328,9 @@ class AnswerService {
           : "0%",
     };
   }
-  static async getTop20byMatch(match_id, limit) {
-    const top20 = await Answer.findAll({
+  static async getTop20byMatch(match_id, limit = 20) {
+    // Bước 1: Lấy danh sách top 20 contestant_id có tổng điểm cao nhất
+    const top20Scores = await Answer.findAll({
       attributes: [
         "contestant_id",
         [Sequelize.fn("SUM", Sequelize.col("Answer.score")), "total_score"],
@@ -338,34 +339,46 @@ class AnswerService {
         match_id: match_id,
         is_correct: true,
       },
+      group: ["contestant_id"],
+      order: [[Sequelize.literal("total_score"), "DESC"]],
+      limit: limit,
+      raw: true, // Lấy dữ liệu dạng object thuần (giúp hiệu suất tốt hơn)
+    });
+
+    // Lấy danh sách contestant_id từ kết quả trên
+    const contestantIds = top20Scores.map((c) => c.contestant_id);
+
+    // Bước 2: Lấy thông tin chi tiết của thí sinh
+    const contestants = await Contestant.findAll({
+      where: { id: contestantIds },
+      attributes: ["id", "fullname", "class"],
       include: [
         {
-          model: Contestant,
-          as: "contestant",
-          attributes: ["fullname", "class"],
-          include: [
-            {
-              model: MatchContestant,
-              as: "matchContestants",
-              attributes: ["registration_number"],
-              where: { match_id: match_id },
-            },
-          ],
+          model: MatchContestant,
+          as: "matchContestants",
+          attributes: ["registration_number"],
+          where: { match_id: match_id },
+          required: false, // Để tránh lỗi nếu không có registration_number
         },
       ],
-      group: ["Answer.contestant_id"],
-      order: [[Sequelize.literal("total_score"), "DESC"]],
-      limit: 20,
+      raw: true, // Lấy dữ liệu dạng object thuần
+      nest: true, // Để dễ truy cập dữ liệu lồng nhau
     });
-    return top20.map((item) => ({
-      id: item.contestant_id,
-      fullname: item.contestant.fullname,
-      class: item.contestant.class,
-      registration_number:
-        item.contestant.matchContestants?.[0]?.registration_number || "N/A",
-      total_score: item.dataValues.total_score,
-    }));
+
+    // Kết hợp dữ liệu
+    return top20Scores.map((item) => {
+      const contestant = contestants.find((c) => c.id === item.contestant_id);
+      return {
+        id: item.contestant_id,
+        fullname: contestant?.fullname || "N/A",
+        class: contestant?.class || "N/A",
+        registration_number:
+          contestant?.matchContestants?.registration_number || "N/A",
+        total_score: item.total_score,
+      };
+    });
   }
+
   static async getCorrectContestantsByQuestion(match_id) {
     const list = await Answer.findAll({
       attributes: ["score"],
