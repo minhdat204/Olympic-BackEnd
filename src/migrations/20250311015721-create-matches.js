@@ -1,6 +1,6 @@
 "use strict";
 
-const { toDefaultValue } = require("sequelize/lib/utils");
+const { toDefaultValue, Json } = require("sequelize/lib/utils");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -51,8 +51,11 @@ module.exports = {
         type: Sequelize.TINYINT,
         DefaultValue: -1,
       },
+      class_names: {
+        type: Sequelize.JSON,
+      },
       round_name: {
-        type: Sequelize.ENUM("Vòng loại", "Tứ Kết", "Bán Kết", "Chung Kết"),
+        type: Sequelize.ENUM("Tứ Kết", "Bán Kết", "Chung Kết"),
         allowNull: false,
       },
       gold_winner_id: {

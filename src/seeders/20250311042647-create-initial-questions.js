@@ -12,9 +12,14 @@ module.exports = {
         question_explanation:
           "Theo khảo sát của Stack Overflow, ngôn ngữ này được sử dụng nhiều nhất.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Python",
-        options: JSON.stringify(["Python", "Java", "C++", "JavaScript"]),
+        options: JSON.stringify([
+          { "text": "Python", "media_url": null },
+          { "text": "Java", "media_url": null },
+          { "text": "C++", "media_url": null },
+          { "text": "JavaScript", "media_url": null }
+        ]),
         question_order: 1,
         timer: 30,
         time_left: 30,
@@ -29,9 +34,14 @@ module.exports = {
         question_topic: "Hệ điều hành",
         question_explanation: "Microsoft phát triển hệ điều hành phổ biến này.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Windows",
-        options: JSON.stringify(["Windows", "Linux", "macOS", "Ubuntu"]),
+        options: JSON.stringify([
+          { "text": "Windows", "media_url": null },
+          { "text": "Linux", "media_url": null },
+          { "text": "macOS", "media_url": null },
+          { "text": "Ubuntu", "media_url": null }
+        ]),
         question_order: 2,
         timer: 30,
         time_left: 30,
@@ -47,9 +57,14 @@ module.exports = {
         question_explanation:
           "Logo này thuộc về một ngôn ngữ lập trình nổi tiếng.",
         question_type: "Hình Ảnh",
-        media_url: null,
+        media_url: JSON.stringify(["/uploads/questions/python_logo.png"]), // Sửa thành mảng
         correct_answer: "Python",
-        options: JSON.stringify(["Python", "Java", "C#", "Ruby"]),
+        options: JSON.stringify([
+          { "text": "Python", "media_url": null },
+          { "text": "Java", "media_url": null },
+          { "text": "C#", "media_url": null },
+          { "text": "Ruby", "media_url": null }
+        ]),
         question_order: 3,
         timer: 30,
         time_left: 30,
@@ -66,9 +81,14 @@ module.exports = {
         question_explanation:
           "Âm thanh này rất quen thuộc với người dùng máy tính.",
         question_type: "Âm Thanh",
-        media_url: null,
+        media_url: JSON.stringify(["/uploads/questions/windows_xp_startup.mp3"]), // Sửa thành mảng
         correct_answer: "Windows XP",
-        options: JSON.stringify(["Windows XP", "Windows 7", "macOS", "Linux"]),
+        options: JSON.stringify([
+          { "text": "Windows XP", "media_url": null },
+          { "text": "Windows 7", "media_url": null },
+          { "text": "macOS", "media_url": null },
+          { "text": "Linux", "media_url": null }
+        ]),
         question_order: 4,
         timer: 30,
         time_left: 30,
@@ -86,9 +106,14 @@ module.exports = {
         question_explanation:
           "Công nghệ này giúp bảo vệ dữ liệu trên internet.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "SSL/TLS",
-        options: JSON.stringify(["SSL/TLS", "Blockchain", "Wi-Fi", "AI"]),
+        options: JSON.stringify([
+          { "text": "SSL/TLS", "media_url": null },
+          { "text": "Blockchain", "media_url": null },
+          { "text": "Wi-Fi", "media_url": null },
+          { "text": "AI", "media_url": null }
+        ]),
         question_order: 5,
         timer: 30,
         time_left: 30,
@@ -98,14 +123,19 @@ module.exports = {
         updated_at: new Date(),
       },
       {
-        question_text: "Hình ảnh này mô tả công nghệ nào?",
-        question_intro: "Nhìn vào hình và chọn công nghệ phù hợp.",
-        question_topic: "Công nghệ",
-        question_explanation: "Công nghệ này là nền tảng của tiền mã hóa.",
-        question_type: "Hình Ảnh",
-        media_url: null,
-        correct_answer: "Blockchain",
-        options: JSON.stringify(["Blockchain", "IoT", "5G", "Big Data"]),
+        question_text: "Phương pháp nào được dùng để mã hóa dữ liệu?",
+        question_intro: "Chọn phương pháp mã hóa đúng.",
+        question_topic: "Bảo mật",
+        question_explanation: "Phương pháp này giúp dữ liệu an toàn hơn.",
+        question_type: "Trắc Nghiệm",
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
+        correct_answer: "AES",
+        options: JSON.stringify([
+          { "text": "AES", "media_url": null },
+          { "text": "RSA", "media_url": null },
+          { "text": "MD5", "media_url": null },
+          { "text": "SHA-256", "media_url": null }
+        ]),
         question_order: 6,
         timer: 30,
         time_left: 30,
@@ -115,18 +145,18 @@ module.exports = {
         updated_at: new Date(),
       },
       {
-        question_text: "Đây là đoạn âm thanh thông báo từ ứng dụng nào?",
-        question_intro: "Nghe và chọn ứng dụng phù hợp.",
-        question_topic: "Âm thanh",
-        question_explanation: "Âm thanh này xuất hiện khi có thông báo mới.",
-        question_type: "Âm Thanh",
-        media_url: null,
-        correct_answer: "Facebook Messenger",
+        question_text: "Phần mềm nào là một trình duyệt web?",
+        question_intro: "Chọn trình duyệt web chính xác.",
+        question_topic: "Phần mềm",
+        question_explanation: "Phần mềm này giúp truy cập internet.",
+        question_type: "Trắc Nghiệm",
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
+        correct_answer: "Google Chrome",
         options: JSON.stringify([
-          "Facebook Messenger",
-          "Zalo",
-          "Gmail",
-          "WhatsApp",
+          { "text": "Google Chrome", "media_url": "/uploads/questions/chrome_logo.png" },
+          { "text": "Microsoft Word", "media_url": "/uploads/questions/word_logo.png" },
+          { "text": "Photoshop", "media_url": "/uploads/questions/photoshop_logo.png" },
+          { "text": "Visual Studio Code", "media_url": "/uploads/questions/vscode_logo.png" }
         ]),
         question_order: 7,
         timer: 30,
@@ -137,18 +167,18 @@ module.exports = {
         updated_at: new Date(),
       },
       {
-        question_text: "Video này giải thích về công nghệ gì?",
-        question_intro: "Xem video và chọn công nghệ chính xác.",
-        question_topic: "Công nghệ",
-        question_explanation: "Công nghệ này đang thay đổi ngành tài chính.",
-        question_type: "Video",
-        media_url: null,
-        correct_answer: "Cryptocurrency",
+        question_text: "Hệ thống quản lý cơ sở dữ liệu nào là mã nguồn mở?",
+        question_intro: "Chọn hệ thống phù hợp.",
+        question_topic: "Cơ sở dữ liệu",
+        question_explanation: "Hệ thống này được sử dụng phổ biến trên web.",
+        question_type: "Trắc Nghiệm",
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
+        correct_answer: "MySQL",
         options: JSON.stringify([
-          "Cryptocurrency",
-          "AI",
-          "Cloud Computing",
-          "Cybersecurity",
+          { "text": "MySQL", "media_url": null },
+          { "text": "SQL Server", "media_url": null },
+          { "text": "Oracle", "media_url": null },
+          { "text": "MongoDB", "media_url": null }
         ]),
         question_order: 8,
         timer: 30,
@@ -167,9 +197,14 @@ module.exports = {
         question_explanation:
           "Giao thức này giúp truyền dữ liệu trên internet.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "HTTP",
-        options: JSON.stringify(["HTTP", "FTP", "SMTP", "SSH"]),
+        options: JSON.stringify([
+          { "text": "HTTP", "media_url": null },
+          { "text": "FTP", "media_url": null },
+          { "text": "SMTP", "media_url": null },
+          { "text": "SSH", "media_url": null }
+        ]),
         question_order: 9,
         timer: 30,
         time_left: 30,
@@ -179,20 +214,66 @@ module.exports = {
         updated_at: new Date(),
       },
       {
-        question_text: "Hình ảnh này mô tả thuật toán nào?",
-        question_intro: "Nhìn vào hình và chọn thuật toán phù hợp.",
-        question_topic: "Thuật toán",
-        question_explanation: "Thuật toán này được dùng để sắp xếp dữ liệu.",
-        question_type: "Hình Ảnh",
-        media_url: null,
-        correct_answer: "Quick Sort",
+        question_text: "Công cụ nào giúp quản lý mã nguồn?",
+        question_intro: "Chọn công cụ phù hợp.",
+        question_topic: "Lập trình",
+        question_explanation: "Công cụ này giúp quản lý và theo dõi thay đổi.",
+        question_type: "Trắc Nghiệm",
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
+        correct_answer: "Git",
         options: JSON.stringify([
-          "Quick Sort",
-          "Bubble Sort",
-          "Merge Sort",
-          "Heap Sort",
+          { "text": "Git", "media_url": null },
+          { "text": "Docker", "media_url": null },
+          { "text": "Jenkins", "media_url": null },
+          { "text": "Kubernetes", "media_url": null }
         ]),
         question_order: 10,
+        timer: 30,
+        time_left: 30,
+        dificulty: "RC",
+        match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        question_text: "Dịch vụ nào của Google cung cấp lưu trữ đám mây?",
+        question_intro: "Chọn dịch vụ lưu trữ đám mây chính xác.",
+        question_topic: "Điện toán đám mây",
+        question_explanation:
+          "Dịch vụ này của Google giúp lưu trữ và chia sẻ dữ liệu trực tuyến.",
+        question_type: "Trắc Nghiệm",
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
+        correct_answer: "Google Drive",
+        options: JSON.stringify([
+          { "text": "Google Drive", "media_url": null },
+          { "text": "OneDrive", "media_url": null },
+          { "text": "Dropbox", "media_url": null },
+          { "text": "iCloud", "media_url": null }
+        ]),
+        question_order: 11,
+        timer: 30,
+        time_left: 30,
+        dificulty: "RC",
+        match_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        question_text: "Dịch vụ nào của Google cung cấp lưu trữ đám mây?",
+        question_intro: "Chọn dịch vụ lưu trữ đám mây chính xác.",
+        question_topic: "Điện toán đám mây",
+        question_explanation:
+          "Dịch vụ này của Google giúp lưu trữ và chia sẻ dữ liệu trực tuyến.",
+        question_type: "Trắc Nghiệm",
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
+        correct_answer: "Google Drive",
+        options: JSON.stringify([
+          { "text": "Google Drive", "media_url": null },
+          { "text": "OneDrive", "media_url": null },
+          { "text": "Dropbox", "media_url": null },
+          { "text": "iCloud", "media_url": null }
+        ]),
+        question_order: 12,
         timer: 30,
         time_left: 30,
         dificulty: "RC",
@@ -209,13 +290,13 @@ module.exports = {
         question_topic: "AI",
         question_explanation: "Công nghệ này giúp máy tính học hỏi từ dữ liệu.",
         question_type: "Trắc Nghiệm",
-        media_url: null,
+        media_url: JSON.stringify([]), // Không có media, nên là mảng rỗng
         correct_answer: "Machine Learning",
         options: JSON.stringify([
-          "Machine Learning",
-          "Cloud Computing",
-          "5G",
-          "Blockchain",
+          { "text": "Machine Learning", "media_url": null },
+          { "text": "Cloud Computing", "media_url": null },
+          { "text": "5G", "media_url": null },
+          { "text": "Blockchain", "media_url": null }
         ]),
         question_order: 13,
         timer: 30,

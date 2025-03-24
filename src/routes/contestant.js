@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const xlsx = require("xlsx");
+
 const router = express.Router();
 const ContestantController = require("../controllers/contestantController");
 const auth = require("../middleware/auth");
@@ -10,19 +10,21 @@ const {
   createContestantSchema,
   updateContestantSchema,
 } = require("../schemas/contestantSchema");
+const { route } = require("./auth");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Lấy danh sách thí sinh theo class ,class_year, status ,
-router.get("/list", ContestantController.getListContestants);
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
-
+router.get("/check-regroup/:match_id",
+  ContestantController.checkRegroupPermission
+);
+router.get(
+  "/get-group-by-match-id/:match_id",
+  ContestantController.getGroupContestantByMatch
+);
 // Lấy chi tiết thí sinh (public)
 router.get("/:id", ContestantController.getContestantById);
-
-// Lay danh sach trang thai
-router.get("/list/status", ContestantController.getListStatus);
 
 // Lay danh sach lop
 router.get("/list/class", ContestantController.getListClass);
@@ -31,24 +33,65 @@ router.get("/list/class", ContestantController.getListClass);
 router.get("/download/excel", ContestantController.downloadExcel);
 
 // API cập nhật thí sinh + gửi emit total thí sinh, thí sinh còn lại lên màn hình chiếu + emit dữ liệu thí sinh (status) lên màn hình điều khiển)
-router.patch("/emit/match/:match_id/contestant-status", ContestantController.updateContestantStatusAndEmit);
+router.patch(
+  "/emit/match/:match_id/contestant-status",
+  ContestantController.updateContestantStatusAndEmit
+);
 
 // Lấy danh sách khoa
 router.get("/list/class_year", ContestantController.getListClass_Year);
 // Lấy danh sachs lớp thí sinh theo khóa
 router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 
+// DAT: Lấy danh sách thí sinh theo match
+router.get("/matches/:match_id", ContestantController.getContestantsByMatchId);
+
+// DAT: lấy danh sách thí sinh được cứu (status = "xác nhân 2")
+router.post(
+  "/matches/:match_id/rescue",
+  ContestantController.getRescueContestants
+);
+
+// DAT: Cập nhật trạng thái thí sinh được cứu hàng loạt
+router.patch(
+  "/matches/:match_id/rescue",
+  ContestantController.updateRescueContestants
+);
+
+// DAT: Tính số lượng thí sinh cần được cứu
+router.post(
+  "/matches/:match_id/rescue/count",
+  ContestantController.getRescueContestantTotal
+);
+
+// DAT: API lấy tổng số thí sinh theo trạng thái (status = "xác nhận 2")
+router.get(
+  "/matches/:match_id/eliminated/count",
+  ContestantController.getContestantTotalByStatus
+);
+
+//  Lấy thông tin thí sinh win gold
+
+router.get("/gold/:match_id", ContestantController.getContestantByGoldMatch);
 // Câp nhật group thí sinh , theo lớp m ,match
 
-/**
- * Các route dưới đây cần xác thực
- *  */
-router.use(auth);
-// Chi danh sách thí sinh theo classclass
+router.post("/list/classes", ContestantController.getListContestantsByClass);
+
 router.patch(
   "/update/class/match",
   ContestantController.updateContestantGroupByClass
 );
+/**
+ * Các route dưới đây cần xác thựccontestants
+ *  */
+router.get(
+  "/judge-match/:judge_id/:match_id",
+  // role("judge"),
+  ContestantController.getContestantByJudgeAndMatch
+);
+router.use(auth);
+// Chi danh sách thí sinh theo classclass
+
 // Tạo thí sinh mới (admin)
 router.post(
   "/upload/excel",
@@ -84,10 +127,5 @@ router.patch("/:id/status", ContestantController.updateContestantStatus);
 router.delete("/:id", role("admin"), ContestantController.deleteContestant);
 
 // lấy danh sách thí sinh theo group dựa vào judge_id và match_id (lấy tên group, tên trận đấu...)
-router.get(
-  "/judge-match/:judge_id/:match_id",
-  role("judge"),
-  ContestantController.getContestantByJudgeAndMatch
-);
 
 module.exports = router;

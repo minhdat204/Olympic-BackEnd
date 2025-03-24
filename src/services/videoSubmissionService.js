@@ -1,17 +1,16 @@
-const { VideoSubmission } = require('../models');
-const { Op } = require('sequelize');
-const fs = require('fs');
-const path = require('path');
+const { VideoSubmission } = require("../models");
+const { Op } = require("sequelize");
+const fs = require("fs");
+const path = require("path");
 
 class VideoSubmissionService {
-
   // lấy danh sách video phân trang
   static async getVideoSubmissionsPaginate(filters = {}, page = 1, limit = 20) {
     const options = {
       where: {},
-      order: [['id', 'ASC']],
+      order: [["id", "ASC"]],
       offset: (page - 1) * limit,
-      limit
+      limit,
     };
 
     if (filters.type) options.where.type = filters.type;
@@ -25,7 +24,7 @@ class VideoSubmissionService {
       total: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      videos: rows
+      videos: rows,
     };
   }
 
@@ -33,7 +32,7 @@ class VideoSubmissionService {
   static async getVideoSubmissions(filters = {}) {
     const options = {
       where: {},
-      order: [['id', 'ASC']]
+      order: [["id", "ASC"]],
     };
 
     if (filters.type) options.where.type = filters.type;
@@ -48,7 +47,7 @@ class VideoSubmissionService {
   static async getVideoSubmissionById(id) {
     const video = await VideoSubmission.findByPk(id);
     if (!video) {
-      throw new Error('Video không tồn tại');
+      throw new Error("Video không tồn tại");
     }
     return video;
   }
@@ -58,14 +57,14 @@ class VideoSubmissionService {
     const file = req.file;
 
     if (!file) {
-      throw new Error('Vui lòng upload file video');
+      throw new Error("Vui lòng upload file video");
     }
 
     const videoUrl = `/uploads/videos/${file.filename}`;
     const videoData = {
       name,
       video_url: videoUrl,
-      type
+      type,
     };
 
     return await VideoSubmission.create(videoData);
@@ -74,7 +73,7 @@ class VideoSubmissionService {
   static async updateVideoSubmission(id, req) {
     const video = await VideoSubmission.findByPk(id);
     if (!video) {
-      throw new Error('Video không tồn tại');
+      throw new Error("Video không tồn tại");
     }
 
     const { name, type } = req.body;
@@ -85,7 +84,7 @@ class VideoSubmissionService {
     if (type) updateData.type = type;
     if (file) {
       // Xóa file cũ
-      const oldFilePath = path.join(__dirname, '..', '..', video.video_url);
+      const oldFilePath = path.join(__dirname, "..", "..", video.video_url);
       if (fs.existsSync(oldFilePath)) {
         fs.unlinkSync(oldFilePath);
       }
@@ -99,26 +98,29 @@ class VideoSubmissionService {
   static async deleteVideoSubmission(id) {
     const video = await VideoSubmission.findByPk(id);
     if (!video) {
-      throw new Error('Video không tồn tại');
+      throw new Error("Video không tồn tại");
     }
 
     // Xóa file trên server
-    const filePath = path.join(__dirname, '..', '..', video.video_url);
+    const filePath = path.join(__dirname, "..", "..", video.video_url);
     console.log(filePath);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
     await video.destroy();
-    return { message: 'Đã xóa video thành công' };
+    return { message: "Đã xóa video thành công" };
   }
 
   static async getVideoSubmissionsByType(type) {
     const videos = await VideoSubmission.findAll({
       where: { type },
-      order: [['created_at', 'DESC']]
+      order: [["created_at", "DESC"]],
     });
     return videos;
+  }
+  static async EmitVideoUrl(id) {
+    return VideoSubmission.findByPk(id);
   }
 }
 

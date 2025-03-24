@@ -9,14 +9,15 @@ const { createGroupSchema, updateGroupSchema, addContestantsSchema } = require('
 // Các routes public
 router.get('/', GroupController.getGroups);
 router.get('/:id', GroupController.getGroupById);
+router.get('/match/:match_id', GroupController.getGroupByMatchId)
 router.get('/:id/contestants', GroupController.getContestantsByGroupId);
 
 // Các routes cần xác thực
 router.use(auth);
 
 // Tạo nhóm mới (admin)
-router.post('/', 
-  role('admin'), 
+router.post('/',
+  role('admin'),
   validate(createGroupSchema),
   GroupController.createGroup
 );

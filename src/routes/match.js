@@ -26,6 +26,8 @@ router.put(
   MatchController.updateMatch
 );
 router.patch("/:id", role("admin"), MatchController.updateMatchBy);
+// Update thí sinh gold
+router.patch("/gold/:id", role("admin"), MatchController.UpdateWinGold);
 router.delete("/:id", role("admin"), MatchController.deleteMatch);
 
 module.exports = router;
