@@ -32,10 +32,27 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSON,
       get() {
         const value = this.getDataValue('media_url');
-        return value ? (typeof value === 'string' ? JSON.parse(value) : value) : [];
+        if (!value) return null;
+        
+        try {
+          return typeof value === 'string' ? JSON.parse(value) : value;
+        } catch (e) {
+          return value; // Return as-is if JSON parsing fails
+        }
       },
       set(value) {
-        this.setDataValue('media_url', value ? (typeof value === 'string' ? value : JSON.stringify(value)) : null);
+        // Ensure we always store JSON strings or null
+        if (value === null || value === undefined) {
+          this.setDataValue('media_url', null);
+        } else {
+          // Always stringify unless it's already a JSON string
+          const valueToStore = 
+            typeof value === 'string' && (value.startsWith('{') || value.startsWith('[')) 
+              ? value 
+              : JSON.stringify(value);
+          
+          this.setDataValue('media_url', valueToStore);
+        }
       }
     },
     correct_answer: DataTypes.TEXT,
@@ -51,7 +68,18 @@ module.exports = (sequelize, DataTypes) => {
         return value ? (typeof value === 'string' ? JSON.parse(value) : value) : [];
       },
       set(value) {
-        this.setDataValue('options', value ? (typeof value === 'string' ? value : JSON.stringify(value)) : null);
+        if (value === null || value === undefined) {
+          this.setDataValue('options', null);
+        } else if (typeof value === 'string') {
+          try {
+            JSON.parse(value);
+            this.setDataValue('options', value);
+          } catch (e) {
+            this.setDataValue('options', JSON.stringify(value));
+          }
+        } else {
+          this.setDataValue('options', JSON.stringify(value));
+        }
       }
     },
     question_order: DataTypes.TINYINT,
@@ -66,6 +94,21 @@ module.exports = (sequelize, DataTypes) => {
     },
     match_id: DataTypes.SMALLINT
   }, {
+    hooks: {
+      beforeCreate: (question) => {
+        // If time_left is not set, use the timer value
+        if (question.time_left === null || question.time_left === undefined) {
+          question.time_left = question.timer;
+        }
+      },
+      beforeUpdate: (question) => {
+        // Optional: also set time_left when timer changes and time_left is null
+        if (question.changed('timer') && 
+            (question.time_left === null || question.time_left === undefined)) {
+          question.time_left = question.timer;
+        }
+      }
+    },
     sequelize,
     modelName: 'Question',
     tableName: 'questions',
