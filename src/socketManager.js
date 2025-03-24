@@ -1,8 +1,11 @@
+
 const handleMatchSockets = require("./socketHandlers/matchHandler");
 const { handleQuestionSockets } = require("./socketHandlers/questionHandler");
 const { handleTimerSockets } = require("./socketHandlers/timerHandler");
 const { handleScreenSokets } = require("./socketHandlers/screenHandler");
 const { handleVieoSokets } = require("./socketHandlers/videoHandler");
+const { handleDisplaySockets } = require('./socketHandlers/displayHandler');
+
 let ioInstance = null;
 
 function initializeSocket(io) {
@@ -16,6 +19,7 @@ function initializeSocket(io) {
     handleTimerSockets(io, socket);
     handleScreenSokets(io, socket);
     handleVieoSokets(io, socket);
+    handleDisplaySockets(io, socket);
 
     socket.on("disconnect", () => {
       console.log(`❌ Client disconnected: ${socket.id}`);

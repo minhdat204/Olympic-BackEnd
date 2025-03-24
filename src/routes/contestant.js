@@ -59,9 +59,15 @@ router.patch(
 );
 
 // DAT: Tính số lượng thí sinh cần được cứu
-router.get(
+router.post(
   "/matches/:match_id/rescue/count",
   ContestantController.getRescueContestantTotal
+);
+
+// DAT: API lấy tổng số thí sinh theo trạng thái (status = "xác nhận 2")
+router.get(
+  "/matches/:match_id/eliminated/count",
+  ContestantController.getContestantTotalByStatus
 );
 
 //  Lấy thông tin thí sinh win gold

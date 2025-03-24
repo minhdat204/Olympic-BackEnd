@@ -4,7 +4,9 @@ const match_contestantsController = require("../controllers/match_contestantsCon
 router.get("/", match_contestantsController.getMatchContestants);
 router.get("/:id", match_contestantsController.getMatchContestant);
 router.patch("/:id", match_contestantsController.updateMatchContestants);
+router.patch("/status/:id", match_contestantsController.updateMatchContestants);
 router.get("/list/status", match_contestantsController.getListStatus);
+
 router.delete("/:id", match_contestantsController.deleteMatch);
 router.post("/", match_contestantsController.createMatchContestants);
 router.post(
