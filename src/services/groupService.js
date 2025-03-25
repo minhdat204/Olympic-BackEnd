@@ -1,5 +1,5 @@
-const { Group, User, Match, Contestant } = require('../models');
-const { Op } = require('sequelize');
+const { Group, User, Match, Contestant } = require("../models");
+const { Op } = require("sequelize");
 
 class GroupService {
   // Lấy danh sách nhóm (có hỗ trợ lọc và phân trang)
@@ -9,18 +9,18 @@ class GroupService {
       include: [
         {
           model: User,
-          as: 'judge',
-          attributes: ['id', 'username', 'email']
+          as: "judge",
+          attributes: ["id", "username", "email"],
         },
         {
           model: Match,
-          as: 'match',
-          attributes: ['id', 'match_name', 'round_name', 'status']
-        }
+          as: "match",
+          attributes: ["id", "match_name", "round_name", "status"],
+        },
       ],
-      order: [['id', 'ASC']],
+      order: [["id", "ASC"]],
       offset: (page - 1) * limit,
-      limit
+      limit,
     };
 
     // Xử lý các bộ lọc
@@ -36,7 +36,7 @@ class GroupService {
       total: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      groups: rows
+      groups: rows,
     };
   }
 
@@ -46,24 +46,24 @@ class GroupService {
       include: [
         {
           model: User,
-          as: 'judge',
-          attributes: ['id', 'username', 'email', 'role']
+          as: "judge",
+          attributes: ["id", "username", "email", "role"],
         },
         {
           model: Match,
-          as: 'match',
-          attributes: ['id', 'match_name', 'round_name', 'status']
+          as: "match",
+          attributes: ["id", "match_name", "round_name", "status"],
         },
         {
           model: Contestant,
-          as: 'contestants',
-          attributes: ['id', 'fullname', 'email', 'class', 'status']
-        }
-      ]
+          as: "contestants",
+          attributes: ["id", "fullname", "email", "class", "status"],
+        },
+      ],
     });
 
     if (!group) {
-      throw new Error('Nhóm không tồn tại');
+      throw new Error("Nhóm không tồn tại");
     }
 
     return group;
@@ -75,17 +75,17 @@ class GroupService {
     if (groupData.match_id) {
       const match = await Match.findByPk(groupData.match_id);
       if (!match) {
-        throw new Error('Trận đấu không tồn tại');
+        throw new Error("Trận đấu không tồn tại");
       }
     }
 
     if (groupData.judge_id) {
       const judge = await User.findByPk(groupData.judge_id);
       if (!judge) {
-        throw new Error('Trọng tài không tồn tại');
+        throw new Error("Trọng tài không tồn tại");
       }
-      if (judge.role !== 'judge') {
-        throw new Error('Người dùng được chọn không phải là trọng tài');
+      if (judge.role !== "judge") {
+        throw new Error("Người dùng được chọn không phải là trọng tài");
       }
     }
 
@@ -97,24 +97,24 @@ class GroupService {
     const group = await Group.findByPk(id);
 
     if (!group) {
-      throw new Error('Nhóm không tồn tại');
+      throw new Error("Nhóm không tồn tại");
     }
 
     // Kiểm tra match_id và judge_id nếu được cập nhật
     if (groupData.match_id) {
       const match = await Match.findByPk(groupData.match_id);
       if (!match) {
-        throw new Error('Trận đấu không tồn tại');
+        throw new Error("Trận đấu không tồn tại");
       }
     }
 
     if (groupData.judge_id) {
       const judge = await User.findByPk(groupData.judge_id);
       if (!judge) {
-        throw new Error('Trọng tài không tồn tại');
+        throw new Error("Trọng tài không tồn tại");
       }
-      if (judge.role !== 'judge') {
-        throw new Error('Người dùng được chọn không phải là trọng tài');
+      if (judge.role !== "judge") {
+        throw new Error("Người dùng được chọn không phải là trọng tài");
       }
     }
 
@@ -127,48 +127,47 @@ class GroupService {
     const group = await Group.findByPk(id);
 
     if (!group) {
-      throw new Error('Nhóm không tồn tại');
+      throw new Error("Nhóm không tồn tại");
     }
 
     await group.destroy();
-    return { message: 'Đã xóa nhóm thành công' };
+    return { message: "Đã xóa nhóm thành công" };
   }
 
   // Lấy thí sinh trong nhóm
   static async getContestantsByGroupId(groupId) {
     const group = await Group.findByPk(groupId);
     if (!group) {
-      throw new Error('Nhóm không tồn tại');
+      throw new Error("Nhóm không tồn tại");
     }
 
     const contestants = await Contestant.findAll({
-      where: { group_id: groupId }
+      where: { group_id: groupId },
     });
 
     return contestants;
   }
 
-
   static async getGroupByMatchId(matchId) {
     // Kiểm tra xem trận đấu có tồn tại không
     const match = await Match.findByPk(matchId);
     if (!match) {
-      throw new Error('Trận đấu không tồn tại');
+      throw new Error("Trận đấu không tồn tại");
     }
     // Lấy danh sách nhóm theo matchId với các trường cụ thể
     const groups = await Group.findAll({
       where: {
-        match_id: matchId
+        match_id: matchId,
       },
-      attributes: ['id', 'group_name', 'match_id', 'judge_id'], // Chỉ lấy các trường mong muốn từ Group
+      attributes: ["id", "group_name", "match_id", "judge_id"], // Chỉ lấy các trường mong muốn từ Group
       include: [
         {
           model: User,
-          as: 'judge',
-          attributes: ['id', 'username'] // Chỉ lấy id và username từ User
-        }
+          as: "judge",
+          attributes: ["id", "username"], // Chỉ lấy id và username từ User
+        },
       ],
-      order: [['id', 'ASC']]
+      order: [["id", "ASC"]],
     });
 
     return groups;
@@ -178,15 +177,15 @@ class GroupService {
   static async addContestantsToGroup(groupId, contestantIds) {
     const group = await Group.findByPk(groupId);
     if (!group) {
-      throw new Error('Nhóm không tồn tại');
+      throw new Error("Nhóm không tồn tại");
     }
 
     await Contestant.update(
       { group_id: groupId },
       {
         where: {
-          id: { [Op.in]: contestantIds }
-        }
+          id: { [Op.in]: contestantIds },
+        },
       }
     );
 
@@ -198,16 +197,23 @@ class GroupService {
     const contestant = await Contestant.findOne({
       where: {
         id: contestantId,
-        group_id: groupId
-      }
+        group_id: groupId,
+      },
     });
 
     if (!contestant) {
-      throw new Error('Thí sinh không thuộc nhóm này');
+      throw new Error("Thí sinh không thuộc nhóm này");
     }
 
     await contestant.update({ group_id: null });
-    return { message: 'Đã xóa thí sinh khỏi nhóm' };
+    return { message: "Đã xóa thí sinh khỏi nhóm" };
+  }
+  // Lấy danh sách trọng theo trận đấu
+  static async getListJudge(match_id) {
+    return Group.findAll({
+      attributes: ["judge_id"],
+      where: { match_id: match_id },
+    });
   }
 }
 

@@ -1,4 +1,4 @@
-const GroupService = require('../services/groupService');
+const GroupService = require("../services/groupService");
 
 class GroupController {
   // Lấy danh sách nhóm
@@ -7,7 +7,7 @@ class GroupController {
       const filters = {
         match_id: req.query.match_id,
         judge_id: req.query.judge_id,
-        search: req.query.search
+        search: req.query.search,
       };
 
       const page = parseInt(req.query.page) || 1;
@@ -16,18 +16,17 @@ class GroupController {
       const result = await GroupService.getGroups(filters, page, limit);
 
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy danh sách nhóm thành công',
-        data: result
+        status: "success",
+        message: "Lấy danh sách nhóm thành công",
+        data: result,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'error',
-        message: error.message || 'Đã có lỗi xảy ra'
+        status: "error",
+        message: error.message || "Đã có lỗi xảy ra",
       });
     }
   }
-
 
   static async getGroupByMatchId(req, res) {
     try {
@@ -35,14 +34,14 @@ class GroupController {
       const groups = await GroupService.getGroupByMatchId(matchId);
 
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy danh sách nhóm theo trận đấu thành công',
-        data: groups
+        status: "success",
+        message: "Lấy danh sách nhóm theo trận đấu thành công",
+        data: groups,
       });
     } catch (error) {
-      res.status(error.message === 'Trận đấu không tồn tại' ? 404 : 500).json({
-        status: 'error',
-        message: error.message || 'Đã có lỗi xảy ra'
+      res.status(error.message === "Trận đấu không tồn tại" ? 404 : 500).json({
+        status: "error",
+        message: error.message || "Đã có lỗi xảy ra",
       });
     }
   }
@@ -54,14 +53,14 @@ class GroupController {
       const group = await GroupService.getGroupById(groupId);
 
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy thông tin nhóm thành công',
-        data: group
+        status: "success",
+        message: "Lấy thông tin nhóm thành công",
+        data: group,
       });
     } catch (error) {
-      res.status(error.message === 'Nhóm không tồn tại' ? 404 : 500).json({
-        status: 'error',
-        message: error.message
+      res.status(error.message === "Nhóm không tồn tại" ? 404 : 500).json({
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -73,18 +72,20 @@ class GroupController {
       const newGroup = await GroupService.createGroup(groupData);
 
       res.status(201).json({
-        status: 'success',
-        message: 'Tạo nhóm thành công',
-        data: newGroup
+        status: "success",
+        message: "Tạo nhóm thành công",
+        data: newGroup,
       });
     } catch (error) {
       const statusCode =
-        error.message.includes('không tồn tại') ||
-          error.message.includes('không phải là trọng tài') ? 400 : 500;
+        error.message.includes("không tồn tại") ||
+        error.message.includes("không phải là trọng tài")
+          ? 400
+          : 500;
 
       res.status(statusCode).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -98,19 +99,22 @@ class GroupController {
       const updatedGroup = await GroupService.updateGroup(groupId, groupData);
 
       res.status(200).json({
-        status: 'success',
-        message: 'Cập nhật nhóm thành công',
-        data: updatedGroup
+        status: "success",
+        message: "Cập nhật nhóm thành công",
+        data: updatedGroup,
       });
     } catch (error) {
       const statusCode =
-        error.message === 'Nhóm không tồn tại' ? 404 :
-          error.message.includes('không tồn tại') ||
-            error.message.includes('không phải là trọng tài') ? 400 : 500;
+        error.message === "Nhóm không tồn tại"
+          ? 404
+          : error.message.includes("không tồn tại") ||
+            error.message.includes("không phải là trọng tài")
+          ? 400
+          : 500;
 
       res.status(statusCode).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -122,13 +126,13 @@ class GroupController {
       await GroupService.deleteGroup(groupId);
 
       res.status(200).json({
-        status: 'success',
-        message: 'Xóa nhóm thành công'
+        status: "success",
+        message: "Xóa nhóm thành công",
       });
     } catch (error) {
-      res.status(error.message === 'Nhóm không tồn tại' ? 404 : 500).json({
-        status: 'error',
-        message: error.message
+      res.status(error.message === "Nhóm không tồn tại" ? 404 : 500).json({
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -140,14 +144,14 @@ class GroupController {
       const contestants = await GroupService.getContestantsByGroupId(groupId);
 
       res.status(200).json({
-        status: 'success',
-        message: 'Lấy danh sách thí sinh trong nhóm thành công',
-        data: contestants
+        status: "success",
+        message: "Lấy danh sách thí sinh trong nhóm thành công",
+        data: contestants,
       });
     } catch (error) {
-      res.status(error.message === 'Nhóm không tồn tại' ? 404 : 500).json({
-        status: 'error',
-        message: error.message
+      res.status(error.message === "Nhóm không tồn tại" ? 404 : 500).json({
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -158,17 +162,20 @@ class GroupController {
       const groupId = req.params.id;
       const { contestant_ids } = req.body;
 
-      const contestants = await GroupService.addContestantsToGroup(groupId, contestant_ids);
+      const contestants = await GroupService.addContestantsToGroup(
+        groupId,
+        contestant_ids
+      );
 
       res.status(200).json({
-        status: 'success',
-        message: 'Thêm thí sinh vào nhóm thành công',
-        data: contestants
+        status: "success",
+        message: "Thêm thí sinh vào nhóm thành công",
+        data: contestants,
       });
     } catch (error) {
-      res.status(error.message === 'Nhóm không tồn tại' ? 404 : 500).json({
-        status: 'error',
-        message: error.message
+      res.status(error.message === "Nhóm không tồn tại" ? 404 : 500).json({
+        status: "error",
+        message: error.message,
       });
     }
   }
@@ -182,18 +189,29 @@ class GroupController {
       await GroupService.removeContestantFromGroup(groupId, contestantId);
 
       res.status(200).json({
-        status: 'success',
-        message: 'Xóa thí sinh khỏi nhóm thành công'
+        status: "success",
+        message: "Xóa thí sinh khỏi nhóm thành công",
       });
     } catch (error) {
       const statusCode =
-        error.message === 'Nhóm không tồn tại' ? 404 :
-          error.message === 'Thí sinh không thuộc nhóm này' ? 400 : 500;
+        error.message === "Nhóm không tồn tại"
+          ? 404
+          : error.message === "Thí sinh không thuộc nhóm này"
+          ? 400
+          : 500;
 
       res.status(statusCode).json({
-        status: 'error',
-        message: error.message
+        status: "error",
+        message: error.message,
       });
+    }
+  }
+  static async getListJudge(req, res) {
+    try {
+      const list = await GroupService.getListJudge(req.params.match_id);
+      res.json(list);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
   }
 }
