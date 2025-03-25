@@ -10,6 +10,10 @@ router.patch(
   "/emit/judge_id/status/:id",
   match_contestantsController.updateMatchContestantsJudge
 );
+router.patch(
+  "/emit/admin/status/:id",
+  match_contestantsController.updateMatchContestantsAdmin
+);
 router.get("/list/status", match_contestantsController.getListStatus);
 
 router.delete("/:id", match_contestantsController.deleteMatch);
@@ -22,9 +26,15 @@ router.patch(
   "/update/contestants/match",
   match_contestantsController.updateContestantGroupByMatch
 );
-router.delete("/delete-by-match/:match_id", match_contestantsController.deleteDividedGroup);
+router.delete(
+  "/delete-by-match/:match_id",
+  match_contestantsController.deleteDividedGroup
+);
 
 // Route mới để kiểm tra trạng thái chia nhóm
-router.get("/check-divided/:match_id", match_contestantsController.checkDivided);
+router.get(
+  "/check-divided/:match_id",
+  match_contestantsController.checkDivided
+);
 
 module.exports = router;
