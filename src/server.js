@@ -25,6 +25,11 @@ const io = socketIo(server, {
   },
 });
 
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'camera=self; microphone=self; display-capture=self; autoplay=self');
+  next();
+});
+
 // Phục vụ file tĩnh từ thư mục uploads
 // uploads/videos là để lưu các file videos
 // upload/questions là để lưu các file của câu hỏi

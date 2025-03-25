@@ -137,7 +137,8 @@ class ContestantService {
 
   // lấy danh sách thí sinh dựa vào judge_id, match_id (kết bảng với groups, contestants, matches)
   static async getContestantByJudgeAndMatch(judge_id, match_id) {
-    const contestants = await Contestant.findAll({
+    const contestants = await Group.findAll({
+      attributes: ["group_name"],
       include: [
         {
           model: Group,
@@ -155,9 +156,17 @@ class ContestantService {
           },
         },
       ],
+      where: { judge_id: judge_id, match_id: match_id },
+      raw: true,
+      nest: true,
     });
 
-    return contestants;
+    return contestants.map((item) => ({
+      group_name: item.group_name,
+      registration_number:
+        item.contestants.matchContestants.registration_number,
+      status: item.contestants.matchContestants.status,
+    }));
   }
 
   // lấy group_id, group_name, match_id, match_name, judge_id, username dựa vào judge_id, match_id (GROUPS)
@@ -288,7 +297,7 @@ class ContestantService {
     const newContestant = email.filter((c) => !emailSet.has(c.email));
     if (newContestant.length == 0) {
       return {
-        msg: "Không có thí sinh mới để thêm"
+        msg: "Không có thí sinh mới để thêm",
       };
     } else {
       await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
@@ -418,9 +427,9 @@ class ContestantService {
             {
               model: MatchContestant,
               as: "matchContestants", // ✅ Đúng alias của hasMany
-              attributes: ["registration_number"],
+              attributes: ["registration_number", "status"],
               where: { match_id }, // ✅ Lọc ở bảng trung gian
-              order: ["registration_number"]
+              order: ["registration_number"],
             },
           ],
         },
@@ -485,7 +494,7 @@ class ContestantService {
     });
 
     // chuyển dữ liệu từ object sang json
-    const contestants = eliminatedContestants.map(mc => {
+    const contestants = eliminatedContestants.map((mc) => {
       const contestant = mc.contestant.toJSON();
       contestant.registration_number = mc.registration_number;
       contestant.match_status = mc.status;
