@@ -8,6 +8,7 @@ const {
   emitTotalContestants,
   emitContestants,
 } = require("../socketEmitters/contestantEmitter");
+const { enableCompileCache } = require("module");
 class ContestantController {
   // Lấy danh sách thí sinh
   static async getContestants(req, res) {
@@ -469,6 +470,26 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
-}
+  static async downloadExcelMatch(req, res) {
+    try {
+      const excle = await ContestantService.downloadExcelMatch(
+        req.params.match_id
+      );
+      const name = encodeURIComponent(excle[0].match_name); // Mã hóa tên file tránh lỗi
+      const buffer = await ContestantService.downloadExcel(excle);
 
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${name}.xlsx"`
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.send(buffer);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+}
 module.exports = ContestantController;

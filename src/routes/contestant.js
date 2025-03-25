@@ -64,6 +64,11 @@ router.post(
   "/matches/:match_id/rescue/count",
   ContestantController.getRescueContestantTotal
 );
+// Donwload danh sach excle
+router.get(
+  "/download/Excel/Match/:match_id",
+  ContestantController.downloadExcelMatch
+);
 
 router.get("/match/total/:match_id", ContestantController.getContestantTotal);
 // DAT: API lấy tổng số thí sinh theo trạng thái (status = "xác nhận 2")

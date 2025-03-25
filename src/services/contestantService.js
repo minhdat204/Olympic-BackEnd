@@ -645,6 +645,47 @@ class ContestantService {
         }
       : null;
   }
+
+  static async downloadExcelMatch(match_id) {
+    const list = await Group.findAll({
+      attributes: ["id", "group_name"],
+      include: [
+        {
+          model: Match,
+          as: "match",
+          attributes: ["id", "match_name"],
+          where: { id: match_id },
+        },
+        {
+          model: Contestant,
+          as: "contestants",
+          attributes: ["fullname", "email", "class"],
+          order: ["class"],
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants",
+              attributes: ["registration_number", "status"],
+              where: { match_id },
+            },
+          ],
+        },
+      ],
+    });
+
+    const flatList = list.flatMap((group) =>
+      group.contestants.map((contestant) => ({
+        fullname: contestant.fullname,
+        group_name: group.group_name,
+        email: contestant.email,
+        class: contestant.class,
+        match_name: group.match.match_name,
+        registration_number:
+          contestant.matchContestants?.[0]?.registration_number || null,
+      }))
+    );
+    return flatList;
+  }
 }
 
 module.exports = ContestantService;

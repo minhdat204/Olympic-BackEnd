@@ -14,4 +14,5 @@ router.use(authMiddleware);
 router.post("/logout", AuthController.logout);
 router.patch("/:id", role("admin"), AuthController.updateUser);
 router.delete("/:id", AuthController.deleteUser);
+
 module.exports = router;

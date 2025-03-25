@@ -131,8 +131,6 @@ class MatchContestantService {
       message: `Thêm ${contestants.length} thí sinh vào trận thành công`,
     };
   }
-
-  //
 }
 
 // Xuất class để có thể sử dụng lại nhiều nơi
