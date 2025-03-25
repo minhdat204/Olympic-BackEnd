@@ -258,10 +258,14 @@ module.exports = {
     },
 
     // Xóa câu hỏi và các file media liên quan
+    // Trong QuestionService.js
     async deleteQuestion(id) {
         try {
             const question = await Question.findByPk(id);
             if (!question) throw new Error("Không tìm thấy câu hỏi");
+
+            const match_id = question.match_id;
+            const deletedOrder = question.question_order;
 
             // Chuẩn hóa media_urls
             let mediaUrls = question.media_url || [];
@@ -286,7 +290,6 @@ module.exports = {
                         options = [];
                     }
                 }
-                // Lấy tất cả media_url từ options
                 optionsMediaUrls = options
                     .filter((opt) => opt.media_url)
                     .map((opt) => opt.media_url);
@@ -296,12 +299,9 @@ module.exports = {
             for (const url of mediaUrls) {
                 try {
                     const filePath = path.join(process.cwd(), url);
-                    console.log("Đang kiểm tra file media_url:", filePath);
                     if (fs.existsSync(filePath)) {
                         fs.unlinkSync(filePath);
                         console.log(`Đã xóa file media_url: ${filePath}`);
-                    } else {
-                        console.log(`File media_url không tồn tại: ${filePath}`);
                     }
                 } catch (error) {
                     console.error(`Lỗi khi xóa file media_url ${url}:`, error);
@@ -312,12 +312,9 @@ module.exports = {
             for (const url of optionsMediaUrls) {
                 try {
                     const filePath = path.join(process.cwd(), url);
-                    console.log("Đang kiểm tra file options:", filePath);
                     if (fs.existsSync(filePath)) {
                         fs.unlinkSync(filePath);
                         console.log(`Đã xóa file options: ${filePath}`);
-                    } else {
-                        console.log(`File options không tồn tại: ${filePath}`);
                     }
                 } catch (error) {
                     console.error(`Lỗi khi xóa file options ${url}:`, error);
@@ -325,29 +322,35 @@ module.exports = {
             }
 
             // Xóa file correct_answer nếu không phải trắc nghiệm và có media
-            if (
-                question.correct_answer_type !== "Text" &&
-                question.correct_answer
-            ) {
+            if (question.correct_answer_type !== "Text" && question.correct_answer) {
                 try {
                     const filePath = path.join(process.cwd(), question.correct_answer);
-                    console.log("Đang kiểm tra file correct_answer:", filePath);
                     if (fs.existsSync(filePath)) {
                         fs.unlinkSync(filePath);
                         console.log(`Đã xóa file correct_answer: ${filePath}`);
-                    } else {
-                        console.log(`File correct_answer không tồn tại: ${filePath}`);
                     }
                 } catch (error) {
-                    console.error(
-                        `Lỗi khi xóa file correct_answer ${question.correct_answer}:`,
-                        error
-                    );
+                    console.error(`Lỗi khi xóa file correct_answer ${question.correct_answer}:`, error);
                 }
             }
 
             // Xóa câu hỏi
             await question.destroy();
+
+            // Sắp xếp lại question_order của các câu hỏi còn lại
+            const remainingQuestions = await Question.findAll({
+                where: { match_id },
+                order: [["question_order", "ASC"]],
+            });
+
+            // Cập nhật lại question_order để không có khoảng trống
+            for (let i = 0; i < remainingQuestions.length; i++) {
+                const newOrder = i + 1;
+                if (remainingQuestions[i].question_order !== newOrder) {
+                    await remainingQuestions[i].update({ question_order: newOrder });
+                }
+            }
+
             return { message: "Câu hỏi và các file liên quan đã được xóa thành công" };
         } catch (error) {
             console.error("Lỗi trong deleteQuestion:", error);
@@ -431,4 +434,26 @@ module.exports = {
 
         return result.time_left; // Trả về giá trị time_left
     },
+
+
+    async getAvailableQuestionOrders(match_id) {
+        try {
+            // Lấy danh sách các question_order đã sử dụng trong match_id
+            const questions = await Question.findAll({
+                where: { match_id },
+                attributes: ["question_order"],
+            });
+
+            const usedOrders = questions.map((q) => q.question_order);
+            const maxOrder = 13; // Giới hạn tối đa question_order là 13
+            const allOrders = Array.from({ length: maxOrder }, (_, i) => i + 1); // [1, 2, ..., 13]
+
+            // Lọc ra các question_order chưa được sử dụng
+            const availableOrders = allOrders.filter((order) => !usedOrders.includes(order));
+            return availableOrders;
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách question_order khả dụng:", error);
+            throw error;
+        }
+    }
 };
