@@ -1,5 +1,11 @@
 const matchContestantService = require("../services/matchContestantService");
-
+const ContestantService = require("../services/contestantService");
+const { emit } = require("process");
+const {
+  emitTotalContestants,
+  emitContestants,
+  emitContestantsjudge_id,
+} = require("../socketEmitters/contestantEmitter");
 // tạo trận đấu
 exports.createMatchContestants = async (req, res) => {
   try {
@@ -34,15 +40,21 @@ exports.getMatchContestant = async (req, res) => {
   }
 };
 
-// cập nhật trạng thái trận đấu
-exports.updateMatchContestants = async (req, res) => {
+// cập nhật trạng thái trận đấu của trọng tài
+exports.updateMatchContestantsJudge = async (req, res) => {
   try {
-    const match_contestant =
-      await matchContestantService.updateMatchContestants(
-        req.params.id,
-        req.body
-      );
-    res.json(match_contestant);
+    const { match_id, judge_id, status } = req.body;
+    await matchContestantService.updateStatus(req.params.id, status);
+    const total = await ContestantService.getContestantTotal(match_id);
+    emitTotalContestants(match_id, total.total, total.remaining);
+    const contestants = await ContestantService.getContestantsByMatchId(
+      match_id
+    );
+    emitContestants(match_id, contestants);
+    const contestants_judge_id =
+      await ContestantService.getContestantByJudgeAndMatch(judge_id, match_id);
+    emitContestantsjudge_id(match_id, judge_id, contestants_judge_id);
+    res.json(contestants_judge_id);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

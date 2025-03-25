@@ -6,6 +6,11 @@ const {
   Group,
   Answer,
 } = require("../models");
+const {
+  emitTotalContestants,
+  emitContestants,
+  emitContestantsjudge_id,
+} = require("../socketEmitters/contestantEmitter");
 const { Op, Sequelize, where } = require("sequelize");
 const contestant = require("../models/contestant");
 
@@ -53,9 +58,10 @@ class MatchContestantService {
     return match;
   }
   async updateStatus(id, status) {
+    // Cập nhật danh sách trạng thái thí sinh theo số báo danh
     return MatchContestant.update(
       { status: status },
-      { where: { contestant_id: id } }
+      { where: { registration_number: id } }
     );
   }
 

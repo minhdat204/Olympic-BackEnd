@@ -12,7 +12,7 @@ const { Op, where, Sequelize } = require("sequelize");
 const group = require("../models/group");
 
 class ContestantService {
-  // Kiểm tra quyền chia nhóm 
+  // Kiểm tra quyền chia nhóm
   static async checkRegroupPermission(match_id) {
     const match = await Match.findByPk(match_id, {
       attributes: ["status", "round_name"],
@@ -141,27 +141,29 @@ class ContestantService {
       attributes: ["group_name"],
       include: [
         {
-          model: Group,
-          as: "group",
-          where: {
-            judge_id,
-            match_id,
-          },
+          model: Contestant,
+          as: "contestants",
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants",
+              attributes: ["registration_number", "status"],
+              order: ["registration_number"],
+            },
+          ],
         },
         {
           model: Match,
-          as: "matches",
-          where: {
-            id: match_id,
-          },
+          as: "match",
+          attributes: ["match_name"],
         },
       ],
       where: { judge_id: judge_id, match_id: match_id },
       raw: true,
       nest: true,
     });
-
     return contestants.map((item) => ({
+      match_name: item.match.match_name,
       group_name: item.group_name,
       registration_number:
         item.contestants.matchContestants.registration_number,
@@ -222,7 +224,10 @@ class ContestantService {
 
     // Kiểm tra số lượng nhóm theo vòng đấu
     const roundName = match.round_name;
-    const classYear = match.class_names && match.class_names.length > 0 ? match.class_names[0].year : null;
+    const classYear =
+      match.class_names && match.class_names.length > 0
+        ? match.class_names[0].year
+        : null;
     let expectedGroupCount = 2; // Mặc định 2 nhóm cho Tứ Kết và Bán Kết
     let maxContestantsPerGroup = 20; // Mặc định 20 thí sinh mỗi nhóm
     let totalContestants = 40; // Tổng số thí sinh mặc định
@@ -233,11 +238,15 @@ class ContestantService {
     }
 
     if (listgroup.length !== expectedGroupCount) {
-      throw new Error(`Trận đấu cần có đúng ${expectedGroupCount} nhóm cho vòng ${roundName}`);
+      throw new Error(
+        `Trận đấu cần có đúng ${expectedGroupCount} nhóm cho vòng ${roundName}`
+      );
     }
 
     // Lấy danh sách thí sinh từ các lớp
-    const listContestants = await ContestantService.getListContestantsByClass(data.className);
+    const listContestants = await ContestantService.getListContestantsByClass(
+      data.className
+    );
     if (listContestants.length <= 0) {
       return { message: "Không có thí sinh để chia" };
     }
@@ -283,7 +292,9 @@ class ContestantService {
       }
     }
 
-    return { message: `Thêm ${contestants.length} thí sinh vào nhóm thành công` };
+    return {
+      message: `Thêm ${contestants.length} thí sinh vào nhóm thành công`,
+    };
   }
 
   // Upload danh sách thí sinh excel
@@ -351,13 +362,11 @@ class ContestantService {
       return { message: "Trận đấu hiện tại chưa có nhóm" };
 
     // Lấy danh sách thí sinh từ các lớp
-    const contestants = await this.getListContestantsByClass(
-      classes
-    );
+    const contestants = await this.getListContestantsByClass(classes);
     if (contestants.length <= 0)
       return { message: "Không có thí sinh để chia" };
 
-    // Xoác các nhóm cũ 
+    // Xoác các nhóm cũ
     await MatchContestant.destroy({ where: { match_id: match_id } });
     await Contestant.update(
       { group_id: null },
@@ -442,11 +451,11 @@ class ContestantService {
   // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
   static async getContestantTotal(matchId) {
     // lấy số thí sinh đang thi trong trận đấu
-    const total = await MatchContestant.count({
+    const remaining = await MatchContestant.count({
       where: { match_id: matchId, status: "Đang thi" },
     });
     //lấy tổng số thí sinh trong trận đấu
-    const remaining = await await MatchContestant.count({
+    const total = await await MatchContestant.count({
       where: { match_id: matchId },
     });
     return { total, remaining };
@@ -631,9 +640,9 @@ class ContestantService {
     });
     return contestant
       ? {
-        fullname: contestant.fullname,
-        match_name: contestant.matches_won.match_name,
-      }
+          fullname: contestant.fullname,
+          match_name: contestant.matches_won.match_name,
+        }
       : null;
   }
 }

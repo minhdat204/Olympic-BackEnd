@@ -355,6 +355,7 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+
   static async getGroupContestantByMatch(req, res) {
     try {
       const list = await ContestantService.getGroupContestantByMatch(
@@ -453,6 +454,17 @@ class ContestantController {
         req.params.match_id
       );
       res.json({ constestant: constestant });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  // Lấy danh sách trận đâu
+  static async getContestantTotal(req, res) {
+    try {
+      const total = await ContestantService.getContestantTotal(
+        req.params.match_id
+      );
+      res.json(total);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
