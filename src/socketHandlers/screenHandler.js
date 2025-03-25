@@ -4,7 +4,7 @@ const handleScreenSokets = (io, socket) => {
    * */
   socket.on("control_screen", (data) => {
     console.log(data);
-    io.to(`match_${data.matchId}`).emit("screens", data);
+    io.emit("screens", data);
   });
 };
 

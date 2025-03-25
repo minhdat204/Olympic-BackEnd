@@ -1,3 +1,5 @@
+const ContestantService = require('../services/contestantService');
+
 const handleDisplaySockets = (io, socket) => {
     socket.on('change_display', (data) => {
       const { type, matchId, payload } = data;
@@ -13,6 +15,23 @@ const handleDisplaySockets = (io, socket) => {
       
       // Forward to all clients in the match room
       io.emit('send_contestant_chart', matchId);
+    });
+
+    // Import at the top of your file
+
+    socket.on('eliminated_contestants', async (matchId) => {
+      console.log(`📺 Client ${socket.id} changed display to eliminated contestants for match_${matchId}`);
+      
+      try {
+      // Get contestants by match ID using the service
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      
+      // Forward the contestants data to all clients in the match room
+      io.emit('eliminated_contestants', { matchId, contestants });
+      } catch (error) {
+      console.error(`Error fetching contestants for match ${matchId}:`, error);
+      socket.emit('error', { message: 'Failed to fetch contestants data' });
+      }
     });
 
   };
