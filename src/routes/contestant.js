@@ -52,8 +52,6 @@ router.post(
   ContestantController.getRescueContestants
 );
 
-
-
 // DAT: Cập nhật trạng thái thí sinh được cứu hàng loạt
 router.patch(
   "/matches/:match_id/rescue",
