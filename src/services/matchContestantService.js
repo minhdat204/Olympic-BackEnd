@@ -7,10 +7,9 @@ const {
   Answer,
 } = require("../models");
 const { Op, Sequelize, where } = require("sequelize");
-const contestant = require("../models/contestant");
 
 class MatchContestantService {
-  constructor() {}
+  constructor() { }
 
   // Tạo trận đấu mới
   async createMatchContestants(data) {
@@ -52,6 +51,7 @@ class MatchContestantService {
     await match.save();
     return match;
   }
+
   async updateStatus(id, status) {
     return MatchContestant.update(
       { status: status },
@@ -126,7 +126,52 @@ class MatchContestantService {
     };
   }
 
-  //
+  // Xóa kết quả chia nhóm
+  async deleteDividedGroup(match_id) {
+    // Kiểm tra match_id có hợp lệ không
+    if (!match_id || isNaN(match_id)) {
+      throw new Error("match_id phải là một số hợp lệ");
+    }
+
+    // Xóa tất cả các dòng trong bảng match_contestants có match_id tương ứng
+    const result = await MatchContestant.destroy({
+      where: { match_id: parseInt(match_id) },
+    });
+
+    // Nếu không có dòng nào bị xóa, trả về thông báo
+    if (result === 0) {
+      throw new Error("Không tìm thấy dữ liệu để xóa trong bảng match_contestants");
+    }
+
+    // Đặt lại group_id của các thí sinh liên quan thành NULL
+    await Contestant.update(
+      { group_id: null },
+      {
+        where: {
+          group_id: {
+            [Op.in]: Sequelize.literal(
+              `(SELECT id FROM groups WHERE match_id = ${parseInt(match_id)})`
+            ),
+          },
+        },
+      }
+    );
+
+    return result;
+  }
+
+  // Kiểm tra xem trận đấu đã được chia nhóm hay chưa
+  async checkDivided(match_id) {
+    if (!match_id || isNaN(match_id)) {
+      throw new Error("match_id phải là một số hợp lệ");
+    }
+
+    const count = await MatchContestant.count({
+      where: { match_id: parseInt(match_id) },
+    });
+
+    return count > 0; // Trả về true nếu có ít nhất 1 dòng, false nếu không có
+  }
 }
 
 // Xuất class để có thể sử dụng lại nhiều nơi
