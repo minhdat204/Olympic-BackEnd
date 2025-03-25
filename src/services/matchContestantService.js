@@ -6,10 +6,15 @@ const {
   Group,
   Answer,
 } = require("../models");
+const {
+  emitTotalContestants,
+  emitContestants,
+  emitContestantsjudge_id,
+} = require("../socketEmitters/contestantEmitter");
 const { Op, Sequelize, where } = require("sequelize");
 
 class MatchContestantService {
-  constructor() { }
+  constructor() {}
 
   // Tạo trận đấu mới
   async createMatchContestants(data) {
@@ -53,9 +58,10 @@ class MatchContestantService {
   }
 
   async updateStatus(id, status) {
+    // Cập nhật danh sách trạng thái thí sinh theo số báo danh
     return MatchContestant.update(
       { status: status },
-      { where: { contestant_id: id } }
+      { where: { registration_number: id } }
     );
   }
 
@@ -140,7 +146,9 @@ class MatchContestantService {
 
     // Nếu không có dòng nào bị xóa, trả về thông báo
     if (result === 0) {
-      throw new Error("Không tìm thấy dữ liệu để xóa trong bảng match_contestants");
+      throw new Error(
+        "Không tìm thấy dữ liệu để xóa trong bảng match_contestants"
+      );
     }
 
     // Đặt lại group_id của các thí sinh liên quan thành NULL

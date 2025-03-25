@@ -16,7 +16,8 @@ const upload = multer({ storage: storage });
 
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
-router.get("/check-regroup/:match_id",
+router.get(
+  "/check-regroup/:match_id",
   ContestantController.checkRegroupPermission
 );
 router.get(
@@ -65,7 +66,13 @@ router.post(
   "/matches/:match_id/rescue/count",
   ContestantController.getRescueContestantTotal
 );
+// Donwload danh sach excle
+router.get(
+  "/download/Excel/Match/:match_id",
+  ContestantController.downloadExcelMatch
+);
 
+router.get("/match/total/:match_id", ContestantController.getContestantTotal);
 // DAT: API lấy tổng số thí sinh theo trạng thái (status = "xác nhận 2")
 router.get(
   "/matches/:match_id/eliminated/count",
