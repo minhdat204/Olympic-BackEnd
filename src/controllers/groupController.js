@@ -11,7 +11,7 @@ class GroupController {
       };
 
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 20;
+      const limit = parseInt(req.query.limit) || 6;
 
       const result = await GroupService.getGroups(filters, page, limit);
 
@@ -79,7 +79,7 @@ class GroupController {
     } catch (error) {
       const statusCode =
         error.message.includes("không tồn tại") ||
-        error.message.includes("không phải là trọng tài")
+          error.message.includes("không phải là trọng tài")
           ? 400
           : 500;
 
@@ -109,8 +109,8 @@ class GroupController {
           ? 404
           : error.message.includes("không tồn tại") ||
             error.message.includes("không phải là trọng tài")
-          ? 400
-          : 500;
+            ? 400
+            : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -197,8 +197,8 @@ class GroupController {
         error.message === "Nhóm không tồn tại"
           ? 404
           : error.message === "Thí sinh không thuộc nhóm này"
-          ? 400
-          : 500;
+            ? 400
+            : 500;
 
       res.status(statusCode).json({
         status: "error",
