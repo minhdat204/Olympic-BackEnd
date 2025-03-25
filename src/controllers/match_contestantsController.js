@@ -5,6 +5,7 @@ const {
   emitTotalContestants,
   emitContestants,
   emitContestantsjudge_id,
+  emitContestantsAdmin,
 } = require("../socketEmitters/contestantEmitter");
 // tạo trận đấu
 
@@ -44,8 +45,13 @@ exports.getMatchContestant = async (req, res) => {
 // cập nhật trạng thái trận đấu của trọng tài
 exports.updateMatchContestantsJudge = async (req, res) => {
   try {
-    const { match_id, judge_id, status } = req.body;
-    await matchContestantService.updateStatus(req.params.id, status);
+    const { match_id, judge_id, status, eliminated_at_question_order } =
+      req.body;
+    await matchContestantService.updateStatus(
+      req.params.id,
+      status,
+      eliminated_at_question_order
+    );
     const total = await ContestantService.getContestantTotal(match_id);
     emitTotalContestants(match_id, total.total, total.remaining);
     const contestants = await ContestantService.getContestantsByMatchId(
@@ -151,11 +157,26 @@ exports.checkDivided = async (req, res) => {
     const isDivided = await matchContestantService.checkDivided(match_id);
     res.status(200).json({ isDivided });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        error: "Lỗi khi kiểm tra trạng thái chia nhóm",
-        details: error.message,
-      });
+    res.status(500).json({
+      error: "Lỗi khi kiểm tra trạng thái chia nhóm",
+      details: error.message,
+    });
+  }
+};
+// Cập nhật trạng thái thí sinh của
+exports.updateMatchContestantsAdmin = async (req, res) => {
+  try {
+    const { match_id, status } = req.body;
+    await matchContestantService.updateStatus(req.params.id, status);
+    const total = await ContestantService.getContestantTotal(match_id);
+    emitTotalContestants(match_id, total.total, total.remaining);
+    const contestants = await ContestantService.getContestantsByMatchId(
+      match_id
+    );
+    emitContestants(match_id, contestants);
+    emitContestantsAdmin(match_id, 1);
+    res.json("Thành công");
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };

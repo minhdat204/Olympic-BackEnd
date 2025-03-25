@@ -16,6 +16,7 @@ const emitTotalContestants = async (
 //gửi API lấy danh sách thí sinh theo trạng thái
 const emitContestants = async (matchId, contestants) => {
   const io = getIO();
+  // console.log(contestants);
   io.to(`match_${matchId}`).emit("contestants", {
     matchId,
     contestants,
@@ -23,7 +24,7 @@ const emitContestants = async (matchId, contestants) => {
 };
 const emitContestantsjudge_id = async (matchId, judge_id, contestants) => {
   const io = getIO();
-  console.log(contestants);
+  // console.log(contestants);
   io.to(`match_${matchId}`).emit("contestants_judge_id", {
     matchId,
     judge_id,
@@ -31,8 +32,15 @@ const emitContestantsjudge_id = async (matchId, judge_id, contestants) => {
   });
 };
 
+const emitContestantsAdmin = async (matchId, status) => {
+  const io = getIO();
+  // console.log(status, matchId);
+  io.to(`match_${matchId}`).emit("contestants_admin", { matchId, status });
+};
+
 module.exports = {
   emitTotalContestants,
   emitContestants,
   emitContestantsjudge_id,
+  emitContestantsAdmin,
 };
