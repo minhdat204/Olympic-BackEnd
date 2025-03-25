@@ -45,4 +45,9 @@ router.put(
 );
 router.delete("/:id", role("admin"), QuestionController.deleteQuestion);
 
+
+// Trong routes/questions.js
+router.get("/available-orders/:match_id", QuestionController.getAvailableQuestionOrders);
+
+
 module.exports = router;
