@@ -52,6 +52,8 @@ router.post(
   ContestantController.getRescueContestants
 );
 
+
+
 // DAT: Cập nhật trạng thái thí sinh được cứu hàng loạt
 router.patch(
   "/matches/:match_id/rescue",
@@ -81,6 +83,19 @@ router.patch(
   "/update/class/match",
   ContestantController.updateContestantGroupByClass
 );
+
+// DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
+router.get(
+  "/matches/:match_id/total",
+  ContestantController.getContestantTotalAndRemaining
+);
+
+// DAT: lấy ds thí sinh dang thi
+router.get(
+  "/matches/:match_id/contestant",
+  ContestantController.getCompetingContestants
+);
+
 /**
  * Các route dưới đây cần xác thựccontestants
  *  */

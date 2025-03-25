@@ -442,11 +442,11 @@ class ContestantService {
   // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
   static async getContestantTotal(matchId) {
     // lấy số thí sinh đang thi trong trận đấu
-    const total = await MatchContestant.count({
+    const remaining = await MatchContestant.count({
       where: { match_id: matchId, status: "Đang thi" },
     });
     //lấy tổng số thí sinh trong trận đấu
-    const remaining = await await MatchContestant.count({
+    const total = await await MatchContestant.count({
       where: { match_id: matchId },
     });
     return { total, remaining };
@@ -520,6 +520,32 @@ class ContestantService {
     });
     return total;
   }
+
+  // DAT: API lấy danh sách thí sinh "Đang thi"
+  static async getCompetingContestants(matchId) {
+    const competingContestants = await MatchContestant.findAll({
+      where: { match_id: matchId, status: "Đang thi" },
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+        },
+      ],
+      order: [["registration_number", "ASC"]],
+    });
+
+    // chuyển dữ liệu từ object sang json
+    const contestants = competingContestants.map((mc) => {
+      const contestant = mc.contestant.toJSON();
+      contestant.registration_number = mc.registration_number;
+      contestant.match_status = mc.status;
+      contestant.eliminated_at_question_order = mc.eliminated_at_question_order;
+      return contestant;
+    });
+
+    return contestants;
+  }
+  
 
   // DAT: API lấy số thí sinh cần cứu với công thức [(điểm nhập vào / 100) * tổng thí sinh bị loại]
   static async getRescueContestantTotal(matchId, rescuePoint) {
@@ -636,6 +662,31 @@ class ContestantService {
       }
       : null;
   }
+
+  // DAT: lấy cột rescue_1, rescue_2, plane: sử dụng ở câu mấy (order question) (-1 là chưa sử dụng) và cột rescued_count_1, rescued_count_2: cứu được bao nhiêu người
+  // không cần ghi dựa vào match service lấy toàn bộ tran đấu
+
+  static async updateRescueContestants(matchId, data) {
+    const contestants = await MatchContestant.findAll({
+      where: { match_id: matchId, status: "Xác nhận 2" },
+    });
+
+    for (const contestant of contestants) {
+      const rescueData = data.find((d) => d.contestant_id === contestant.contestant_id);
+      if (rescueData) {
+        await contestant.update({
+          rescue_1: rescueData.rescue_1,
+          rescue_2: rescueData.rescue_2,
+          plane: rescueData.plane,
+          rescued_count_1: rescueData.rescued_count_1,
+          rescued_count_2: rescueData.rescued_count_2,
+        });
+      }
+    }
+
+    return { message: "Cập nhật thành công" };
+  }
+
 }
 
 module.exports = ContestantService;

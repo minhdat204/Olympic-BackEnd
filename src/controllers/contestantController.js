@@ -457,6 +457,39 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  /**
+   * DAT: PHẦN CỨU MÀN HÌNH CHIẾU
+   * ===========================================================
+   */
+    // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
+    static async getContestantTotalAndRemaining(req, res) {
+      try {
+        const matchId = req.params.match_id;
+        const { total, remaining } = await ContestantService.getContestantTotal(matchId);
+        res.json({
+          message: "Lấy total thí sinh và thí sinh còn lại thành công",
+          total: total, remaining: remaining, matchId: matchId
+          });
+      } catch (error) {
+        res.status(400).json({ error: error.message });
+      }
+    }
+
+    // DAT: lấy cột rescue_1, rescue_2, plane: sử dụng ở câu mấy (order question) (-1 là chưa sử dụng) và cột rescued_count_1, rescued_count_2: cứu được bao nhiêu người
+    // không cần ghi dựa vào match service lấy toàn bộ tran đấu
+
+  // DAT: API lấy danh sách thí sinh "Đang thi"
+  static async getCompetingContestants(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const contestants = await ContestantService.getCompetingContestants(matchId);
+      res.json({ contestants: contestants });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+    
 }
 
 module.exports = ContestantController;
