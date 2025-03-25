@@ -282,7 +282,7 @@ class ContestantService {
       );
       await MatchContestant.create({
         registration_number: i + 1,
-        status: "Chưa thi",
+        status: "Đang thi",
         match_id: data.match_id,
         contestant_id: contestants[i].id,
       });

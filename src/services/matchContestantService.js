@@ -57,12 +57,25 @@ class MatchContestantService {
     return match;
   }
 
-  async updateStatus(id, status) {
-    // Cập nhật danh sách trạng thái thí sinh theo số báo danh
-    return MatchContestant.update(
-      { status: status },
-      { where: { registration_number: id } }
-    );
+  async updateStatus(id, status, eliminated_at_question_order) {
+    try {
+      let updateData = { status };
+      if (status === "Xác nhận 2") {
+        updateData.eliminated_at_question_order = eliminated_at_question_order;
+      }
+
+      const result = await MatchContestant.update(updateData, {
+        where: { registration_number: id },
+      });
+
+      if (result[0] > 0) {
+        console.log(`✅ Đã cập nhật trạng thái cho thí sinh ${id}`);
+      } else {
+        console.log(`⚠️ Không tìm thấy thí sinh có số báo danh ${id}`);
+      }
+    } catch (error) {
+      console.error(`❌ Lỗi cập nhật thí sinh:`, error);
+    }
   }
 
   // Xóa trận đấu
@@ -116,7 +129,7 @@ class MatchContestantService {
 
       await MatchContestant.create({
         registration_number: i + 1,
-        status: "Chưa thi",
+        status: "Đang thi",
         match_id,
         contestant_id: contestants[i].contestant_id,
       });
