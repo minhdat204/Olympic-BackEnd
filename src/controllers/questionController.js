@@ -169,3 +169,15 @@ exports.updateQuestionTimeLeft = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Trong QuestionController.js
+exports.getAvailableQuestionOrders = async (req, res) => {
+  try {
+    const match_id = req.params.match_id;
+    const availableOrders = await QuestionService.getAvailableQuestionOrders(match_id);
+    res.json({ availableOrders });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách question_order khả dụng:", error);
+    res.status(400).json({ error: error.message });
+  }
+};
