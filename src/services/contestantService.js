@@ -90,28 +90,17 @@ class ContestantService {
     return await Contestant.create(contestantData);
   }
 
-  // Cập nhật thông tin thí sinh
-  static async updateContestant(id, contestantData) {
-    const contestant = await Contestant.findByPk(id);
+  // // Cập nhật thông tin thí sinh
+  // static async updateContestant(id, contestantData) {
+  //   const contestant = await Contestant.findByPk(id);
 
-    if (!contestant) {
-      throw new Error("Thí sinh không tồn tại");
-    }
+  //   if (!contestant) {
+  //     throw new Error("Thí sinh không tồn tại");
+  //   }
 
-    // Nếu thay đổi email, kiểm tra email mới đã tồn tại chưa
-    if (contestantData.email && contestantData.email !== contestant.email) {
-      const existingContestant = await Contestant.findOne({
-        where: { email: contestantData.email },
-      });
-
-      if (existingContestant) {
-        throw new Error("Email đã được sử dụng");
-      }
-    }
-
-    await contestant.update(contestantData);
-    return contestant;
-  }
+  //   await contestant.update(contestantData);
+  //   return contestant;
+  // }
 
   // Xóa thí sinh
   static async deleteContestant(id) {
@@ -282,7 +271,7 @@ class ContestantService {
       );
       await MatchContestant.create({
         registration_number: i + 1,
-        status: "Chưa thi",
+        status: "Đang thi",
         match_id: data.match_id,
         contestant_id: contestants[i].id,
       });
@@ -566,30 +555,52 @@ class ContestantService {
   }
 
   // Phương thức updateContestant đã sửa
-  static async updateContestant(contestantId, data) {
-    // Kiểm tra xem bản ghi có tồn tại không
-    const matchContestant = await MatchContestant.findOne({
-      where: { contestant_id: contestantId },
-    });
-    if (!matchContestant) {
-      throw new Error("Thí sinh không tồn tại trong trận đấu");
+  static async updateContestant(contestantIds, data) {
+    // Check if contestantIds is not an array, convert it to an array
+    if (!Array.isArray(contestantIds)) {
+      contestantIds = [contestantIds];
     }
 
-    // Cập nhật dữ liệu
-    await matchContestant.update({
-      status: data.status,
-      eliminated_at_question_order: data.eliminated_at_question_order,
-      // Thêm các trường khác nếu cần
-    });
+    // Update all contestants in the array
+    const updatedContestants = [];
+    for (const contestantId of contestantIds) {
+      const matchContestant = await MatchContestant.findOne({
+        where: { contestant_id: contestantId },
+      });
 
-    return matchContestant;
+      if (!matchContestant) {
+        throw new Error(
+          `Thí sinh với ID ${contestantId} không tồn tại trong bảng MatchContestant`
+        );
+      }
+
+      // Cập nhật dữ liệu với status từ data
+      await matchContestant.update(data);
+
+      // Lấy dữ liệu đầy đủ của thí sinh sau khi cập nhật
+      const contestant = await Contestant.findByPk(contestantId);
+
+      // Thêm vào danh sách thí sinh đã cập nhật
+      updatedContestants.push({
+        ...contestant.toJSON(),
+        registration_number: matchContestant.registration_number,
+        match_status: matchContestant.status,
+        eliminated_at_question_order:
+          matchContestant.eliminated_at_question_order,
+      });
+    }
+
+    return {
+      message: "Cập nhật thông tin thí sinh thành công",
+      contestants: updatedContestants,
+    };
   }
 
   /**
    * RESULT
    * DAT: lấy danh sách thí sinh được cứu (status = "xác nhận 2")
    */
-  static async getRescueContestants(matchId, score) {
+  static async getRescueContestants(matchId, score, rescueNumber) {
     /**
      * 1. lấy danh sách thí sinh bị loại
      */
@@ -599,6 +610,21 @@ class ContestantService {
      * 2. lấy số lượng thí sinh được cứu
      */
     let rescueContestant = await this.getRescueContestantTotal(matchId, score);
+
+    // Check if this is the second rescue (cứu trợ 2)
+    if (rescueNumber === 2) {
+      rescueContestant = Math.min(10, rescueContestant);
+      console.log(
+        `Cứu trợ 2: giới hạn tối đa 10 thí sinh (${rescueContestant} người)`
+      );
+    }
+
+    // Check if this is the first rescue (cứu trợ 1)
+    if (rescueNumber === 1) {
+      console.log(
+        `Cứu trợ thường: ${rescueContestant} người dựa trên điểm ${score}`
+      );
+    }
 
     /**
      * 3. Nhóm thí sinh theo câu hỏi
