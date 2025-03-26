@@ -105,8 +105,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-            ? 409
-            : 500;
+          ? 409
+          : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -388,27 +388,32 @@ class ContestantController {
     try {
       const matchId = req.params.match_id;
       const score = req.body.score;
+      const rescueNumber = req.body.rescueNumber; // lần cứu trợ thứ mấy
 
       //lấy danh sách thí sinh được cứu
       const contestants = await ContestantService.getRescueContestants(
-      matchId,
-      score
+        matchId,
+        score,
+        rescueNumber
       );
 
       const totalEliminated =
-      await ContestantService.getContestantTotalByStatus(
-        matchId,
-        "Xác nhận 2"
-      );
-      
+        await ContestantService.getContestantTotalByStatus(
+          matchId,
+          "Xác nhận 2"
+        );
+
       // Tạo mảng chỉ chứa id của các thí sinh cứu trợ
-      const selectedContestantIds = contestants.map(contestant => contestant.id);
+      const selectedContestantIds = contestants.map(
+        (contestant) => contestant.id
+      );
 
       res.json({
-      message: "Lấy danh sách thí sinh được cứu thành công",
-      selectedContestants: contestants,
-      selectedContestantIds: selectedContestantIds,
-      totalEliminated: totalEliminated,
+        message: "Lấy danh sách thí sinh được cứu thành công",
+        selectedContestants: contestants,
+        selectedContestantIds: selectedContestantIds,
+        totalEliminated: totalEliminated,
+        rescueNumber: rescueNumber,
       });
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -420,33 +425,42 @@ class ContestantController {
     try {
       const matchId = req.params.match_id;
       const score = req.body.score;
-      const rescueNumber = req.body.rescueNumber;
-      
+      const rescueNumber = req.body.rescueNumber; // lần cứu trợ thứ mấy
+
       // Get contestants directly from service instead of controller method
-      const rescuedContestants = await ContestantService.getRescueContestants(matchId, score);
-      
-      // Extract just the IDs
-      const contestantIds = rescuedContestants.map(contestant => contestant.contestant_id);
-      
-      if (contestantIds.length === 0) {
-        return res.status(400).json({ error: "Không có thí sinh nào được chọn để cứu trợ" });
-      }
-      
-      // Update their status
-      const result = await ContestantService.updateContestant(
-        contestantIds, 
-        {status: "Đang thi"}
+      const rescuedContestants = await ContestantService.getRescueContestants(
+        matchId,
+        score,
+        rescueNumber
       );
 
+      // Extract just the IDs
+      const contestantIds = rescuedContestants.map(
+        (contestant) => contestant.contestant_id
+      );
+
+      if (contestantIds.length === 0) {
+        return res
+          .status(400)
+          .json({ error: "Không có thí sinh nào được chọn để cứu trợ" });
+      }
+
+      // Update their status
+      const result = await ContestantService.updateContestant(contestantIds, {
+        status: "Đang thi",
+      });
+
       // danh sách thí sinh trong trận để gửi socket
-      const contestants = await ContestantService.getContestantsByMatchId(matchId);
-      
+      const contestants = await ContestantService.getContestantsByMatchId(
+        matchId
+      );
+
       // Emit socket event
       emitEliminatedContestants(matchId, contestants);
-      
-      res.json({ 
-        message: "Cập nhật trạng thái thí sinh thành công", 
-        contestants: result.contestants 
+
+      res.json({
+        message: "Cập nhật trạng thái thí sinh thành công",
+        contestants: result.contestants,
       });
     } catch (error) {
       console.error("Error in updateRescueContestants:", error);

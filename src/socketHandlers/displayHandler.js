@@ -25,9 +25,11 @@ const handleDisplaySockets = (io, socket) => {
       try {
       // Get contestants by match ID using the service
       const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      // API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
+      const constestantTotal = await ContestantService.getContestantTotal(matchId);
       
       // Forward the contestants data to all clients in the match room
-      io.emit('eliminated_contestants', { matchId, contestants });
+      io.emit('eliminated_contestants', { matchId, contestants, constestantTotal });
       } catch (error) {
       console.error(`Error fetching contestants for match ${matchId}:`, error);
       socket.emit('error', { message: 'Failed to fetch contestants data' });

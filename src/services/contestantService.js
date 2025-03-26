@@ -556,7 +556,6 @@ class ContestantService {
 
   // Phương thức updateContestant đã sửa
   static async updateContestant(contestantIds, data) {
-
     // Check if contestantIds is not an array, convert it to an array
     if (!Array.isArray(contestantIds)) {
       contestantIds = [contestantIds];
@@ -566,31 +565,34 @@ class ContestantService {
     const updatedContestants = [];
     for (const contestantId of contestantIds) {
       const matchContestant = await MatchContestant.findOne({
-        where: { contestant_id: contestantId }
+        where: { contestant_id: contestantId },
       });
-      
+
       if (!matchContestant) {
-        throw new Error(`Thí sinh với ID ${contestantId} không tồn tại trong bảng MatchContestant`);
+        throw new Error(
+          `Thí sinh với ID ${contestantId} không tồn tại trong bảng MatchContestant`
+        );
       }
-      
+
       // Cập nhật dữ liệu với status từ data
       await matchContestant.update(data);
-      
+
       // Lấy dữ liệu đầy đủ của thí sinh sau khi cập nhật
       const contestant = await Contestant.findByPk(contestantId);
-      
+
       // Thêm vào danh sách thí sinh đã cập nhật
       updatedContestants.push({
         ...contestant.toJSON(),
         registration_number: matchContestant.registration_number,
         match_status: matchContestant.status,
-        eliminated_at_question_order: matchContestant.eliminated_at_question_order
+        eliminated_at_question_order:
+          matchContestant.eliminated_at_question_order,
       });
     }
 
     return {
       message: "Cập nhật thông tin thí sinh thành công",
-      contestants: updatedContestants
+      contestants: updatedContestants,
     };
   }
 
@@ -598,7 +600,7 @@ class ContestantService {
    * RESULT
    * DAT: lấy danh sách thí sinh được cứu (status = "xác nhận 2")
    */
-  static async getRescueContestants(matchId, score) {
+  static async getRescueContestants(matchId, score, rescueNumber) {
     /**
      * 1. lấy danh sách thí sinh bị loại
      */
@@ -608,6 +610,21 @@ class ContestantService {
      * 2. lấy số lượng thí sinh được cứu
      */
     let rescueContestant = await this.getRescueContestantTotal(matchId, score);
+
+    // Check if this is the second rescue (cứu trợ 2)
+    if (rescueNumber === 2) {
+      rescueContestant = Math.min(10, rescueContestant);
+      console.log(
+        `Cứu trợ 2: giới hạn tối đa 10 thí sinh (${rescueContestant} người)`
+      );
+    }
+
+    // Check if this is the first rescue (cứu trợ 1)
+    if (rescueNumber === 1) {
+      console.log(
+        `Cứu trợ thường: ${rescueContestant} người dựa trên điểm ${score}`
+      );
+    }
 
     /**
      * 3. Nhóm thí sinh theo câu hỏi
