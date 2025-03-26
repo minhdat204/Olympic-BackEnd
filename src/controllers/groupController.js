@@ -214,6 +214,16 @@ class GroupController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  // lấy nhóm theo trận đấu
+  static async getIdGroupByMatch(req, res) {
+    try {
+      const list_group = await GroupService.getIdGroupByMatch(req.params.match_id);
+      res.json(list_group);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = GroupController;
