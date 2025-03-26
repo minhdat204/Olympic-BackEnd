@@ -54,7 +54,7 @@ app.use("/api/mc", mCRoutes);
 
 initializeSocket(io);
 
-const HOST = '192.168.92.140';
+const HOST = 'localhost';
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
   server.listen(PORT, HOST, () => {
