@@ -8,6 +8,7 @@ const {
   emitTotalContestants,
   emitContestants,
 } = require("../socketEmitters/contestantEmitter");
+const { enableCompileCache } = require("module");
 class ContestantController {
   // Lấy danh sách thí sinh
   static async getContestants(req, res) {
@@ -103,8 +104,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-          ? 409
-          : 500;
+            ? 409
+            : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -355,6 +356,7 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+
   static async getGroupContestantByMatch(req, res) {
     try {
       const list = await ContestantService.getGroupContestantByMatch(
@@ -457,6 +459,77 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
-}
 
+  // Lấy danh sách trận đâu
+  static async getContestantTotal(req, res) {
+    try {
+      const total = await ContestantService.getContestantTotal(
+        req.params.match_id
+      );
+      res.json(total);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  /**
+   * DAT: PHẦN CỨU MÀN HÌNH CHIẾU
+   * ===========================================================
+   */
+  // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
+  static async getContestantTotalAndRemaining(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const { total, remaining } = await ContestantService.getContestantTotal(
+        matchId
+      );
+      res.json({
+        message: "Lấy total thí sinh và thí sinh còn lại thành công",
+        total: total,
+        remaining: remaining,
+        matchId: matchId,
+      });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  // DAT: lấy cột rescue_1, rescue_2, plane: sử dụng ở câu mấy (order question) (-1 là chưa sử dụng) và cột rescued_count_1, rescued_count_2: cứu được bao nhiêu người
+  // không cần ghi dựa vào match service lấy toàn bộ tran đấu
+
+  // DAT: API lấy danh sách thí sinh "Đang thi"
+  static async getCompetingContestants(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const contestants = await ContestantService.getCompetingContestants(
+        matchId
+      );
+      res.json({ contestants: contestants });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  static async downloadExcelMatch(req, res) {
+    try {
+      const excle = await ContestantService.downloadExcelMatch(
+        req.params.match_id
+      );
+      const name = encodeURIComponent(excle[0].match_name); // Mã hóa tên file tránh lỗi
+      const buffer = await ContestantService.downloadExcel(excle);
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${name}.xlsx"`
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.send(buffer);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+}
 module.exports = ContestantController;

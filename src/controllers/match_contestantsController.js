@@ -1,6 +1,13 @@
 const matchContestantService = require("../services/matchContestantService");
-
+const ContestantService = require("../services/contestantService");
+const { emit } = require("process");
+const {
+  emitTotalContestants,
+  emitContestants,
+  emitContestantsjudge_id,
+} = require("../socketEmitters/contestantEmitter");
 // tạo trận đấu
+
 exports.createMatchContestants = async (req, res) => {
   try {
     const match_contestant =
@@ -11,7 +18,7 @@ exports.createMatchContestants = async (req, res) => {
   }
 };
 
-// lấy danh sách các trận đấu
+// Lấy danh sách các trận đấu
 exports.getMatchContestants = async (req, res) => {
   try {
     const match_contestants =
@@ -22,7 +29,7 @@ exports.getMatchContestants = async (req, res) => {
   }
 };
 
-// chi tiết trận đấu
+// Chi tiết trận đấu
 exports.getMatchContestant = async (req, res) => {
   try {
     const match_contestant = await matchContestantService.getMatchContestant(
@@ -34,7 +41,27 @@ exports.getMatchContestant = async (req, res) => {
   }
 };
 
-// cập nhật trạng thái trận đấu
+// cập nhật trạng thái trận đấu của trọng tài
+exports.updateMatchContestantsJudge = async (req, res) => {
+  try {
+    const { match_id, judge_id, status } = req.body;
+    await matchContestantService.updateStatus(req.params.id, status);
+    const total = await ContestantService.getContestantTotal(match_id);
+    emitTotalContestants(match_id, total.total, total.remaining);
+    const contestants = await ContestantService.getContestantsByMatchId(
+      match_id
+    );
+    emitContestants(match_id, contestants);
+    const contestants_judge_id =
+      await ContestantService.getContestantByJudgeAndMatch(judge_id, match_id);
+    emitContestantsjudge_id(match_id, judge_id, contestants_judge_id);
+    res.json(contestants_judge_id);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Cập nhật trạng thái trận đấu
 exports.updateMatchContestants = async (req, res) => {
   try {
     const match_contestant =
@@ -47,6 +74,8 @@ exports.updateMatchContestants = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Xóa trận đấu
 exports.deleteMatch = async (req, res) => {
   try {
     const match = await matchContestantService.deleteMatchContestant(
@@ -57,6 +86,8 @@ exports.deleteMatch = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Lấy danh sách trạng thái
 exports.getListStatus = async (req, res) => {
   try {
     const listStatus = await matchContestantService.getListStatus();
@@ -65,6 +96,8 @@ exports.getListStatus = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Lấy danh sách thí sinh theo trận đấu
 exports.getListContestantsByMatch = async (req, res) => {
   try {
     const list = await matchContestantService.getListContestantsByMatch(
@@ -75,6 +108,8 @@ exports.getListContestantsByMatch = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Cập nhật nhóm thí sinh trong trận đấu
 exports.updateContestantGroupByMatch = async (req, res) => {
   try {
     const status = await matchContestantService.updateContestantGroupByMatch(
@@ -86,10 +121,41 @@ exports.updateContestantGroupByMatch = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Cập nhật trạng thái
 exports.updateStatus = async (req, res) => {
   try {
     await matchContestantService.updateStatus(req.params.id, req.body.status);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+// Xóa kết quả chia nhóm
+exports.deleteDividedGroup = async (req, res) => {
+  try {
+    const match_id = req.params.match_id;
+    await matchContestantService.deleteDividedGroup(match_id);
+    res.status(200).json({ message: "Xóa kết quả chia nhóm thành công" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Lỗi khi xóa kết quả chia nhóm", details: error.message });
+  }
+};
+
+// Kiểm tra trạng thái chia nhóm
+exports.checkDivided = async (req, res) => {
+  try {
+    const match_id = req.params.match_id;
+    const isDivided = await matchContestantService.checkDivided(match_id);
+    res.status(200).json({ isDivided });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        error: "Lỗi khi kiểm tra trạng thái chia nhóm",
+        details: error.message,
+      });
   }
 };

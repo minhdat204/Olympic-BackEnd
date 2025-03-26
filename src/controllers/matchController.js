@@ -59,7 +59,6 @@ exports.updateMatchBy = async (req, res) => {
 exports.getListRounds = async (req, res) => {
   try {
     const listRounds = await MatchService.getListRounds();
-    console.log(listRounds);
     res.json({ listRounds: listRounds });
   } catch (error) {
     res.status(400).json({ error: error.message });

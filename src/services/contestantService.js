@@ -12,7 +12,7 @@ const { Op, where, Sequelize } = require("sequelize");
 const group = require("../models/group");
 
 class ContestantService {
-  // Kiểm tra quyền chia nhóm 
+  // Kiểm tra quyền chia nhóm
   static async checkRegroupPermission(match_id) {
     const match = await Match.findByPk(match_id, {
       attributes: ["status", "round_name"],
@@ -141,27 +141,29 @@ class ContestantService {
       attributes: ["group_name"],
       include: [
         {
-          model: Group,
-          as: "group",
-          where: {
-            judge_id,
-            match_id,
-          },
+          model: Contestant,
+          as: "contestants",
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants",
+              attributes: ["registration_number", "status"],
+              order: ["registration_number"],
+            },
+          ],
         },
         {
           model: Match,
-          as: "matches",
-          where: {
-            id: match_id,
-          },
+          as: "match",
+          attributes: ["match_name"],
         },
       ],
       where: { judge_id: judge_id, match_id: match_id },
       raw: true,
       nest: true,
     });
-
     return contestants.map((item) => ({
+      match_name: item.match.match_name,
       group_name: item.group_name,
       registration_number:
         item.contestants.matchContestants.registration_number,
@@ -222,7 +224,10 @@ class ContestantService {
 
     // Kiểm tra số lượng nhóm theo vòng đấu
     const roundName = match.round_name;
-    const classYear = match.class_names && match.class_names.length > 0 ? match.class_names[0].year : null;
+    const classYear =
+      match.class_names && match.class_names.length > 0
+        ? match.class_names[0].year
+        : null;
     let expectedGroupCount = 2; // Mặc định 2 nhóm cho Tứ Kết và Bán Kết
     let maxContestantsPerGroup = 20; // Mặc định 20 thí sinh mỗi nhóm
     let totalContestants = 40; // Tổng số thí sinh mặc định
@@ -233,11 +238,15 @@ class ContestantService {
     }
 
     if (listgroup.length !== expectedGroupCount) {
-      throw new Error(`Trận đấu cần có đúng ${expectedGroupCount} nhóm cho vòng ${roundName}`);
+      throw new Error(
+        `Trận đấu cần có đúng ${expectedGroupCount} nhóm cho vòng ${roundName}`
+      );
     }
 
     // Lấy danh sách thí sinh từ các lớp
-    const listContestants = await ContestantService.getListContestantsByClass(data.className);
+    const listContestants = await ContestantService.getListContestantsByClass(
+      data.className
+    );
     if (listContestants.length <= 0) {
       return { message: "Không có thí sinh để chia" };
     }
@@ -283,7 +292,9 @@ class ContestantService {
       }
     }
 
-    return { message: `Thêm ${contestants.length} thí sinh vào nhóm thành công` };
+    return {
+      message: `Thêm ${contestants.length} thí sinh vào nhóm thành công`,
+    };
   }
 
   // Upload danh sách thí sinh excel
@@ -351,13 +362,11 @@ class ContestantService {
       return { message: "Trận đấu hiện tại chưa có nhóm" };
 
     // Lấy danh sách thí sinh từ các lớp
-    const contestants = await this.getListContestantsByClass(
-      classes
-    );
+    const contestants = await this.getListContestantsByClass(classes);
     if (contestants.length <= 0)
       return { message: "Không có thí sinh để chia" };
 
-    // Xoác các nhóm cũ 
+    // Xoác các nhóm cũ
     await MatchContestant.destroy({ where: { match_id: match_id } });
     await Contestant.update(
       { group_id: null },
@@ -442,11 +451,11 @@ class ContestantService {
   // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
   static async getContestantTotal(matchId) {
     // lấy số thí sinh đang thi trong trận đấu
-    const total = await MatchContestant.count({
+    const remaining = await MatchContestant.count({
       where: { match_id: matchId, status: "Đang thi" },
     });
     //lấy tổng số thí sinh trong trận đấu
-    const remaining = await await MatchContestant.count({
+    const total = await await MatchContestant.count({
       where: { match_id: matchId },
     });
     return { total, remaining };
@@ -519,6 +528,31 @@ class ContestantService {
       where: { match_id: matchId, status: status },
     });
     return total;
+  }
+
+  // DAT: API lấy danh sách thí sinh "Đang thi"
+  static async getCompetingContestants(matchId) {
+    const competingContestants = await MatchContestant.findAll({
+      where: { match_id: matchId, status: "Đang thi" },
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+        },
+      ],
+      order: [["registration_number", "ASC"]],
+    });
+
+    // chuyển dữ liệu từ object sang json
+    const contestants = competingContestants.map((mc) => {
+      const contestant = mc.contestant.toJSON();
+      contestant.registration_number = mc.registration_number;
+      contestant.match_status = mc.status;
+      contestant.eliminated_at_question_order = mc.eliminated_at_question_order;
+      return contestant;
+    });
+
+    return contestants;
   }
 
   // DAT: API lấy số thí sinh cần cứu với công thức [(điểm nhập vào / 100) * tổng thí sinh bị loại]
@@ -635,6 +669,72 @@ class ContestantService {
         match_name: contestant.matches_won.match_name,
       }
       : null;
+  }
+
+  static async downloadExcelMatch(match_id) {
+    const list = await Group.findAll({
+      attributes: ["id", "group_name"],
+      include: [
+        {
+          model: Match,
+          as: "match",
+          attributes: ["id", "match_name"],
+          where: { id: match_id },
+        },
+        {
+          model: Contestant,
+          as: "contestants",
+          attributes: ["fullname", "email", "class"],
+          order: ["class"],
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants",
+              attributes: ["registration_number", "status"],
+              where: { match_id },
+            },
+          ],
+        },
+      ],
+    });
+
+    const flatList = list.flatMap((group) =>
+      group.contestants.map((contestant) => ({
+        fullname: contestant.fullname,
+        group_name: group.group_name,
+        email: contestant.email,
+        class: contestant.class,
+        match_name: group.match.match_name,
+        registration_number:
+          contestant.matchContestants?.[0]?.registration_number || null,
+      }))
+    );
+    return flatList;
+  }
+  // DAT: lấy cột rescue_1, rescue_2, plane: sử dụng ở câu mấy (order question) (-1 là chưa sử dụng) và cột rescued_count_1, rescued_count_2: cứu được bao nhiêu người
+  // không cần ghi dựa vào match service lấy toàn bộ tran đấu
+
+  static async updateRescueContestants(matchId, data) {
+    const contestants = await MatchContestant.findAll({
+      where: { match_id: matchId, status: "Xác nhận 2" },
+    });
+
+    for (const contestant of contestants) {
+      const rescueData = data.find(
+        (d) => d.contestant_id === contestant.contestant_id
+      );
+      if (rescueData) {
+        await contestant.update({
+          rescue_1: rescueData.rescue_1,
+          rescue_2: rescueData.rescue_2,
+          plane: rescueData.plane,
+          rescued_count_1: rescueData.rescued_count_1,
+          rescued_count_2: rescueData.rescued_count_2,
+        });
+      }
+    }
+
+    return { message: "Cập nhật thành công" };
   }
 }
 

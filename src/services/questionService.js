@@ -431,4 +431,26 @@ module.exports = {
 
         return result.time_left; // Trả về giá trị time_left
     },
+
+    // Trong QuestionService.js
+    async getAvailableQuestionOrders(match_id) {
+        try {
+            // Lấy danh sách các question_order đã sử dụng trong match_id
+            const questions = await Question.findAll({
+                where: { match_id },
+                attributes: ["question_order"],
+            });
+
+            const usedOrders = questions.map((q) => q.question_order);
+            const maxOrder = 13; // Giới hạn tối đa question_order là 13
+            const allOrders = Array.from({ length: maxOrder }, (_, i) => i + 1); // [1, 2, ..., 13]
+
+            // Lọc ra các question_order chưa được sử dụng
+            const availableOrders = allOrders.filter((order) => !usedOrders.includes(order));
+            return availableOrders;
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách question_order khả dụng:", error);
+            throw error;
+        }
+    }
 };
