@@ -665,9 +665,9 @@ class ContestantService {
     });
     return contestant
       ? {
-          fullname: contestant.fullname,
-          match_name: contestant.matches_won.match_name,
-        }
+        fullname: contestant.fullname,
+        match_name: contestant.matches_won.match_name,
+      }
       : null;
   }
 

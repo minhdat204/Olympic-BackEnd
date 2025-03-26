@@ -215,6 +215,14 @@ class GroupService {
       where: { match_id: match_id },
     });
   }
+
+  // Lấy nhóm theo trận đấu
+  static async getIdGroupByMatch(match_id) {
+    return Group.findAll({
+      attributes: ["id", "judge_id", "group_name"],
+      where: { match_id: match_id },
+    });
+  }
 }
 
 module.exports = GroupService;
