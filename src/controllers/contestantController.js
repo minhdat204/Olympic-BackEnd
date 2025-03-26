@@ -7,6 +7,7 @@ const { emit } = require("process");
 const {
   emitTotalContestants,
   emitContestants,
+  emitEliminatedContestants,
 } = require("../socketEmitters/contestantEmitter");
 const { enableCompileCache } = require("module");
 class ContestantController {
@@ -390,20 +391,24 @@ class ContestantController {
 
       //lấy danh sách thí sinh được cứu
       const contestants = await ContestantService.getRescueContestants(
-        matchId,
-        score
+      matchId,
+      score
       );
 
       const totalEliminated =
-        await ContestantService.getContestantTotalByStatus(
-          matchId,
-          "Xác nhận 2"
-        );
+      await ContestantService.getContestantTotalByStatus(
+        matchId,
+        "Xác nhận 2"
+      );
+      
+      // Tạo mảng chỉ chứa id của các thí sinh cứu trợ
+      const selectedContestantIds = contestants.map(contestant => contestant.id);
 
       res.json({
-        message: "Lấy danh sách thí sinh được cứu thành công",
-        selectedContestants: contestants,
-        totalEliminated: totalEliminated,
+      message: "Lấy danh sách thí sinh được cứu thành công",
+      selectedContestants: contestants,
+      selectedContestantIds: selectedContestantIds,
+      totalEliminated: totalEliminated,
       });
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -413,14 +418,41 @@ class ContestantController {
   // Cập nhật trạng thái thí sinh được cứu hàng loạt
   static async updateRescueContestants(req, res) {
     try {
-      const contestants = this.getRescueContestants(req, res);
-      await ContestantService.updateContestant(contestants, "Đang thi");
-      res.json({ message: "Cập nhật trạng thái thí sinh thành công" });
+      const matchId = req.params.match_id;
+      const score = req.body.score;
+      const rescueNumber = req.body.rescueNumber;
+      
+      // Get contestants directly from service instead of controller method
+      const rescuedContestants = await ContestantService.getRescueContestants(matchId, score);
+      
+      // Extract just the IDs
+      const contestantIds = rescuedContestants.map(contestant => contestant.contestant_id);
+      
+      if (contestantIds.length === 0) {
+        return res.status(400).json({ error: "Không có thí sinh nào được chọn để cứu trợ" });
+      }
+      
+      // Update their status
+      const result = await ContestantService.updateContestant(
+        contestantIds, 
+        {status: "Đang thi"}
+      );
+
+      // danh sách thí sinh trong trận để gửi socket
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      
+      // Emit socket event
+      emitEliminatedContestants(matchId, contestants);
+      
+      res.json({ 
+        message: "Cập nhật trạng thái thí sinh thành công", 
+        contestants: result.contestants 
+      });
     } catch (error) {
+      console.error("Error in updateRescueContestants:", error);
       res.status(400).json({ error: error.message });
     }
   }
-
   // Tính số lượng thí sinh cần được cứu
   static async getRescueContestantTotal(req, res) {
     try {

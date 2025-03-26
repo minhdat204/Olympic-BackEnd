@@ -38,9 +38,19 @@ const emitContestantsAdmin = async (matchId, status) => {
   io.to(`match_${matchId}`).emit("contestants_admin", { matchId, status });
 };
 
+const emitEliminatedContestants = async (matchId, contestants) => {
+  const io = getIO();
+  io.emit("eliminated_contestants", {
+    matchId,
+    contestants,
+  });
+};
+
+
 module.exports = {
   emitTotalContestants,
   emitContestants,
   emitContestantsjudge_id,
   emitContestantsAdmin,
+  emitEliminatedContestants
 };
