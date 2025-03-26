@@ -39,7 +39,7 @@ const upload = multer({
     }
     cb(new Error("Chỉ hỗ trợ định dạng video MP4, MOV, AVI"));
   },
-  limits: { fileSize: 100 * 1024 * 1024 }, // Giới hạn 100MB
+  // limits: { fileSize: 100 * 1024 * 1024 }, // Giới hạn 100MB
 });
 router.get("/emit/:match_id/:id", VideoSubmissionController.EmitVideoUrl);
 
