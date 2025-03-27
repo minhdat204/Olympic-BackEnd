@@ -14,6 +14,9 @@ const { route } = require("./auth");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+
+//  Đếm danh sách sinh viên xác nhận 1 ;
+router.get("/count/:judge_id/:match_id",ContestantController.CountContestantsXacNhan1);
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 router.get(
@@ -101,6 +104,7 @@ router.get(
   ContestantController.getCompetingContestants
 );
 
+// Long create Answers
 /**
  * Các route dưới đây cần xác thựccontestants
  *  */

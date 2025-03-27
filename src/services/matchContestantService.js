@@ -185,6 +185,14 @@ class MatchContestantService {
 
     return count > 0; // Trả về true nếu có ít nhất 1 dòng, false nếu không có
   }
+
+  // Lấy trạng thái của sinh viên ở hiện tại theo trận
+  async getListContestantStatusByMatch(match_id, status) {
+    return MatchContestant.findAll({
+      attributes: ["contestant_id"],
+      where: { match_id: match_id, status: status },
+    });
+  }
 }
 
 // Xuất class để có thể sử dụng lại nhiều nơi

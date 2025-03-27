@@ -18,6 +18,15 @@ const emitGoldWinUpdate = async (match_id, info) => {
   io.to(`match_${match_id}`).emit("update_win_gold", { info });
 };
 
+
+const emitRescueUpdate = async (matchId, rescueNumber) => {
+  const io = getIO();
+  console.log(
+    `🚀 Emitting event to match_${matchId} with rescue number: ${rescueNumber}`
+  );
+  io.to(`match_${matchId}`).emit("rescue-updated", { matchId, rescueNumber });
+}
+
 module.exports = {
   emitMatchStatusUpdate,
   emitGoldWinUpdate,

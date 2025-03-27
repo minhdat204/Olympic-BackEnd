@@ -8,6 +8,7 @@ const {
   emitTotalContestants,
   emitContestants,
   emitEliminatedContestants,
+  emitContestantsAdmin
 } = require("../socketEmitters/contestantEmitter");
 const { enableCompileCache } = require("module");
 class ContestantController {
@@ -105,8 +106,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-            ? 409
-            : 500;
+          ? 409
+          : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -457,10 +458,12 @@ class ContestantController {
 
       // Emit socket event
       emitEliminatedContestants(matchId, contestants);
+      // gửi tín hiệu useEffect lại getContesetant ở trọng tài (JudgeHomePage)
+      emitContestantsAdmin(matchId, 1);
 
       res.json({
         message: "Cập nhật trạng thái thí sinh thành công",
-        contestants: result.contestants,
+        contestants: contestants,
       });
     } catch (error) {
       console.error("Error in updateRescueContestants:", error);
@@ -573,6 +576,19 @@ class ContestantController {
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       );
       res.send(buffer);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  // Đếm sinh viên xác nhân 1
+  static async CountContestantsXacNhan1(req, res) {
+    try {
+      const { judge_id, match_id } = req.params;
+      const count = await ContestantService.CountContestantsXacNhan1(
+        judge_id,
+        match_id
+      );
+      res.json(count);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
