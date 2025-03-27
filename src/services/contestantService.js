@@ -769,6 +769,43 @@ class ContestantService {
 
     return { message: "Cập nhật thành công" };
   }
+  //  Long lấy danh sách thí sinh xác nhận 1 theo trọng tài
+  static async CountContestantsXacNhan1(judge_id, match_id) {
+    const groups = await Group.findAll({
+      attributes: ["group_name"],
+      include: [
+        {
+          model: Contestant,
+          as: "contestants",
+          include: [
+            {
+              model: MatchContestant,
+              as: "matchContestants",
+              attributes: ["registration_number", "status"],
+              where: { status: "Xác nhận 1" },
+            },
+          ],
+        },
+        {
+          model: Match,
+          as: "match",
+          attributes: ["match_name"],
+        },
+      ],
+      where: { judge_id: judge_id, match_id: match_id },
+      raw: true,
+      nest: true,
+    });
+
+    // const contestantCount = groups.reduce((total, group) => {
+    //   if (group.contestants) {
+    //     total += group.contestants.length;
+    //   }
+    //   return total;
+    // }, 0);
+
+    return groups || 0; // Nếu không có thí sinh nào, trả về 0
+  }
 }
 
 module.exports = ContestantService;
