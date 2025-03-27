@@ -40,6 +40,9 @@ router.get(
   "/correct-12/:match_id",
   AnswerController.getCorrectContestantsByQuestion
 );
+
+//
+router.post("/create/answer/match", AnswerController.createAnswerByMatch);
 // Các routes cần xác thực
 router.use(auth);
 

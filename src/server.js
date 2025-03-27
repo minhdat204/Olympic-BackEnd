@@ -26,7 +26,10 @@ const io = socketIo(server, {
 });
 
 app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'camera=self; microphone=self; display-capture=self; autoplay=self');
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=self; microphone=self; display-capture=self; autoplay=self"
+  );
   next();
 });
 
@@ -34,7 +37,10 @@ app.use((req, res, next) => {
 // uploads/videos là để lưu các file videos
 // upload/questions là để lưu các file của câu hỏi
 app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'camera=self; microphone=self; display-capture=self; autoplay=self');
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=self; microphone=self; display-capture=self; autoplay=self"
+  );
   next();
 });
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
@@ -54,7 +60,7 @@ app.use("/api/mc", mCRoutes);
 
 initializeSocket(io);
 
-const HOST = 'localhost';
+const HOST = "localhost";
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
   server.listen(PORT, HOST, () => {

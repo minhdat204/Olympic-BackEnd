@@ -101,6 +101,7 @@ router.get(
   ContestantController.getCompetingContestants
 );
 
+// Long create Answers
 /**
  * Các route dưới đây cần xác thựccontestants
  *  */
