@@ -9,7 +9,7 @@ const fileUpload = require('express-fileupload');
 
 // Middleware cho upload file
 router.use(fileUpload({
-  limits: { fileSize: 500 * 1024 * 1024 },
+  // limits: { fileSize: 500 * 1024 * 1024 },
   createParentPath: true
 }));
 
