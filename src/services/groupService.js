@@ -1,3 +1,4 @@
+const { raw } = require("express");
 const { Group, User, Match, Contestant } = require("../models");
 const { Op } = require("sequelize");
 
@@ -210,10 +211,24 @@ class GroupService {
   }
   // Lấy danh sách trọng theo trận đấu
   static async getListJudge(match_id) {
-    return Group.findAll({
+    const info = await Group.findAll({
       attributes: ["judge_id"],
+      include: [
+        {
+          model: User,
+          as: "judge",
+          attributes: ["username"], // Đảm bảo lấy đúng username
+        },
+      ],
       where: { match_id: match_id },
     });
+
+    console.log(info); // Kiểm tra dữ liệu có `judge` không
+
+    return info.map((item) => ({
+      judge_id: item.judge_id,
+      username: item.judge?.username || "Không có dữ liệu",
+    }));
   }
 
   // Lấy nhóm theo trận đấu
