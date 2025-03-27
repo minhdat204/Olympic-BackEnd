@@ -95,3 +95,13 @@ exports.UpdateWinGold = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// caạp nhật rescue_1, rescue_2, plane
+exports.updateRescue = async (req, res) => {
+  try {
+    const match = await MatchService.updateRescue(req.params.id, req.body);
+    res.json(match);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};

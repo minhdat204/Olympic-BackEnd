@@ -88,4 +88,14 @@ module.exports = {
 
     return contestant_win;
   },
+
+
+  // update rescure_1, rescure_2, plane
+  async updateRescue(matchId, data) {
+    const match = await Match.findByPk(matchId);
+    if (!match) throw new Error("Không tìm thấy trận đấu");
+    match.set(data);
+    await match.save();
+    return match;
+  },
 };
