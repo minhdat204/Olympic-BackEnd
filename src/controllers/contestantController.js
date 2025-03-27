@@ -8,6 +8,7 @@ const {
   emitTotalContestants,
   emitContestants,
   emitEliminatedContestants,
+  emitContestantsAdmin
 } = require("../socketEmitters/contestantEmitter");
 const { enableCompileCache } = require("module");
 class ContestantController {
@@ -457,10 +458,12 @@ class ContestantController {
 
       // Emit socket event
       emitEliminatedContestants(matchId, contestants);
+      // gửi tín hiệu useEffect lại getContesetant ở trọng tài (JudgeHomePage)
+      emitContestantsAdmin(matchId, 1);
 
       res.json({
         message: "Cập nhật trạng thái thí sinh thành công",
-        contestants: result.contestants,
+        contestants: contestants,
       });
     } catch (error) {
       console.error("Error in updateRescueContestants:", error);

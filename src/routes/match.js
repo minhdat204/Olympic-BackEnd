@@ -12,22 +12,21 @@ router.get("/list/rounds", MatchController.getListRounds);
 router.get("/list/match/:round_name", MatchController.getMatchByIdRounds);
 router.get("/list/status", MatchController.getListStatus);
 router.get("/:id", MatchController.getMatchById);
-router.use(auth);
+
 router.post(
   "/",
-  role("admin"),
+
   validate(matchSchema),
   MatchController.createMatch
 );
 router.put(
   "/:id",
-  role("admin"),
   validate(matchSchema),
   MatchController.updateMatch
 );
-router.patch("/:id", role("admin"), MatchController.updateMatchBy);
+router.patch("/:id", MatchController.updateMatchBy);
 // Update thí sinh gold
-router.patch("/gold/:id", role("admin"), MatchController.UpdateWinGold);
-router.delete("/:id", role("admin"), MatchController.deleteMatch);
+router.patch("/gold/:id", MatchController.UpdateWinGold);
+router.delete("/:id", MatchController.deleteMatch);
 
 module.exports = router;
