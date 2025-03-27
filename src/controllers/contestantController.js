@@ -105,8 +105,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-          ? 409
-          : 500;
+            ? 409
+            : 500;
 
       res.status(statusCode).json({
         status: "error",

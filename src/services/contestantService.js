@@ -333,7 +333,6 @@ class ContestantService {
         class: { [Op.in]: classes },
         group_id: null,
       },
-      // limit: 60,
       order: Sequelize.literal("RAND()"),
       raw: true,
     });
@@ -375,7 +374,7 @@ class ContestantService {
       );
       await MatchContestant.create({
         registration_number: i + 1,
-        status: "Chưa thi",
+        status: "Đang thi", // sau khi chia nhóm thì cập nhật trạng thái thí sinh trong trận đấu là đang thi
         match_id: match_id,
         contestant_id: contestants[i].id,
       });

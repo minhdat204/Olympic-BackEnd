@@ -54,10 +54,11 @@ app.use("/api/mc", mCRoutes);
 
 initializeSocket(io);
 
+const HOST = 'localhost'
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
-  server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  server.listen(PORT, HOST, () => {
+    console.log(`Server is running on  http://${HOST}:${PORT}`);
   });
 });
 
