@@ -1,5 +1,6 @@
 const AnswerService = require("../services/answerService");
-
+const questionService = require("../services/questionService");
+const { answersEmitter } = require("../socketEmitters/answersEmitter");
 class AnswerController {
   // Lấy danh sách câu trả lời
   static async getAnswers(req, res) {
@@ -268,6 +269,27 @@ class AnswerController {
         req.params.match_id
       );
       res.json({ list: list });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  // Long
+  static async createAnswerByMatch(req, res) {
+    try {
+      const { match_id, question_id } = req.body;
+      const status = await AnswerService.createAnswerByMatch(
+        match_id,
+        question_id
+      );
+      const question_order = await questionService.getQuestion_oder_Byid(
+        question_id
+      );
+      console.log(match_id, "  ", question_id);
+      if (question_order.question_order >= 12) {
+        answersEmitter(match_id, true);
+      }
+
+      res.json(status);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

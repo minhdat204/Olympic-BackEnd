@@ -425,11 +425,19 @@ class ContestantService {
               model: MatchContestant,
               as: "matchContestants", // ✅ Đúng alias của hasMany
               attributes: ["registration_number", "status"],
-              where: { match_id }, // ✅ Lọc ở bảng trung gian
+
               order: ["registration_number"],
             },
           ],
         },
+      ],
+      order: [
+        [
+          { model: Contestant, as: "contestants" },
+          { model: MatchContestant, as: "matchContestants" },
+          "registration_number",
+          "ASC",
+        ],
       ],
     });
 
@@ -690,9 +698,9 @@ class ContestantService {
     });
     return contestant
       ? {
-        fullname: contestant.fullname,
-        match_name: contestant.matches_won.match_name,
-      }
+          fullname: contestant.fullname,
+          match_name: contestant.matches_won.match_name,
+        }
       : null;
   }
 
