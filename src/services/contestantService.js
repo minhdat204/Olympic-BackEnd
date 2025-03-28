@@ -128,6 +128,8 @@ class ContestantService {
   static async getContestantByJudgeAndMatch(judge_id, match_id) {
     const contestants = await Group.findAll({
       attributes: ["group_name"],
+      where: { judge_id: judge_id, match_id: match_id },
+
       include: [
         {
           model: Contestant,
@@ -137,7 +139,6 @@ class ContestantService {
               model: MatchContestant,
               as: "matchContestants",
               attributes: ["registration_number", "status"],
-              order: ["registration_number"],
             },
           ],
         },
@@ -147,7 +148,12 @@ class ContestantService {
           attributes: ["match_name"],
         },
       ],
-      where: { judge_id: judge_id, match_id: match_id },
+      order: [
+        [
+          Sequelize.col("contestants->matchContestants.registration_number"),
+          "ASC",
+        ],
+      ],
       raw: true,
       nest: true,
     });
@@ -425,7 +431,6 @@ class ContestantService {
               model: MatchContestant,
               as: "matchContestants", // ✅ Đúng alias của hasMany
               attributes: ["registration_number", "status"],
-
               order: ["registration_number"],
             },
           ],
