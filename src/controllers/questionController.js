@@ -3,12 +3,35 @@ const {
   emitQuestion,
   emitTimeLeft,
 } = require("../socketEmitters/questionEmitter");
-
+//Fix dữ liệu json từ db
+const fixJson = (data) => {
+  if (data === null) { return []; }
+  if (Array.isArray(data)) { return data; }
+  if (typeof data === "string") {
+    let s = data.trim();
+    if (s.length === 0) { return []; }
+    while (typeof s === "string") {
+      try {
+        s = JSON.parse(s);
+      } catch (error) {
+        return ['error: ' + error.message];
+      }
+    }
+    return s;
+  }
+};
+const v2Question = (q) => {
+  let v2q = {...q.dataValues};
+  v2q.v2_options = fixJson(q.options);
+  v2q.v2_media_url = fixJson(q.media_url);
+  v2q.v2_trac_nghiem = q.options.length > 0;
+  return v2q;
+}
 // Tạo câu hỏi
 exports.createQuestion = async (req, res) => {
   try {
     const question = await QuestionService.createQuestion(req.body, req.files);
-    res.status(201).json(question);
+    res.status(201).json(v2Question(question));
   } catch (error) {
     console.error("Error creating question:", error);
     res.status(400).json({ error: error.message });
@@ -19,6 +42,9 @@ exports.createQuestion = async (req, res) => {
 exports.getQuestions = async (req, res) => {
   try {
     const questions = await QuestionService.getQuestions();
+    if (questions && questions.length > 0) {
+      questions.map((q) => v2Question(q));
+    }
     res.json(questions);
   } catch (error) {
     console.error("Error getting questions:", error);
@@ -33,7 +59,7 @@ exports.getQuestionById = async (req, res) => {
     if (!question) {
       return res.status(404).json({ error: "⚠️ Question not found" });
     }
-    res.json(question);
+    res.json(v2Question(question));
   } catch (error) {
     console.error("Error getting question:", error);
     res.status(400).json({ error: error.message });
@@ -48,7 +74,7 @@ exports.updateQuestions = async (req, res) => {
       req.body,
       req.files
     );
-    res.json(question);
+    res.json(v2Question(question));
   } catch (error) {
     console.error("Error updating question:", error);
     res.status(400).json({ error: error.message });
@@ -73,7 +99,7 @@ exports.updateQuestionBy = async (req, res) => {
       req.params.id,
       req.body
     );
-    res.json(question);
+    res.json(v2Question(question));
   } catch (error) {
     console.error("Error updating question partially:", error);
     res.status(400).json({ error: error.message });
@@ -104,6 +130,9 @@ exports.getListQuestionType = async (req, res) => {
 exports.getQuestionsByMatch = async (req, res) => {
   try {
     const questions = await QuestionService.getQuestionsByMatch(req.params.id);
+    if (questions && questions.length > 0) {
+      questions.map((q) => v2Question(q));
+    }
     res.json(questions);
   } catch (error) {
     console.error("Error getting questions by match:", error);
@@ -118,7 +147,7 @@ exports.getQuestionByMatch = async (req, res) => {
       req.params.question_order,
       req.params.match_id
     );
-    res.json(question);
+    res.json(v2Question(question));
   } catch (error) {
     console.error("Error getting question by match:", error);
     res.status(400).json({ error: error.message });
@@ -137,8 +166,8 @@ exports.emitQuestionByMatch = async (req, res) => {
       match_id
     );
     // gọi emit socket để gửi câu hỏi
-    emitQuestion(match_id, question_order, question);
-    res.json(question);
+    emitQuestion(match_id, question_order, v2Question(question));
+    res.json(v2Question(question));
   } catch (error) {
     console.error("Error emitting question:", error);
     res.status(400).json({ error: error.message });
@@ -150,7 +179,7 @@ exports.getCurrentQuestion = async (req, res) => {
   try {
     const match_id = req.params.match_id;
     const question = await QuestionService.getCurrentQuestion(match_id);
-    res.json(question);
+    res.json(v2Question(question));
   } catch (error) {
     console.error("Error getting current question:", error);
     res.status(400).json({ error: error.message });

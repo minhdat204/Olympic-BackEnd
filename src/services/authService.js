@@ -2,7 +2,8 @@ const { User } = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
-const { use } = require("../routes/auth");
+// dòng này không dùng + bị báo CircularRequireWarning
+// const { use } = require("../routes/auth");
 
 const blacklistedTokens = new Set(); // Tạo một set để lưu token đã logout
 

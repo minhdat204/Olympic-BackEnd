@@ -1,6 +1,7 @@
 const MatchService = require("../services/matchService");
 const ContestantService = require("../services/contestantService");
 const { emitGoldWinUpdate } = require("../socketEmitters/matchEmitter");
+const { json } = require("sequelize");
 // tạo trận đấu
 exports.createMatch = async (req, res) => {
   try {
@@ -101,6 +102,16 @@ exports.updateRescue = async (req, res) => {
   try {
     const match = await MatchService.updateRescue(req.params.id, req.body);
     res.json(match);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getListMatchByJudge = async (req, res) => {
+  try {
+    const { match_id, judge_id } = req.params;
+    const list = await MatchService.getListMatchByJudge(match_id, judge_id);
+    res.json(list);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
