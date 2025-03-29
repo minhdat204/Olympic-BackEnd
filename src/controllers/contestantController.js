@@ -401,7 +401,7 @@ class ContestantController {
       const totalEliminated =
         await ContestantService.getContestantTotalByStatus(
           matchId,
-          "Xác nhận 2"
+          "Bị loại"
         );
 
       // Tạo mảng chỉ chứa id của các thí sinh cứu trợ
@@ -448,7 +448,7 @@ class ContestantController {
 
       // Update their status
       const result = await ContestantService.updateContestant(contestantIds, {
-        status: "Đang thi",
+        status: "Được cứu",
       });
 
       // danh sách thí sinh trong trận để gửi socket
@@ -490,7 +490,7 @@ class ContestantController {
       const matchId = req.params.match_id;
       const total = await ContestantService.getContestantTotalByStatus(
         matchId,
-        "Xác nhận 2"
+        "Bị loại"
       );
       res.json({ total: total });
     } catch (error) {

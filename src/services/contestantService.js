@@ -518,7 +518,7 @@ class ContestantService {
   //DAT: API lấy danh sách thí sinh bị loại (status = Xác nhận 2)
   static async getEliminatedContestants(matchId) {
     const contestants = await MatchContestant.findAll({
-      where: { match_id: matchId, status: "Xác nhận 2" },
+      where: { match_id: matchId, status: "Bị loại" },
     });
     return contestants;
   }
@@ -560,7 +560,7 @@ class ContestantService {
   static async getRescueContestantTotal(matchId, rescuePoint) {
     const eliminatedTotal = await this.getContestantTotalByStatus(
       matchId,
-      "Xác nhận 2"
+      "Bị loại"
     );
     const total = Math.ceil((rescuePoint / 100) * eliminatedTotal);
     return total;
@@ -833,7 +833,7 @@ class ContestantService {
 
   static async updateRescueContestants(matchId, data) {
     const contestants = await MatchContestant.findAll({
-      where: { match_id: matchId, status: "Xác nhận 2" },
+      where: { match_id: matchId, status: "Bị loại" },
     });
 
     for (const contestant of contestants) {
