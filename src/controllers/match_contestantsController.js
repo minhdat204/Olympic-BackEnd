@@ -166,7 +166,7 @@ exports.checkDivided = async (req, res) => {
 // Cập nhật trạng thái thí sinh của
 exports.updateMatchContestantsAdmin = async (req, res) => {
   try {
-    const { match_id, status } = req.body;
+    const { match_id, status, question_order } = req.body;
     await matchContestantService.updateStatus(req.params.id, status);
     const total = await ContestantService.getContestantTotal(match_id);
     emitTotalContestants(match_id, total.total, total.remaining);
@@ -182,3 +182,21 @@ exports.updateMatchContestantsAdmin = async (req, res) => {
 };
 
 //
+exports.updateContestantGroupByMatchLoai = async (req, res) => {
+  try {
+    const { match_id, question_order } = req.body;
+
+    const status =
+      await matchContestantService.updateContestantGroupByMatchLoai(
+        match_id,
+        question_order
+      );
+    const contestants = await ContestantService.getContestantsByMatchId(
+      match_id
+    );
+    emitContestants(match_id, contestants);
+    res.json(status);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};

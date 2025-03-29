@@ -99,7 +99,7 @@ module.exports = {
     return match;
   },
   //  Lấy  danh sách  trận đấu theo trọng tài
-  async getListMatchByJudge(match_id, judge_id) {
+  async getListMatchByJudge(judge_id) {
     return Match.findAll({
       attributes: ["id", "match_name"],
       include: [
@@ -107,7 +107,7 @@ module.exports = {
           model: Group,
           as: "groups",
           attributes: ["group_name"],
-          where: { match_id: match_id, judge_id: judge_id },
+          where: { judge_id: judge_id },
         },
       ],
     });

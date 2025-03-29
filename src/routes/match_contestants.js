@@ -4,7 +4,11 @@ const match_contestantsController = require("../controllers/match_contestantsCon
 
 router.get("/", match_contestantsController.getMatchContestants);
 router.get("/:id", match_contestantsController.getMatchContestant);
-
+// Up thí sinh bị loại
+router.put(
+  "/update/status/loai",
+  match_contestantsController.updateContestantGroupByMatchLoai
+);
 // Cập nhật trang thái thí , trong tài
 router.patch(
   "/emit/judge_id/status/:id",

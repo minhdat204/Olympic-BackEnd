@@ -109,8 +109,8 @@ exports.updateRescue = async (req, res) => {
 
 exports.getListMatchByJudge = async (req, res) => {
   try {
-    const { match_id, judge_id } = req.params;
-    const list = await MatchService.getListMatchByJudge(match_id, judge_id);
+    const { judge_id } = req.params;
+    const list = await MatchService.getListMatchByJudge(judge_id);
     res.json(list);
   } catch (error) {
     res.status(400).json({ error: error.message });
