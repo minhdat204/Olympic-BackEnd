@@ -1,8 +1,9 @@
-const { Question, Match, Contestant } = require("../models");
+const { Question, Match, Contestant, Group } = require("../models");
 const { error } = require("../schemas/questionSchema");
 const { Sequelize } = require("../models");
 
 const { emitMatchStatusUpdate } = require("../socketEmitters/matchEmitter");
+const group = require("../models/group");
 
 module.exports = {
   // tạo trận đấu mới
@@ -89,7 +90,6 @@ module.exports = {
     return contestant_win;
   },
 
-
   // update rescure_1, rescure_2, plane
   async updateRescue(matchId, data) {
     const match = await Match.findByPk(matchId);
@@ -97,5 +97,19 @@ module.exports = {
     match.set(data);
     await match.save();
     return match;
+  },
+  //  Lấy  danh sách  trận đấu theo trọng tài
+  async getListMatchByJudge(match_id, judge_id) {
+    return Match.findAll({
+      attributes: ["id", "match_name"],
+      include: [
+        {
+          model: Group,
+          as: "groups",
+          attributes: ["group_name"],
+          where: { match_id: match_id, judge_id: judge_id },
+        },
+      ],
+    });
   },
 };
