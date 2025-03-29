@@ -53,6 +53,13 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
+    // Add unique constraint for mssv field in contestants table
+    await queryInterface.addConstraint("contestants", {
+      fields: ["mssv"],
+      type: "unique",
+      name: "contestants_mssv_unique",
+    });
+
     // Ràng buộc bảng groups
     await queryInterface.addConstraint("groups", {
       fields: ["match_id"],
@@ -149,6 +156,10 @@ module.exports = {
       await queryInterface.removeConstraint(
         "contestants",
         "contestants_email_unique"
+      );
+      await queryInterface.removeConstraint(
+        "contestants",
+        "contestants_mssv_unique"
       );
 
       // Xóa các ràng buộc khóa ngoại từng dòng
