@@ -13,8 +13,15 @@ router.use(fileUpload({
   createParentPath: true
 }));
 
+// lấy danh sách độ khóa
 router.get("/list/dificultys", QuestionController.getListDificulty);
-router.get("/list/question_type", QuestionController.getListQuestionType);
+
+// lấy danh sách loại câu hỏi
+router.get("/list/question-types", QuestionController.getListQuestionTypes);
+
+// lấy danh sách lại câu trả lời
+router.get("/list/correct-answer-types", QuestionController.getListCorrectAnswerTypes);
+
 router.get("/", QuestionController.getQuestions);
 
 // lấy danh sách câu hỏi theo trận đấu

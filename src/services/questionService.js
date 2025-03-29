@@ -371,8 +371,13 @@ module.exports = {
   },
 
   // Lấy danh sách loại câu hỏi
-  async getListQuestionType() {
+  async getListQuestionTypes() {
     return Object.values(Question.getAttributes().question_type.values);
+  },
+
+  // Lấy danh sách loại câu trả lời
+  async getListCorrectAnswerTypes() {
+    return Object.values(Question.getAttributes().correct_answer_type.values);
   },
 
   // Lấy danh sách câu hỏi theo trận đấu

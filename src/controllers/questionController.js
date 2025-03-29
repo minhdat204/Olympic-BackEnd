@@ -21,7 +21,7 @@ const fixJson = (data) => {
   }
 };
 const v2Question = (q) => {
-  let v2q = {...q.dataValues};
+  let v2q = { ...q.dataValues };
   v2q.v2_options = fixJson(q.options);
   v2q.v2_media_url = fixJson(q.media_url);
   v2q.v2_trac_nghiem = q.options.length > 0;
@@ -116,15 +116,25 @@ exports.getListDificulty = async (req, res) => {
   }
 };
 
-exports.getListQuestionType = async (req, res) => {
+exports.getListQuestionTypes = async (req, res) => {
   try {
-    const listQuestionType = await QuestionService.getListQuestionType();
-    res.json({ listQuestionType: listQuestionType });
+    const listQuestionType = await QuestionService.getListQuestionTypes();
+    res.json({ listQuestionTypes: listQuestionType });
   } catch (error) {
     console.error("Error getting question type list:", error);
     res.status(400).json({ error: error.message });
   }
 };
+
+exports.getListCorrectAnswerTypes = async (req, res) => {
+  try {
+    const listCorrectAnswerTypes = await QuestionService.getListCorrectAnswerTypes();
+    res.json({ listCorrectAnswerTypes: listCorrectAnswerTypes });
+  } catch (error) {
+    console.error("Error getting correct answer type: ", error);
+    res.status(400).json({ error: error.message });
+  }
+}
 
 // Lấy danh sách câu hỏi theo trận đấu
 exports.getQuestionsByMatch = async (req, res) => {
