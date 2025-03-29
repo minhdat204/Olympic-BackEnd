@@ -20,10 +20,11 @@ module.exports = {
           "Xác nhận 1",
           "Xác nhận 2",
           "Bị loại",
+          "Được cứu",
           "Cấm thi",
           "Qua vòng"
         ),
-        defaultValue: "Chưa thi",
+        defaultValue: "Đang thi",
       },
       eliminated_at_question_order: {
         type: Sequelize.TINYINT,

@@ -12,6 +12,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.SMALLINT,
       },
+      mssv: {
+        type: Sequelize.STRING(12),
+        allowNull: false,
+        unique: true,
+      },
       fullname: {
         type: Sequelize.STRING(50),
         allowNull: false,
