@@ -59,14 +59,21 @@ class MatchContestantService {
 
   async updateStatus(id, status, eliminated_at_question_order) {
     try {
-      let updateData = { status };
-      if (status === "Xác nhận 2") {
-        updateData.eliminated_at_question_order = eliminated_at_question_order;
+      let sts;
+      if (status === "Đang thi") {
+        sts = null;
+      } else {
+        sts = eliminated_at_question_order;
       }
-
-      const result = await MatchContestant.update(updateData, {
-        where: { registration_number: id },
-      });
+      const result = await MatchContestant.update(
+        {
+          status: status,
+          eliminated_at_question_order: sts,
+        },
+        {
+          where: { registration_number: id },
+        }
+      );
 
       if (result[0] > 0) {
         console.log(`✅ Đã cập nhật trạng thái cho thí sinh ${id}`);
@@ -200,6 +207,12 @@ class MatchContestantService {
       attributes: ["contestant_id"],
       where: { match_id: match_id, status: status },
     });
+  }
+  async updateContestantGroupByMatchLoai(match_id, question_order) {
+    return MatchContestant.update(
+      { status: "Bị loại", eliminated_at_question_order: question_order },
+      { where: { match_id: match_id, status: "Xác nhận 2" } }
+    );
   }
 }
 

@@ -284,11 +284,11 @@ class AnswerController {
       const question_order = await questionService.getQuestion_oder_Byid(
         question_id
       );
-      console.log(match_id, "  ", question_id);
+
+      console.log("match", match_id, "question_order", question_id);
       if (question_order.question_order >= 12) {
         answersEmitter(match_id, true);
       }
-
       res.json(status);
     } catch (error) {
       res.status(400).json({ error: error.message });

@@ -12,7 +12,7 @@ router.get("/list/rounds", MatchController.getListRounds);
 router.get("/list/match/:round_name", MatchController.getMatchByIdRounds);
 router.get("/list/status", MatchController.getListStatus);
 router.get("/:id", MatchController.getMatchById);
-router.get("/list/:match_id/:judge_id", MatchController.getListMatchByJudge);
+router.get("/match_name/:judge_id", MatchController.getListMatchByJudge);
 //  Láy danh sách trân đâu theo trọng tài
 // caạp nhật rescue_1, rescue_2, plane
 router.patch("/:id/rescure", MatchController.updateRescue);
