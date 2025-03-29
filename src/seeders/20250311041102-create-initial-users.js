@@ -18,9 +18,9 @@ module.exports = {
 
     // Tạo 7 tài khoản trọng tài
     let users = [];
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 6; i++) {
       users.push({
-        username: `Trọng Tài ${i}`,
+        username: `TrongTai${i}`,
         password: await bcrypt.hash("tinhoc2025", 10),
         email: `trongtai${i}@gmail.com`,
         role: "judge",

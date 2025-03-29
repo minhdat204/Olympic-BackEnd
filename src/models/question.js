@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     question_topic: DataTypes.TEXT,
     question_explanation: DataTypes.TEXT,
     question_type: {
-      type: DataTypes.ENUM("Trắc Nghiệm", "Hình Ảnh", "Âm Thanh", "Video", "Tự Luận"),
+      type: DataTypes.ENUM("Hình Ảnh", "Âm Thanh", "Video", "Tự Luận"),
       allowNull: false
     },
     media_url: {
@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       get() {
         const value = this.getDataValue('media_url');
         if (!value) return null;
-        
+
         try {
           return typeof value === 'string' ? JSON.parse(value) : value;
         } catch (e) {
@@ -46,18 +46,18 @@ module.exports = (sequelize, DataTypes) => {
           this.setDataValue('media_url', null);
         } else {
           // Always stringify unless it's already a JSON string
-          const valueToStore = 
-            typeof value === 'string' && (value.startsWith('{') || value.startsWith('[')) 
-              ? value 
+          const valueToStore =
+            typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))
+              ? value
               : JSON.stringify(value);
-          
+
           this.setDataValue('media_url', valueToStore);
         }
       }
     },
     correct_answer: DataTypes.TEXT,
     correct_answer_type: {
-      type: DataTypes.ENUM("Text", "Image", "Audio", "Video"),
+      type: DataTypes.ENUM("Text", "Image", "Audio", "Video", "Multiple Choice"),
       allowNull: false,
       defaultValue: "Text"
     },
@@ -103,8 +103,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       beforeUpdate: (question) => {
         // Optional: also set time_left when timer changes and time_left is null
-        if (question.changed('timer') && 
-            (question.time_left === null || question.time_left === undefined)) {
+        if (question.changed('timer') &&
+          (question.time_left === null || question.time_left === undefined)) {
           question.time_left = question.timer;
         }
       }

@@ -14,7 +14,7 @@ const {
 const { Op, Sequelize, where } = require("sequelize");
 
 class MatchContestantService {
-  constructor() {}
+  constructor() { }
 
   // Tạo trận đấu mới
   async createMatchContestants(data) {
@@ -47,7 +47,6 @@ class MatchContestantService {
   async getMatchContestant(id) {
     return await MatchContestant.findByPk(id);
   }
-
   // Cập nhật trạng thái trận đấu
   async updateMatchContestants(id, data) {
     const match = await MatchContestant.findByPk(id);
@@ -117,13 +116,11 @@ class MatchContestantService {
     if (groups.length <= 0)
       return { message: "Trận đấu hiện tại chưa có nhóm" };
 
-    console.log(groups);
     const contestants = await this.getListContestantsByMatch(matches);
 
     if (contestants.length <= 0)
       return { message: "Không có thí sinh để chia" };
 
-    console.log(contestants.length, contestants);
     const k = Math.floor(contestants.length / groups.length);
     const r = contestants.length % groups.length;
     let index = 0;
@@ -146,7 +143,6 @@ class MatchContestantService {
         index++;
       }
     }
-
     return {
       message: `Thêm ${contestants.length} thí sinh vào trận thành công`,
     };
@@ -158,19 +154,16 @@ class MatchContestantService {
     if (!match_id || isNaN(match_id)) {
       throw new Error("match_id phải là một số hợp lệ");
     }
-
     // Xóa tất cả các dòng trong bảng match_contestants có match_id tương ứng
     const result = await MatchContestant.destroy({
       where: { match_id: parseInt(match_id) },
     });
-
     // Nếu không có dòng nào bị xóa, trả về thông báo
     if (result === 0) {
       throw new Error(
         "Không tìm thấy dữ liệu để xóa trong bảng match_contestants"
       );
     }
-
     // Đặt lại group_id của các thí sinh liên quan thành NULL
     await Contestant.update(
       { group_id: null },
@@ -184,7 +177,6 @@ class MatchContestantService {
         },
       }
     );
-
     return result;
   }
 

@@ -21,7 +21,7 @@ module.exports = {
       let optionsWithMedia = [];
 
       if (files) {
-        // Xử lý media cho câu hỏi (media_url) - giữ nguyên logic hiện tại
+        // Xử lý media cho câu hỏi (media_url)
         for (let i = 0; i < 10; i++) {
           const fieldName = `media_${i}`;
           if (files[fieldName]) {
@@ -33,8 +33,8 @@ module.exports = {
           }
         }
 
-        // Xử lý câu hỏi trắc nghiệm
-        if (questionsData.question_type === "Trắc Nghiệm") {
+        // Xử lý câu hỏi trắc nghiệm dựa trên correct_answer_type
+        if (questionsData.correct_answer_type === "Multiple Choice") {
           const options = JSON.parse(questionsData.options || "[]");
           optionsWithMedia = await Promise.all(
             options.map(async (opt, i) => {
@@ -54,12 +54,9 @@ module.exports = {
               return { text: opt.text, media_url: opt.media_url || null };
             })
           );
-          // Gán options mới vào questionsData
           questionsData.options = optionsWithMedia;
-          // Đảm bảo correct_answer_type là "Text" cho trắc nghiệm
-          questionsData.correct_answer_type = "Text";
         }
-        // Xử lý file cho correct_answer (nếu không phải trắc nghiệm)
+        // Xử lý file cho correct_answer (nếu không phải Multiple Choice)
         else if (files.correct_answer_media) {
           const file = files.correct_answer_media;
           const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
@@ -67,7 +64,7 @@ module.exports = {
           await file.mv(filePath);
           correctAnswerUrl = `/uploads/questions/${fileName}`;
           questionsData.correct_answer = correctAnswerUrl;
-          // Xác định loại media dựa trên MIME type - giữ nguyên logic hiện tại
+
           if (file.mimetype.startsWith("image/")) {
             questionsData.correct_answer_type = "Image";
           } else if (file.mimetype.startsWith("audio/")) {
@@ -78,22 +75,18 @@ module.exports = {
         }
       }
 
-      // Gán media_url nếu có
       if (mediaUrls.length > 0) {
         questionsData.media_url = mediaUrls;
       }
 
-      // Tạo câu hỏi trong database
       return Question.create(questionsData);
     } catch (error) {
-      // Xóa file nếu có lỗi - giữ nguyên logic hiện tại
       if (correctAnswerUrl) {
         const filePath = path.join(__dirname, "../..", correctAnswerUrl);
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       }
-      // Xóa các file media của options nếu có lỗi
       if (
-        questionsData.question_type === "Trắc Nghiệm" &&
+        questionsData.correct_answer_type === "Multiple Choice" &&
         optionsWithMedia.length > 0
       ) {
         for (const opt of optionsWithMedia) {
@@ -169,10 +162,10 @@ module.exports = {
         }
       }
 
-      // Xử lý câu hỏi trắc nghiệm
-      if (data.question_type === "Trắc Nghiệm") {
+      // Xử lý câu hỏi trắc nghiệm dựa trên correct_answer_type
+      if (data.correct_answer_type === "Multiple Choice") {
         const options = JSON.parse(data.options || "[]");
-        const existingOptions = question.options || []; // Lấy options cũ từ database
+        const existingOptions = question.options || [];
 
         optionsWithMedia = await Promise.all(
           options.map(async (opt, i) => {
@@ -183,7 +176,6 @@ module.exports = {
             };
 
             if (optionFile) {
-              // Nếu có file mới, upload và thay thế
               const fileName = `${Date.now()}_${optionFile.name.replace(
                 /\s+/g,
                 "_"
@@ -191,7 +183,6 @@ module.exports = {
               const filePath = path.join(UPLOAD_DIR, fileName);
               await optionFile.mv(filePath);
 
-              // Xóa file cũ nếu có
               if (existingOpt.media_url) {
                 const oldFilePath = path.join(
                   __dirname,
@@ -200,7 +191,6 @@ module.exports = {
                 );
                 if (fs.existsSync(oldFilePath)) {
                   fs.unlinkSync(oldFilePath);
-                  console.log(`Đã xóa file option cũ: ${oldFilePath}`);
                 }
               }
               return {
@@ -208,7 +198,6 @@ module.exports = {
                 media_url: `/uploads/questions/${fileName}`,
               };
             }
-            // Nếu không có file mới, ưu tiên media_url từ frontend, nếu không có thì lấy từ database
             return {
               text: opt.text,
               media_url: opt.media_url || existingOpt.media_url,
@@ -216,12 +205,10 @@ module.exports = {
           })
         );
         data.options = optionsWithMedia;
-        data.correct_answer_type = "Text";
       }
 
       // Xử lý file mới cho media_url và correct_answer
       if (files) {
-        // Xử lý file mới cho media_url
         for (let i = 0; i < 10; i++) {
           const fieldName = `media_${i}`;
           if (files[fieldName]) {
@@ -233,21 +220,17 @@ module.exports = {
           }
         }
 
-        // Xử lý file mới cho correct_answer (nếu không phải trắc nghiệm)
-        if (
-          data.question_type !== "Trắc Nghiệm" &&
-          files.correct_answer_media
-        ) {
+        if (data.correct_answer_type !== "Multiple Choice" && files.correct_answer_media) {
           const file = files.correct_answer_media;
           const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
           const filePath = path.join(UPLOAD_DIR, fileName);
           await file.mv(filePath);
           correctAnswerUrl = `/uploads/questions/${fileName}`;
 
-          // Xóa file correct_answer cũ nếu có
           if (
             question.correct_answer &&
-            question.correct_answer_type !== "Text"
+            question.correct_answer_type !== "Text" &&
+            question.correct_answer_type !== "Multiple Choice"
           ) {
             const oldFilePath = path.join(
               __dirname,
@@ -256,7 +239,6 @@ module.exports = {
             );
             if (fs.existsSync(oldFilePath)) {
               fs.unlinkSync(oldFilePath);
-              console.log(`Đã xóa file correct_answer cũ: ${oldFilePath}`);
             }
           }
           data.correct_answer = correctAnswerUrl;
@@ -270,19 +252,16 @@ module.exports = {
         }
       }
 
-      // Gán media_url nếu có
       data.media_url = mediaUrls.length > 0 ? mediaUrls : null;
 
-      // Cập nhật câu hỏi
       await question.update(data);
       return question;
     } catch (error) {
-      // Rollback
       if (correctAnswerUrl) {
         const filePath = path.join(__dirname, "../..", correctAnswerUrl);
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       }
-      if (data.question_type === "Trắc Nghiệm" && optionsWithMedia.length > 0) {
+      if (data.correct_answer_type === "Multiple Choice" && optionsWithMedia.length > 0) {
         for (const opt of optionsWithMedia) {
           if (
             opt.media_url &&
@@ -317,7 +296,7 @@ module.exports = {
 
       // Chuẩn hóa options (nếu là câu hỏi trắc nghiệm)
       let optionsMediaUrls = [];
-      if (question.question_type === "Trắc Nghiệm" && question.options) {
+      if (question.correct_answer_type === "Multiple Choice" && question.options) {
         let options = question.options;
         if (typeof options === "string") {
           try {
@@ -327,7 +306,6 @@ module.exports = {
             options = [];
           }
         }
-        // Lấy tất cả media_url từ options
         optionsMediaUrls = options
           .filter((opt) => opt.media_url)
           .map((opt) => opt.media_url);
@@ -337,12 +315,8 @@ module.exports = {
       for (const url of mediaUrls) {
         try {
           const filePath = path.join(process.cwd(), url);
-          console.log("Đang kiểm tra file media_url:", filePath);
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log(`Đã xóa file media_url: ${filePath}`);
-          } else {
-            console.log(`File media_url không tồn tại: ${filePath}`);
           }
         } catch (error) {
           console.error(`Lỗi khi xóa file media_url ${url}:`, error);
@@ -353,28 +327,24 @@ module.exports = {
       for (const url of optionsMediaUrls) {
         try {
           const filePath = path.join(process.cwd(), url);
-          console.log("Đang kiểm tra file options:", filePath);
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log(`Đã xóa file options: ${filePath}`);
-          } else {
-            console.log(`File options không tồn tại: ${filePath}`);
           }
         } catch (error) {
           console.error(`Lỗi khi xóa file options ${url}:`, error);
         }
       }
 
-      // Xóa file correct_answer nếu không phải trắc nghiệm và có media
-      if (question.correct_answer_type !== "Text" && question.correct_answer) {
+      // Xóa file correct_answer nếu không phải Text hoặc Multiple Choice và có media
+      if (
+        question.correct_answer_type !== "Text" &&
+        question.correct_answer_type !== "Multiple Choice" &&
+        question.correct_answer
+      ) {
         try {
           const filePath = path.join(process.cwd(), question.correct_answer);
-          console.log("Đang kiểm tra file correct_answer:", filePath);
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log(`Đã xóa file correct_answer: ${filePath}`);
-          } else {
-            console.log(`File correct_answer không tồn tại: ${filePath}`);
           }
         } catch (error) {
           console.error(
@@ -401,8 +371,13 @@ module.exports = {
   },
 
   // Lấy danh sách loại câu hỏi
-  async getListQuestionType() {
+  async getListQuestionTypes() {
     return Object.values(Question.getAttributes().question_type.values);
+  },
+
+  // Lấy danh sách loại câu trả lời
+  async getListCorrectAnswerTypes() {
+    return Object.values(Question.getAttributes().correct_answer_type.values);
   },
 
   // Lấy danh sách câu hỏi theo trận đấu
