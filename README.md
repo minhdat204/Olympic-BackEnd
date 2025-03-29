@@ -112,3 +112,27 @@ npm install
 ```
 npm start
 ```
+
+## Host
+#### Bật cmd
+```
+ipconfig
+```
+- lấy ip v4 mạng LAN
+#### Backend cấu hình:
+```
+const HOST = "localhost";
+const PORT = process.env.PORT || 3000;
+sequelize.sync().then(() => {
+  server.listen(PORT, HOST, () => {
+    console.log(`Server is running on  http://${HOST}:${PORT}`);
+  });
+});
+```
+- sửa HOST "localhost" thành ip v4
+#### Frontend cấu hình:
+```
+VITE_API_URL= https://olympiccaothang.duckdns.org
+VITE_API_URL= http://localhost:3000
+```
+- sửa localhost thành ip v4
