@@ -37,7 +37,7 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       correct_answer_type: {
-        type: Sequelize.ENUM("Text", "Image", "Audio", "Video", "multiple choice"),
+        type: Sequelize.ENUM("Text", "Image", "Audio", "Video", "Multiple Choice"),
         allowNull: false,
         defaultValue: "Text",
       },
