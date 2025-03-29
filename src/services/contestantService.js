@@ -689,6 +689,85 @@ class ContestantService {
     return contestants;
   }
 
+
+  /**
+   * lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
+   * có thêm tham số để loại trừ thí sinh gold (nếu có)
+   *  */ 
+  static async getContestants20WithExclusion(matchId, excludeContestantId = null) {
+    /**
+     * 1. lấy danh sách thí sinh bị loại
+     */
+    const eliminatedContestants = await this.getEliminatedContestants(matchId);
+
+    /**
+     * 1.5 Loại bỏ thí sinh Gold nếu có
+     */
+    let filteredContestants = eliminatedContestants;
+    if (excludeContestantId) {
+      filteredContestants = eliminatedContestants.filter(
+        contestant => contestant.contestant_id !== parseInt(excludeContestantId)
+      );
+    }
+
+    if (filteredContestants.length < 20) {
+      throw new Error("Không đủ thí sinh bị loại để chọn 20 người");
+    }
+
+    /**
+     * 2. Nhóm thí sinh theo câu hỏi
+     */
+    const question = [];
+    filteredContestants.map((contestant) => {
+      const questionOrder = contestant.eliminated_at_question_order;
+      if (!question[questionOrder]) {
+        question[questionOrder] = [];
+      }
+      question[questionOrder].push(contestant);
+    });
+
+    /**
+     * 3. sắp xếp câu hỏi theo thứ tự giảm dần
+     */
+    const questionIndices = Object.keys(question)
+      .map(Number)
+      .filter((index) => question[index] && question[index].length > 0)
+      .sort((a, b) => b - a); // Sort in descending order
+
+    /**
+     * 4. chọn chính xác 20 thí sinh
+     */
+    const selectedContestants = [];
+    let remainingSlots = 20;
+
+    // duyệt từng câu hỏi đã sắp xếp
+    for (const i of questionIndices) {
+      if (remainingSlots <= 0) {
+        break;
+      }
+      
+      // số lượng thí sinh trong câu hỏi đó
+      const available = question[i].length;
+
+      // nếu số thí sinh <= slot còn lại (chọn hết)
+      if (available <= remainingSlots) {
+        selectedContestants.push(question[i]);
+        remainingSlots -= available;
+      }
+      // nếu số thí sinh > slot còn lại (chọn ngẫu nhiên)
+      else {
+        // random thí sinh
+        const contestantRandom = question[i].sort(() => Math.random() - 0.5);
+        selectedContestants.push(contestantRandom.slice(0, remainingSlots));
+        remainingSlots = 0;
+      }
+    }
+
+    // chuyển mảng 2 chiều thành mảng 1 chiều
+    const contestants = selectedContestants.flat();
+    return contestants;
+  }
+
   static async getContestantByGoldMatch(match_id) {
     const contestant = await Contestant.findOne({
       attributes: ["fullname", ["id", "contestant_id"]],
