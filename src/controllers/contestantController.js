@@ -7,6 +7,8 @@ const { emit } = require("process");
 const {
   emitTotalContestants,
   emitContestants,
+  emitEliminatedContestants,
+  emitContestantsAdmin
 } = require("../socketEmitters/contestantEmitter");
 const { enableCompileCache } = require("module");
 class ContestantController {
@@ -104,8 +106,8 @@ class ContestantController {
         error.message === "Thí sinh không tồn tại"
           ? 404
           : error.message === "Email đã được sử dụng"
-            ? 409
-            : 500;
+          ? 409
+          : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -387,11 +389,13 @@ class ContestantController {
     try {
       const matchId = req.params.match_id;
       const score = req.body.score;
+      const rescueNumber = req.body.rescueNumber; // lần cứu trợ thứ mấy
 
       //lấy danh sách thí sinh được cứu
       const contestants = await ContestantService.getRescueContestants(
         matchId,
-        score
+        score,
+        rescueNumber
       );
 
       const totalEliminated =
@@ -400,10 +404,17 @@ class ContestantController {
           "Xác nhận 2"
         );
 
+      // Tạo mảng chỉ chứa id của các thí sinh cứu trợ
+      const selectedContestantIds = contestants.map(
+        (contestant) => contestant.id
+      );
+
       res.json({
         message: "Lấy danh sách thí sinh được cứu thành công",
         selectedContestants: contestants,
+        selectedContestantIds: selectedContestantIds,
         totalEliminated: totalEliminated,
+        rescueNumber: rescueNumber,
       });
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -413,14 +424,52 @@ class ContestantController {
   // Cập nhật trạng thái thí sinh được cứu hàng loạt
   static async updateRescueContestants(req, res) {
     try {
-      const contestants = this.getRescueContestants(req, res);
-      await ContestantService.updateContestant(contestants, "Đang thi");
-      res.json({ message: "Cập nhật trạng thái thí sinh thành công" });
+      const matchId = req.params.match_id;
+      const score = req.body.score;
+      const rescueNumber = req.body.rescueNumber; // lần cứu trợ thứ mấy
+
+      // Get contestants directly from service instead of controller method
+      const rescuedContestants = await ContestantService.getRescueContestants(
+        matchId,
+        score,
+        rescueNumber
+      );
+
+      // Extract just the IDs
+      const contestantIds = rescuedContestants.map(
+        (contestant) => contestant.contestant_id
+      );
+
+      if (contestantIds.length === 0) {
+        return res
+          .status(400)
+          .json({ error: "Không có thí sinh nào được chọn để cứu trợ" });
+      }
+
+      // Update their status
+      const result = await ContestantService.updateContestant(contestantIds, {
+        status: "Đang thi",
+      });
+
+      // danh sách thí sinh trong trận để gửi socket
+      const contestants = await ContestantService.getContestantsByMatchId(
+        matchId
+      );
+
+      // Emit socket event
+      emitEliminatedContestants(matchId, contestants);
+      // gửi tín hiệu useEffect lại getContesetant ở trọng tài (JudgeHomePage)
+      emitContestantsAdmin(matchId, 1);
+
+      res.json({
+        message: "Cập nhật trạng thái thí sinh thành công",
+        contestants: contestants,
+      });
     } catch (error) {
+      console.error("Error in updateRescueContestants:", error);
       res.status(400).json({ error: error.message });
     }
   }
-
   // Tính số lượng thí sinh cần được cứu
   static async getRescueContestantTotal(req, res) {
     try {
@@ -527,6 +576,19 @@ class ContestantController {
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       );
       res.send(buffer);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  // Đếm sinh viên xác nhân 1
+  static async CountContestantsXacNhan1(req, res) {
+    try {
+      const { judge_id, match_id } = req.params;
+      const count = await ContestantService.CountContestantsXacNhan1(
+        judge_id,
+        match_id
+      );
+      res.json(count);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

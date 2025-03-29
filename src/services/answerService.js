@@ -5,6 +5,7 @@ const {
   Match,
   MatchContestant,
 } = require("../models");
+const matchContestantService = require("../services/matchContestantService");
 const { Op, Sequelize, where } = require("sequelize");
 const group = require("../models/group");
 
@@ -423,6 +424,44 @@ class AnswerService {
       registration_number: item.contestant.matchContestants.registration_number,
     }));
   }
+
+  //
+  static async createAnswerByMatch(match_id, question_id) {
+    const dangthi = await matchContestantService.getListContestantStatusByMatch(
+      match_id,
+      "Đang thi"
+    );
+
+    for (const contestant of dangthi) {
+      await Answer.create({
+        score: 1,
+        is_correct: true,
+        contestant_id: contestant.contestant_id,
+        question_id: question_id,
+        match_id: match_id,
+      });
+    }
+
+    const xacnhan2 =
+      await matchContestantService.getListContestantStatusByMatch(
+        match_id,
+        "Xác nhận 2"
+      );
+
+    for (const contestant of xacnhan2) {
+      await Answer.create({
+        score: 0,
+        is_correct: false,
+        contestant_id: contestant.contestant_id,
+        question_id: question_id,
+        match_id: match_id,
+      });
+    }
+
+    return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${xacnhan2.length} thí sinh có đáp án sai`;
+  }
 }
+
+// creatr answers By
 
 module.exports = AnswerService;

@@ -16,6 +16,11 @@ const handleMatchSockets = (io, socket) => {
     console.log(`📢 Client ${socket.id} left match_${matchId}`);
     socket.leave(`match_${matchId}`);
   });
+
+  socket.on("rescue-updated", (data) => {
+    console.log(`📢 Client ${socket.id} updated rescue for match_${data.matchId}`);
+    io.emit("rescue-updated", data);
+  });
 };
 
 module.exports = handleMatchSockets;
