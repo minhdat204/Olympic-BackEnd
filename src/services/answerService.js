@@ -163,6 +163,11 @@ class AnswerService {
     return answer;
   }
 
+  // Xóa tất cả câu trả lời của một câu hỏi
+  static async deleteAnswersByQuestionId(questionId) {
+    await Answer.destroy({ where: { question_id: questionId } });
+    return { message: "Đã xóa tất cả câu trả lời cho câu hỏi này" };
+  }
   // Xóa câu trả lời
   static async deleteAnswer(id) {
     const answer = await Answer.findByPk(id);
@@ -427,6 +432,9 @@ class AnswerService {
 
   //
   static async createAnswerByMatch(match_id, question_id) {
+    // Xóa tất cả câu trả lời của câu hỏi này trong trận đấu
+    await AnswerService.deleteAnswersByQuestionId(question_id);
+
     const dangthi = await matchContestantService.getListContestantStatusByMatch(
       match_id,
       "Đang thi"
@@ -442,13 +450,13 @@ class AnswerService {
       });
     }
 
-    const xacnhan2 =
+    const biloai =
       await matchContestantService.getListContestantStatusByMatch(
         match_id,
-        "Xác nhận 2"
+        "Bị Loại"
       );
 
-    for (const contestant of xacnhan2) {
+    for (const contestant of biloai) {
       await Answer.create({
         score: 0,
         is_correct: false,
@@ -458,7 +466,7 @@ class AnswerService {
       });
     }
 
-    return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${xacnhan2.length} thí sinh có đáp án sai`;
+    return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${biloai.length} thí sinh có đáp án sai`;
   }
 }
 
