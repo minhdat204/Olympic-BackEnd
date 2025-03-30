@@ -437,10 +437,47 @@ class ContestantService {
 
   // DAT: API lấy thí sinh theo trạng thái
   static async getContestantsWithStatus(data) {
-    const contestants = await Contestant.findAll({
-      where: { status: data.status },
+    if (!data || !data.status) {
+      throw new Error("Status is required");
+    }
+    
+    const matchContestants = await MatchContestant.findAll({
+      where: { 
+        status: data.status,
+        ...(data.match_id && { match_id: data.match_id })
+      },
+      include: [{
+        model: Contestant,
+        as: "contestant"
+      }],
+      order: [["registration_number", "ASC"]]
     });
+    
+    const contestants = matchContestants.map(mc => {
+      const contestant = mc.contestant.toJSON();
+      contestant.registration_number = mc.registration_number;
+      contestant.match_status = mc.status;
+      contestant.eliminated_at_question_order = mc.eliminated_at_question_order;
+      return contestant;
+    });
+    
     return contestants;
+  }
+
+  // lấy mảng thí sinh contestantIds ở trạng thái "Được cứu" trong trận
+  static async getContestantsRescue(match_id) {
+    // Lấy danh sách các contestant_id có trạng thái "Được cứu" trong trận
+    const rescuedContestants = await MatchContestant.findAll({
+      attributes: ['contestant_id'],
+      where: { 
+        match_id: match_id, 
+        status: "Được cứu" 
+      },
+      raw: true
+    });
+    
+    // Trả về mảng các contestant_id
+    return rescuedContestants.map(contestant => contestant.contestant_id);
   }
 
   static async getGroupContestantByMatch(match_id) {
@@ -484,7 +521,10 @@ class ContestantService {
   static async getContestantTotal(matchId) {
     // lấy số thí sinh đang thi trong trận đấu
     const remaining = await MatchContestant.count({
-      where: { match_id: matchId, status: "Đang thi" },
+      where: { 
+        match_id: matchId, 
+        status: { [Op.or]: ["Đang thi", "Được cứu"] }
+      },
     });
     //lấy tổng số thí sinh trong trận đấu
     const total = await await MatchContestant.count({
@@ -549,7 +589,7 @@ class ContestantService {
   //DAT: API lấy danh sách thí sinh bị loại (status = Xác nhận 2)
   static async getEliminatedContestants(matchId) {
     const contestants = await MatchContestant.findAll({
-      where: { match_id: matchId, status: "Xác nhận 2" },
+      where: { match_id: matchId, status: "Bị loại" },
     });
     return contestants;
   }
@@ -591,7 +631,7 @@ class ContestantService {
   static async getRescueContestantTotal(matchId, rescuePoint) {
     const eliminatedTotal = await this.getContestantTotalByStatus(
       matchId,
-      "Xác nhận 2"
+      "Bị loại"
     );
     const total = Math.ceil((rescuePoint / 100) * eliminatedTotal);
     return total;
@@ -867,7 +907,7 @@ class ContestantService {
 
   static async updateRescueContestants(matchId, data) {
     const contestants = await MatchContestant.findAll({
-      where: { match_id: matchId, status: "Xác nhận 2" },
+      where: { match_id: matchId, status: "Bị loại" },
     });
 
     for (const contestant of contestants) {

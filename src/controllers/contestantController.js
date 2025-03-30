@@ -403,7 +403,7 @@ class ContestantController {
       const totalEliminated =
         await ContestantService.getContestantTotalByStatus(
           matchId,
-          "Xác nhận 2"
+          "Bị loại"
         );
 
       // Tạo mảng chỉ chứa id của các thí sinh cứu trợ
@@ -449,8 +449,8 @@ class ContestantController {
       }
 
       // Update their status
-      const result = await ContestantService.updateContestant(contestantIds, {
-        status: "Đang thi",
+      const resultUpdate = await ContestantService.updateContestant(contestantIds, {
+        status: "Được cứu",
       });
 
       // danh sách thí sinh trong trận để gửi socket
@@ -492,7 +492,7 @@ class ContestantController {
       const matchId = req.params.match_id;
       const total = await ContestantService.getContestantTotalByStatus(
         matchId,
-        "Xác nhận 2"
+        "Bị loại"
       );
       res.json({ total: total });
     } catch (error) {
@@ -522,6 +522,75 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  // DAT: cập nhật trạng thái thí sinh hàng loạt
+  static async updateContestantsBulk(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const { contestantIds, status } = req.body;
+      
+      if (!contestantIds || !Array.isArray(contestantIds) || contestantIds.length === 0) {
+        return res.status(400).json({ 
+          error: "Vui lòng cung cấp danh sách ID thí sinh hợp lệ" 
+        });
+      }
+      
+      // Cập nhật trạng thái cho tất cả thí sinh được chọn
+      const resultUpdate = await ContestantService.updateContestant(contestantIds, {
+        status: status
+      });
+      
+      // Lấy danh sách thí sinh sau khi cập nhật để gửi qua socket
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      
+      // Lấy tổng số thí sinh và số thí sinh còn lại
+      const contestantTotal = await ContestantService.getContestantTotal(matchId);
+      
+      // Gửi các thông báo qua socket
+      emitEliminatedContestants(matchId, contestants);
+      
+      emitContestantsAdmin(matchId, 1); // Trigger client refresh
+      
+      res.json({
+        message: `Cập nhật trạng thái ${contestantIds.length} thí sinh thành công`,
+        contestants: contestants
+      });
+    } catch (error) {
+      console.error("Error updating contestants in bulk:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  // DAT: cập nhật trạng thái thí sinh "Được cứu" hàng loạt thành "Đang thi"
+  static async updateRescuedContestantsToCompeting(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      
+      // Get all contestant IDs with status "Được cứu"
+      const contestantIds = await ContestantService.getContestantsRescue(matchId);
+      if (contestantIds.length === 0) {
+        return res.status(200).json({
+          message: "Không có thí sinh nào được cứu để cập nhật",
+          contestants: []
+        });
+      }
+      
+      // Add contestantIds and status to the request body
+      req.body.contestantIds = contestantIds;
+      req.body.status = "Đang thi";
+      
+      // Call updateContestantsBulk
+      return await ContestantController.updateContestantsBulk(req, res);
+      
+    } catch (error) {
+      console.error("Error getting rescued contestants:", error);
+      if (!res.headersSent) {
+        return res.status(400).json({ error: error.message });
+      }
+    }
+  }
+
+  
 
   /**
    * DAT: PHẦN CỨU MÀN HÌNH CHIẾU

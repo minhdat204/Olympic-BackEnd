@@ -60,6 +60,17 @@ router.patch(
   ContestantController.updateRescueContestants
 );
 
+// DAT: cập nhật trạng thái thí sinh hàng loạt
+router.patch(
+  "/matches/:match_id/status-bulk",
+  ContestantController.updateContestantsBulk
+);
+// DAT: cập nhật trạng thái thí sinh "Được cứu" hàng loạt thành "Đang thi"
+router.patch(
+  "/matches/:match_id/rescued-to-competing",
+  ContestantController.updateRescuedContestantsToCompeting
+);
+
 // DAT: Tính số lượng thí sinh cần được cứu
 router.post(
   "/matches/:match_id/rescue/count",
