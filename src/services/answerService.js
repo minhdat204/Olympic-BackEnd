@@ -450,13 +450,13 @@ class AnswerService {
       });
     }
 
-    const biloai =
+    const xacnhan2 =
       await matchContestantService.getListContestantStatusByMatch(
         match_id,
-        "Bị Loại"
+        "Xác nhận 2"
       );
 
-    for (const contestant of biloai) {
+    for (const contestant of xacnhan2) {
       await Answer.create({
         score: 0,
         is_correct: false,
@@ -466,7 +466,7 @@ class AnswerService {
       });
     }
 
-    return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${biloai.length} thí sinh có đáp án sai`;
+    return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${xacnhan2.length} thí sinh có đáp án sai`;
   }
 }
 
