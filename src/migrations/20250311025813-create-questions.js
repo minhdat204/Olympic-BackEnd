@@ -22,13 +22,7 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       question_type: {
-        type: Sequelize.ENUM(
-          "Trắc Nghiệm",
-          "Hình Ảnh",
-          "Âm Thanh",
-          "Video",
-          "Tự Luận"
-        ),
+        type: Sequelize.ENUM("Hình Ảnh", "Âm Thanh", "Video", "Tự Luận"),
         allowNull: false,
       },
       media_url: {
@@ -38,7 +32,13 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       correct_answer_type: {
-        type: Sequelize.ENUM("Text", "Image", "Audio", "Video"),
+        type: Sequelize.ENUM(
+          "Text",
+          "Image",
+          "Audio",
+          "Video",
+          "Multiple Choice"
+        ),
         allowNull: false,
         defaultValue: "Text",
       },

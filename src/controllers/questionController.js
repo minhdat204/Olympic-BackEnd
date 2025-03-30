@@ -5,28 +5,34 @@ const {
 } = require("../socketEmitters/questionEmitter");
 //Fix dữ liệu json từ db
 const fixJson = (data) => {
-  if (data === null) { return []; }
-  if (Array.isArray(data)) { return data; }
+  if (data === null) {
+    return [];
+  }
+  if (Array.isArray(data)) {
+    return data;
+  }
   if (typeof data === "string") {
     let s = data.trim();
-    if (s.length === 0) { return []; }
+    if (s.length === 0) {
+      return [];
+    }
     while (typeof s === "string") {
       try {
         s = JSON.parse(s);
       } catch (error) {
-        return ['error: ' + error.message];
+        return ["error: " + error.message];
       }
     }
     return s;
   }
 };
 const v2Question = (q) => {
-  let v2q = {...q.dataValues};
+  let v2q = { ...q.dataValues };
   v2q.v2_options = fixJson(q.options);
   v2q.v2_media_url = fixJson(q.media_url);
   v2q.v2_trac_nghiem = q.options.length > 0;
   return v2q;
-}
+};
 // Tạo câu hỏi
 exports.createQuestion = async (req, res) => {
   try {
@@ -116,12 +122,23 @@ exports.getListDificulty = async (req, res) => {
   }
 };
 
-exports.getListQuestionType = async (req, res) => {
+exports.getListQuestionTypes = async (req, res) => {
   try {
-    const listQuestionType = await QuestionService.getListQuestionType();
-    res.json({ listQuestionType: listQuestionType });
+    const listQuestionType = await QuestionService.getListQuestionTypes();
+    res.json({ listQuestionTypes: listQuestionType });
   } catch (error) {
     console.error("Error getting question type list:", error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getListCorrectAnswerTypes = async (req, res) => {
+  try {
+    const listCorrectAnswerTypes =
+      await QuestionService.getListCorrectAnswerTypes();
+    res.json({ listCorrectAnswerTypes: listCorrectAnswerTypes });
+  } catch (error) {
+    console.error("Error getting correct answer type: ", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -203,7 +220,9 @@ exports.updateQuestionTimeLeft = async (req, res) => {
 exports.getAvailableQuestionOrders = async (req, res) => {
   try {
     const match_id = req.params.match_id;
-    const availableOrders = await QuestionService.getAvailableQuestionOrders(match_id);
+    const availableOrders = await QuestionService.getAvailableQuestionOrders(
+      match_id
+    );
     res.json({ availableOrders });
   } catch (error) {
     console.error("Lỗi khi lấy danh sách question_order khả dụng:", error);
