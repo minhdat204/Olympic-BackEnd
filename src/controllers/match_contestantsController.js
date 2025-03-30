@@ -167,7 +167,11 @@ exports.checkDivided = async (req, res) => {
 exports.updateMatchContestantsAdmin = async (req, res) => {
   try {
     const { match_id, status, question_order } = req.body;
-    await matchContestantService.updateStatus(req.params.id, status);
+    await matchContestantService.updateStatus(
+      req.params.id,
+      status,
+      question_order
+    );
     const total = await ContestantService.getContestantTotal(match_id);
     emitTotalContestants(match_id, total.total, total.remaining);
     const contestants = await ContestantService.getContestantsByMatchId(
@@ -195,6 +199,7 @@ exports.updateContestantGroupByMatchLoai = async (req, res) => {
       match_id
     );
     emitContestants(match_id, contestants);
+    emitContestantsAdmin(match_id, 1);
     res.json(status);
   } catch (error) {
     res.status(400).json({ error: error.message });

@@ -128,17 +128,21 @@ class ContestantService {
   static async getContestantByJudgeAndMatch(judge_id, match_id) {
     const contestants = await Group.findAll({
       attributes: ["group_name"],
-      where: { judge_id: judge_id, match_id: match_id },
-
+      where: { judge_id: judge_id },
       include: [
         {
           model: Contestant,
           as: "contestants",
+          required: true, // Chỉ lấy nhóm có thí sinh
           include: [
             {
               model: MatchContestant,
               as: "matchContestants",
               attributes: ["registration_number", "status"],
+              where: {
+                status: { [Op.in]: ["Đang thi", "Xác nhận 1", "Xác nhận 2"] },
+              },
+              required: true, // Chỉ lấy khi có dữ liệu matchContestants
             },
           ],
         },
@@ -146,6 +150,8 @@ class ContestantService {
           model: Match,
           as: "match",
           attributes: ["match_name"],
+          where: { id: match_id },
+          required: true, // Chỉ lấy nếu có trận đấu
         },
       ],
       order: [
@@ -154,16 +160,21 @@ class ContestantService {
           "ASC",
         ],
       ],
-      raw: true,
+      raw: false,
       nest: true,
     });
-    return contestants.map((item) => ({
-      match_name: item.match.match_name,
-      group_name: item.group_name,
-      registration_number:
-        item.contestants.matchContestants.registration_number,
-      status: item.contestants.matchContestants.status,
-    }));
+
+    console.log(JSON.stringify(contestants, null, 2)); // In toàn bộ dữ liệu Sequelize trả về
+
+    return contestants.flatMap((item) =>
+      item.contestants.map((contestant) => ({
+        match_name: item.match.match_name,
+        group_name: item.group_name,
+        registration_number:
+          contestant.matchContestants?.[0]?.registration_number || "N/A",
+        status: contestant.matchContestants?.[0]?.status || "N/A",
+      }))
+    );
   }
 
   // lấy group_id, group_name, match_id, match_name, judge_id, username dựa vào judge_id, match_id (GROUPS)
@@ -294,21 +305,41 @@ class ContestantService {
 
   // Upload danh sách thí sinh excel
   static async uploadExcel(data) {
-    const email = Array.from(new Map(data.map((c) => [c.email, c])).values());
-    const unq = await Contestant.findAll({
-      attributes: ["email"],
-      where: { email: email.map((c) => c.email) },
+    // Lọc danh sách duy nhất theo email và MSSV
+    const uniqueContestants = Array.from(
+      new Map(data.map((c) => [`${c.email}-${c.mssv}`, c])).values()
+    );
+
+    // Lấy danh sách email và MSSV đã tồn tại trong database
+    const existingContestants = await Contestant.findAll({
+      attributes: ["email", "mssv"],
+      where: {
+        [Op.or]: [
+          { email: uniqueContestants.map((c) => c.email) },
+          { mssv: uniqueContestants.map((c) => c.mssv) },
+        ],
+      },
+      raw: true,
     });
-    const emailSet = new Set(unq.map((e) => e.email));
-    const newContestant = email.filter((c) => !emailSet.has(c.email));
-    if (newContestant.length == 0) {
+
+    // Chuyển danh sách thí sinh đã có thành Set để kiểm tra nhanh
+    const existingSet = new Set(
+      existingContestants.map((e) => `${e.email}-${e.mssv}`)
+    );
+
+    // Lọc ra những thí sinh chưa có trong database
+    const newContestants = uniqueContestants.filter(
+      (c) => !existingSet.has(`${c.email}-${c.mssv}`)
+    );
+
+    if (newContestants.length === 0) {
       return {
         msg: "Không có thí sinh mới để thêm",
       };
     } else {
-      await Contestant.bulkCreate(newContestant, { ignoreDuplicates: true });
+      await Contestant.bulkCreate(newContestants, { ignoreDuplicates: true });
       return {
-        msg: `Thêm thành công +${newContestant.length} thí sinh`,
+        msg: `Thêm thành công ${newContestants.length} thí sinh`,
       };
     }
   }
@@ -729,12 +760,14 @@ class ContestantService {
     return contestants;
   }
 
-
   /**
    * lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
    * có thêm tham số để loại trừ thí sinh gold (nếu có)
-   *  */ 
-  static async getContestants20WithExclusion(matchId, excludeContestantId = null) {
+   *  */
+  static async getContestants20WithExclusion(
+    matchId,
+    excludeContestantId = null
+  ) {
     /**
      * 1. lấy danh sách thí sinh bị loại
      */
@@ -746,7 +779,8 @@ class ContestantService {
     let filteredContestants = eliminatedContestants;
     if (excludeContestantId) {
       filteredContestants = eliminatedContestants.filter(
-        contestant => contestant.contestant_id !== parseInt(excludeContestantId)
+        (contestant) =>
+          contestant.contestant_id !== parseInt(excludeContestantId)
       );
     }
 
@@ -785,7 +819,7 @@ class ContestantService {
       if (remainingSlots <= 0) {
         break;
       }
-      
+
       // số lượng thí sinh trong câu hỏi đó
       const available = question[i].length;
 
@@ -894,42 +928,6 @@ class ContestantService {
     return { message: "Cập nhật thành công" };
   }
   //  Long lấy danh sách thí sinh xác nhận 1 theo trọng tài
-  static async CountContestantsXacNhan1(judge_id, match_id) {
-    const groups = await Group.findAll({
-      attributes: ["group_name"],
-      include: [
-        {
-          model: Contestant,
-          as: "contestants",
-          include: [
-            {
-              model: MatchContestant,
-              as: "matchContestants",
-              attributes: ["registration_number", "status"],
-              where: { status: "Xác nhận 1" },
-            },
-          ],
-        },
-        {
-          model: Match,
-          as: "match",
-          attributes: ["match_name"],
-        },
-      ],
-      where: { judge_id: judge_id, match_id: match_id },
-      raw: true,
-      nest: true,
-    });
-
-    // const contestantCount = groups.reduce((total, group) => {
-    //   if (group.contestants) {
-    //     total += group.contestants.length;
-    //   }
-    //   return total;
-    // }, 0);
-
-    return groups || 0; // Nếu không có thí sinh nào, trả về 0
-  }
 }
 
 module.exports = ContestantService;
