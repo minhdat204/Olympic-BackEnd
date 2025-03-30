@@ -61,14 +61,12 @@ class MatchContestantService {
     try {
       let sts;
       if (status === "Đang thi") {
-        sts = null;
-      } else {
-        sts = eliminated_at_question_order;
+        eliminated_at_question_order = null;
       }
       const result = await MatchContestant.update(
         {
           status: status,
-          eliminated_at_question_order: sts,
+          eliminated_at_question_order: eliminated_at_question_order,
         },
         {
           where: { registration_number: id },
@@ -214,6 +212,12 @@ class MatchContestantService {
       { where: { match_id: match_id, status: "Xác nhận 2" } }
     );
   }
+  // Long dem so thi sinh xac nhan 1 va xac nhan 2
+  //   async countContestantsByStatus(match_id) {
+  //     return MatchContestant.count({
+  //       where: { status: { Sequeliz } },
+  //     });
+  //   }
 }
 
 // Xuất class để có thể sử dụng lại nhiều nơi

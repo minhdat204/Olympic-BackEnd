@@ -1,5 +1,5 @@
 const { getIO } = require("../socketManager");
-const ContestantService = require('../services/contestantService');
+const ContestantService = require("../services/contestantService");
 //gửi API lấy total thí sinh và thí sinh còn lại (status = đang thi)
 const emitTotalContestants = async (
   matchId,
@@ -46,7 +46,7 @@ const emitEliminatedContestants = async (matchId, contestants) => {
   io.emit("eliminated_contestants", {
     matchId,
     contestants,
-    constestantTotal
+    constestantTotal,
   });
 };
 

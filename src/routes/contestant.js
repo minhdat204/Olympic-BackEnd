@@ -14,9 +14,7 @@ const { route } = require("./auth");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
 //  Đếm danh sách sinh viên xác nhận 1 ;
-router.get("/count/:judge_id/:match_id",ContestantController.CountContestantsXacNhan1);
 // Lấy danh sách thí sinh (public)
 router.get("/", ContestantController.getContestants);
 router.get(
@@ -113,16 +111,16 @@ router.get(
   // role("judge"),
   ContestantController.getContestantByJudgeAndMatch
 );
+router.post(
+  "/upload/excel",
+  upload.single("file"),
+  ContestantController.uploadExcel
+);
 router.use(auth);
 // Chi danh sách thí sinh theo classclass
 
 // Tạo thí sinh mới (admin)
-router.post(
-  "/upload/excel",
-  upload.single("file"),
-  role("admin"),
-  ContestantController.uploadExcel
-);
+
 // cập nhât group thí sinh theo match
 router.patch(
   "/update/group",

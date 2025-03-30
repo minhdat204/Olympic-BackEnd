@@ -47,6 +47,11 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
+      mssv: {
+        type: DataTypes.STRING(12),
+        allowNull: false,
+        unique: true,
+      },
       fullname: {
         type: DataTypes.STRING(50),
         allowNull: false,
