@@ -23,6 +23,7 @@ module.exports = {
       },
       question_type: {
         type: Sequelize.ENUM(
+          "Trắc Nghiệm",
           "Hình Ảnh",
           "Âm Thanh",
           "Video",
@@ -37,7 +38,7 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       correct_answer_type: {
-        type: Sequelize.ENUM("Text", "Image", "Audio", "Video", "Multiple Choice"),
+        type: Sequelize.ENUM("Text", "Image", "Audio", "Video"),
         allowNull: false,
         defaultValue: "Text",
       },

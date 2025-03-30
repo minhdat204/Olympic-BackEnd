@@ -8,7 +8,7 @@ const {
   emitTotalContestants,
   emitContestants,
   emitEliminatedContestants,
-  emitContestantsAdmin
+  emitContestantsAdmin,
 } = require("../socketEmitters/contestantEmitter");
 const { enableCompileCache } = require("module");
 class ContestantController {
@@ -229,6 +229,7 @@ class ContestantController {
     const contestants = [
       {
         fullname: "Phan Thành Long",
+        mssv: "0306221037",
         email: "long@example.com",
         class: "CD TH 22 WebB",
         class_year: 22,
@@ -236,6 +237,7 @@ class ContestantController {
       },
       {
         fullname: "Nguyễn Văn A",
+        mssv: "0306221037",
         email: "nguyenvana@example.com",
         class: "CD TH 22 WebB",
         class_year: 22,
@@ -581,17 +583,5 @@ class ContestantController {
     }
   }
   // Đếm sinh viên xác nhân 1
-  static async CountContestantsXacNhan1(req, res) {
-    try {
-      const { judge_id, match_id } = req.params;
-      const count = await ContestantService.CountContestantsXacNhan1(
-        judge_id,
-        match_id
-      );
-      res.json(count);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
 }
 module.exports = ContestantController;
