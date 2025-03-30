@@ -100,7 +100,26 @@ exports.UpdateWinGold = async (req, res) => {
 // caạp nhật rescue_1, rescue_2, plane
 exports.updateRescue = async (req, res) => {
   try {
-    const match = await MatchService.updateRescue(req.params.id, req.body);
+    // Get current match data to access existing counts
+    const currentMatch = await MatchService.getMatchById(req.params.id);
+    
+    // Create updated data object
+    const updatedData = { ...req.body };
+    
+    // Make rescued_count_1 cumulative if provided
+    if (updatedData.rescued_count_1 !== undefined) {
+      const currentCount = currentMatch.rescued_count_1 || 0;
+      updatedData.rescued_count_1 = currentCount + parseInt(updatedData.rescued_count_1);
+    }
+    
+    // Make rescued_count_2 cumulative if provided
+    if (updatedData.rescued_count_2 !== undefined) {
+      const currentCount = currentMatch.rescued_count_2 || 0;
+      updatedData.rescued_count_2 = currentCount + parseInt(updatedData.rescued_count_2);
+    }
+    
+    // Update the match with cumulative counts
+    const match = await MatchService.updateRescue(req.params.id, updatedData);
     res.json(match);
   } catch (error) {
     res.status(400).json({ error: error.message });

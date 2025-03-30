@@ -23,9 +23,9 @@ const handleDisplaySockets = (io, socket) => {
       console.log(`📺 Client ${socket.id} changed display to eliminated contestants for match_${matchId}`);
       
       try {
-      // Get contestants by match ID using the service
+      // DAT: Lấy danh sách thí sinh theo match
       const contestants = await ContestantService.getContestantsByMatchId(matchId);
-      // API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
+      // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
       const constestantTotal = await ContestantService.getContestantTotal(matchId);
       
       // Forward the contestants data to all clients in the match room
