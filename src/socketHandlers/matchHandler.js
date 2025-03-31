@@ -17,8 +17,18 @@ const handleMatchSockets = (io, socket) => {
     socket.leave(`match_${matchId}`);
   });
 
+  /**
+   * Được gửi từ RescueControl.jsx
+   * @param data {Object}
+   *  matchId,
+      rescueNumber,
+      questionId: questions[currentQuestionIndex].id,
+   */
   socket.on("rescue-updated", (data) => {
     console.log(`📢 Client ${socket.id} updated rescue for match_${data.matchId}`);
+    /**
+     * gửi cho màn hình chiếu: Show.jsx
+     */
     io.emit("rescue-updated", data);
   });
 };
