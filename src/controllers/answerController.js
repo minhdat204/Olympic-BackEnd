@@ -277,12 +277,15 @@ class AnswerController {
   static async createAnswerByMatch(req, res) {
     try {
       const { match_id, question_id } = req.body;
-      const status = await AnswerService.createAnswerByMatch(
-        match_id,
-        question_id
-      );
+      
       const question_order = await questionService.getQuestion_oder_Byid(
         question_id
+      );
+      
+      const status = await AnswerService.createAnswerByMatch(
+        match_id,
+        question_id,
+        question_order.question_order
       );
 
       console.log("match", match_id, "question_order", question_id);

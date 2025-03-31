@@ -6,6 +6,7 @@ const {
   MatchContestant,
 } = require("../models");
 const matchContestantService = require("../services/matchContestantService");
+const contestantService = require("../services/contestantService");
 const { Op, Sequelize, where } = require("sequelize");
 const group = require("../models/group");
 
@@ -163,6 +164,11 @@ class AnswerService {
     return answer;
   }
 
+  // Xóa tất cả câu trả lời của một câu hỏi
+  static async deleteAnswersByQuestionId(questionId) {
+    await Answer.destroy({ where: { question_id: questionId } });
+    return { message: "Đã xóa tất cả câu trả lời cho câu hỏi này" };
+  }
   // Xóa câu trả lời
   static async deleteAnswer(id) {
     const answer = await Answer.findByPk(id);
@@ -426,7 +432,11 @@ class AnswerService {
   }
 
   //
-  static async createAnswerByMatch(match_id, question_id) {
+  static async createAnswerByMatch(match_id, question_id, question_order) {
+    // Xóa tất cả câu trả lời *của câu hỏi này* trong trận đấu
+    await AnswerService.deleteAnswersByQuestionId(question_id);
+
+    // Tạo câu trả lời đúng cho thí sinh có trạng thái "Đang thi"
     const dangthi = await matchContestantService.getListContestantStatusByMatch(
       match_id,
       "Đang thi"
@@ -441,27 +451,25 @@ class AnswerService {
         match_id: match_id,
       });
     }
-
-    const xacnhan2 =
-      await matchContestantService.getListContestantStatusByMatch(
+    // Tạo câu trả lời sai cho thí sinh có trạng thái "Loại" *của câu hỏi này*
+    const biLoai =
+      await contestantService.getEliminatedContestantsByQuestion(
         match_id,
-        "Xác nhận 2"
+        question_order
       );
-
-    for (const contestant of xacnhan2) {
+    //return `bị loại ở câu hỏi ${question_order}: ${biLoai.map(c=>c.id).join(', ')}`;
+    for (const contestant of biLoai) {
       await Answer.create({
         score: 0,
         is_correct: false,
-        contestant_id: contestant.contestant_id,
+        contestant_id: contestant.id,
         question_id: question_id,
         match_id: match_id,
       });
     }
-
-    return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${xacnhan2.length} thí sinh có đáp án sai`;
+    //return `match_id: ${match_id}, question_id: ${question_id}, question_order: ${question_order}`;
+    return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${biLoai.length} thí sinh có đáp án sai`;
   }
 }
-
-// creatr answers By
 
 module.exports = AnswerService;
