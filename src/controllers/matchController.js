@@ -97,28 +97,31 @@ exports.UpdateWinGold = async (req, res) => {
   }
 };
 
-// caạp nhật rescue_1, rescue_2, plane
+/**
+ * gọi api từ RescueControl.jsx
+ */
+// Dat: caạp nhật rescue_1, rescue_2, plane
 exports.updateRescue = async (req, res) => {
   try {
-    // Get current match data to access existing counts
-    const currentMatch = await MatchService.getMatchById(req.params.id);
+    // lấy thông tin trận đấu hiện tại
+    // const currentMatch = await MatchService.getMatchById(req.params.id);
     
-    // Create updated data object
+    // tạo mới một object updatedData từ req.body
     const updatedData = { ...req.body };
     
-    // Make rescued_count_1 cumulative if provided
-    if (updatedData.rescued_count_1 !== undefined) {
-      const currentCount = currentMatch.rescued_count_1 || 0;
-      updatedData.rescued_count_1 = currentCount + parseInt(updatedData.rescued_count_1);
-    }
+    // Kiểm tra nếu rescue_1 được cung cấp và không phải là undefined => cộng dồn 
+    // if (updatedData.rescued_count_1 !== undefined) {
+    //   const currentCount = currentMatch.rescued_count_1 || 0;
+    //   updatedData.rescued_count_1 = currentCount + parseInt(updatedData.rescued_count_1);
+    // }
     
-    // Make rescued_count_2 cumulative if provided
-    if (updatedData.rescued_count_2 !== undefined) {
-      const currentCount = currentMatch.rescued_count_2 || 0;
-      updatedData.rescued_count_2 = currentCount + parseInt(updatedData.rescued_count_2);
-    }
+    // Kiểm tra nếu rescue_2 được cung cấp và không phải là undefined => cộng dồn 
+    // if (updatedData.rescued_count_2 !== undefined) {
+    //   const currentCount = currentMatch.rescued_count_2 || 0;
+    //   updatedData.rescued_count_2 = currentCount + parseInt(updatedData.rescued_count_2);
+    // }
     
-    // Update the match with cumulative counts
+    // Cập nhật lại thông tin trận đấu với dữ liệu mới
     const match = await MatchService.updateRescue(req.params.id, updatedData);
     res.json(match);
   } catch (error) {
