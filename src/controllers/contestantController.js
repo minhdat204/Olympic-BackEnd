@@ -410,6 +410,26 @@ class ContestantController {
       const selectedContestantIds = contestants.map(
         (contestant) => contestant.id
       );
+      
+      // Chuyển mảng ID thành chuỗi ngăn cách bởi dấu phẩy
+      const selectedContestantIdsString = selectedContestantIds.join(',');
+      
+      // Cập nhật vào database dựa vào số lần cứu trợ
+      const updateField = rescueNumber == 1 ? 'rescued_count_1' : 'rescued_count_2';
+
+      /**DAT
+     * Cập nhật chuỗi id thí sinh được cứu vào db (bảng match)
+     * @param {*} matchId : id trận đấu
+     * @param {*} updateField : rescued_count_1, rescued_count_2
+     * @param {*} selectedContestantIdsString : chuỗi id thí sinh được cứu (vd: 1,2,3,4)
+     * @returns {boolean} : true nếu cập nhật thành công, false nếu thất bại
+     * 
+     */
+      await ContestantService.updateRescuedCountInMatch(
+        matchId, 
+        updateField, 
+        selectedContestantIdsString
+      );
 
       res.json({
         message: "Lấy danh sách thí sinh được cứu thành công",
