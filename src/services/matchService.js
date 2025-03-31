@@ -112,4 +112,66 @@ module.exports = {
       ],
     });
   },
+
+  /**DAT
+   * Cập nhật chuỗi id thí sinh được cứu vào db (bảng match)
+   * @param {*} matchId : id trận đấu
+   * @param {*} field : rescued_count_1, rescued_count_2
+   * @param {*} idsString : chuỗi id thí sinh được cứu (vd: 1,2,3,4)
+   * @returns {boolean} : true nếu cập nhật thành công, false nếu thất bại
+   *
+   * NƠI SỬ DỤNG:
+   * - contestantController: getRescueContestants
+   */
+  async updateRescuedCountInMatch(matchId, field, idsString) {
+    try {
+      // field là tên thuộc tính trong bảng match
+      if (field !== "rescued_count_1" && field !== "rescued_count_2") {
+        throw new Error("Invalid field name");
+      }
+
+      // cập nhật chuỗi id thí sinh được cứu vào bảng match
+      await Match.update({ [field]: idsString }, { where: { id: matchId } });
+
+      return true;
+    } catch (error) {
+      console.error("Error updating rescued count:", error);
+      throw new Error("Failed to update rescued contestants count");
+    }
+  },
+
+  /**DAT
+   * lấy mảng id thí sinh được cứu từ db (bảng match: thuộc tính rescue_1, rescue_2)
+   * @param {number} matchId - ID của trận đấu
+   * @param {number} rescueNumber - Số lần cứu trợ (1 hoặc 2)
+   */
+  async getContestantIdsRescue(matchId, rescueNumber) {
+    // Xác định field cần lấy dữ liệu dựa vào rescueNumber
+    const field = rescueNumber == 1 ? "rescued_count_1" : "rescued_count_2";
+
+    /**
+     * Lấy chuỗi ID thí sinh đã lưu trước đó từ database
+     * @param {number} matchId - ID của trận đấu
+     *
+     */
+    const match = await this.getMatchById(matchId);
+
+    if (
+      !match ||
+      !match[field] ||
+      match[field] === "" ||
+      match[field] === null ||
+      match[field] === undefined ||
+      match[field] == -1
+    ) {
+      return [];
+    }
+
+    // Tách chuỗi ID thành mảng và chuyển về kiểu số
+    const contestantIds = match[field]
+      .split(",")
+      .map((id) => parseInt(id.trim(), 10));
+
+    return contestantIds;
+  },
 };

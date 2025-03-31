@@ -48,7 +48,7 @@ router.get("/class/:class_year", ContestantController.getClassByClass_Year);
 // DAT: Lấy danh sách thí sinh theo match
 router.get("/matches/:match_id", ContestantController.getContestantsByMatchId);
 
-// DAT: lấy danh sách thí sinh được cứu (status = "xác nhân 2")
+// DAT: nhập điểm và lấy danh sách thí sinh được cứu (status = "xác nhân 2")
 router.post(
   "/matches/:match_id/rescue",
   ContestantController.getRescueContestants
@@ -58,6 +58,12 @@ router.post(
 router.patch(
   "/matches/:match_id/rescue",
   ContestantController.updateRescueContestants
+);
+
+// DAT: lấy mảng id thí sinh được cứu từ db (bảng match: thuộc tính rescue_1, rescue_2)
+router.get(
+  "/matches/:match_id/rescue/:rescue_number",
+  ContestantController.getRescueContestantsInDb
 );
 
 // DAT: cập nhật trạng thái thí sinh hàng loạt
@@ -76,6 +82,8 @@ router.post(
   "/matches/:match_id/rescue/count",
   ContestantController.getRescueContestantTotal
 );
+
+
 // Donwload danh sach excle
 router.get(
   "/download/Excel/Match/:match_id",

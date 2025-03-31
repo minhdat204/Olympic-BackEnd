@@ -387,14 +387,22 @@ class ContestantController {
    * DAT: PHẦN CỨU TRỢ THÍ SINH
    * ===========================================================
    */
-  // lấy danh sách thí sinh được cứu (status = "xác nhận 2")
+
+  /**DAT
+   * Nhập điểm và lấsy danh sách thí sinh được cứu (status = "xác nhận 2")
+   * NƠI SỬ DỤNG: 
+   * - RescueControl.jsx: fetchupdateRescueContestants
+   */
   static async getRescueContestants(req, res) {
     try {
       const matchId = req.params.match_id;
       const score = req.body.score;
       const rescueNumber = req.body.rescueNumber; // lần cứu trợ thứ mấy
 
-      //lấy danh sách thí sinh được cứu
+      /**lấy danh sách thí sinh được cứu ưu tiên câu cao nhất
+         * @return
+         * contestant_id, created_at, eliminated_at_question_order, id (của match_contestants), match_id, registration_number, status, updated_at
+         */
       const contestants = await ContestantService.getRescueContestants(
         matchId,
         score,
@@ -426,7 +434,7 @@ class ContestantController {
      * @returns {boolean} : true nếu cập nhật thành công, false nếu thất bại
      * 
      */
-      const isUpdateContestantIdsInMatchTable = await ContestantService.updateRescuedCountInMatch(
+      const isUpdateContestantIdsInMatchTable = await matchService.updateRescuedCountInMatch(
         matchId, 
         updateField, 
         selectedContestantIdsString
@@ -445,45 +453,29 @@ class ContestantController {
     }
   }
 
-  /**
+  /**DAT
+   * Cập nhật trạng thái thí sinh được cứu hàng loạt
    * NƠI SỬ DỤNG: 
    * - RescueControl.jsx: fetchupdateRescueContestants
    */
-  // Cập nhật trạng thái thí sinh được cứu hàng loạt
   static async updateRescueContestants(req, res) {
     try {
       const matchId = req.params.match_id;
       const rescueNumber = req.body.rescueNumber; // lần cứu trợ thứ mấy
 
-      // Xác định field cần lấy dữ liệu dựa vào rescueNumber
-      const field = rescueNumber == 1 ? 'rescued_count_1' : 'rescued_count_2';
-      
-       /** DAT
-       * Lấy thông tin trận đấu theo ID
-       * @param {number} matchId - ID của trận đấu
-       * @returns {Object} Thông tin trận đấu ('id', 'match_name', 'rescued_count_1', 'rescued_count_2')
-       * 
+      /**
+       * lấsy mảrng ths được cứu từ db
+       * @return array
        */
-      // Lấy chuỗi ID thí sinh đã lưu trước đó từ database
-      const match = await matchService.getMatchById(matchId);
+      const contestantIds = await matchService.getContestantIdsRescue(matchId, rescueNumber);
       
-      console.log("match=====>", match);
-      if (!match || !match[field] || match[field] === "" || match[field] === null || match[field] === undefined || match[field] == -1) {
-        return res.status(400).json({ 
-          error: "Không tìm thấy danh sách thí sinh cứu trợ" 
-        });
-      }
-      
-      // Tách chuỗi ID thành mảng và chuyển về kiểu số
-      const contestantIds = match[field].split(',').map(id => parseInt(id.trim(), 10));
-
       if (contestantIds.length === 0) {
         return res.status(400).json({ 
           error: "Không có thí sinh nào được chọn để cứu trợ" 
         });
       }
 
-      // Update their status
+      // cập nhật status cho tất cả thí sinh được chọn
       const resultUpdate = await ContestantService.updateContestant(contestantIds, {
         status: "Được cứu",
       });
@@ -503,6 +495,45 @@ class ContestantController {
       });
     } catch (error) {
       console.error("Error in updateRescueContestants:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  /**Dat
+   * lấy danh sách thí sinh được cứu từ db
+   * NƠI SỬ DỤNG:
+   * - RescueControl.jsx: fetchRescueContestants
+   */
+  static async getRescueContestantsInDb(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const rescueNumber = req.params.rescue_number; // lần cứu trợ thứ mấy
+
+      // lấy danh sách thí sinh được cứu từ db
+      const contestantIds = await matchService.getContestantIdsRescue(matchId, rescueNumber);
+
+      // lấy danh sách thí sinh theo match_id
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+
+      // Lọc danh sách thí sinh để chỉ lấy những thí sinh có ID trong contestantIds
+      const selectedContestants = contestants.filter((contestant) =>
+        contestantIds.includes(contestant.id)
+      );
+
+      const totalEliminated =
+      await ContestantService.getContestantTotalByStatus(
+        matchId,
+        "Bị loại"
+      );
+
+      res.json({
+        message: "Load danh sách thí sinh được cứu thành công",
+        selectedContestants: selectedContestants,
+        selectedContestantIds: contestantIds,
+        totalEliminated: totalEliminated,
+        rescueNumber: rescueNumber,
+      });
+    } catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
