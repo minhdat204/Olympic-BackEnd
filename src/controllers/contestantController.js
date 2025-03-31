@@ -717,6 +717,33 @@ class ContestantController {
       res.status(400).json({ error: error.message });
     }
   }
-  // Đếm sinh viên xác nhân 1
+  
+  /**
+   * TOP 20 THÍ SINH
+   */
+  /**
+   * Dat: lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
+   * có thêm tham số để loại trừ thí sinh gold (nếu có)
+   * DÙNG:
+   * - ContestantService : getContestants20WithInclusion
+   */
+  static async getContestants20WithInclusion(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const contestantIdToExclude = await matchService.getGoldWinnerId(matchId); // ID của thí sinh cần loại trừ (nếu có)
+
+      const contestants = await ContestantService.getContestants20WithInclusion(
+        matchId,
+        contestantIdToExclude
+      );
+
+      res.json({
+        message: "Lấy danh sách 20 thí sinh thành công",
+        contestants: contestants,
+      });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 module.exports = ContestantController;

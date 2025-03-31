@@ -174,4 +174,18 @@ module.exports = {
 
     return contestantIds;
   },
+
+  /**DAT
+   * lấy gold_winner_id từ bảng match
+   * @param {number} matchId - ID của trận đấu
+   * @return {number} - ID của người thắng cuộc (gold_winner_id)
+   * 
+   * SỬ DỤNG Ở:
+   * - contestantController: getContestants20WithInclusion
+   */
+  async getGoldWinnerId(matchId) {
+    const match = await this.getMatchById(matchId);
+    if (!match) throw new Error("Không tìm thấy trận đấu");
+    return match.gold_winner_id;
+  }
 };
