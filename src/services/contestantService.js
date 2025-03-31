@@ -930,7 +930,36 @@ class ContestantService {
 
     return { message: "Cập nhật thành công" };
   }
-  //  Long lấy danh sách thí sinh xác nhận 1 theo trọng tài
+
+  /**DAT
+   * Cập nhật chuỗi id thí sinh được cứu vào db (bảng match)
+   * @param {*} matchId : id trận đấu
+   * @param {*} field : rescued_count_1, rescued_count_2
+   * @param {*} idsString : chuỗi id thí sinh được cứu (vd: 1,2,3,4)
+   * @returns {boolean} : true nếu cập nhật thành công, false nếu thất bại
+   * 
+   * NƠI SỬ DỤNG:
+   * - controller getRescueContestants
+   */
+  async updateRescuedCountInMatch(matchId, field, idsString) {
+    try {
+      // Ensure field is either 'rescued_count_1' or 'rescued_count_2' to prevent SQL injection
+      if (field !== 'rescued_count_1' && field !== 'rescued_count_2') {
+        throw new Error('Invalid field name');
+      }
+      
+      // Update the match table with the comma-separated IDs
+      await db.Match.update(
+        { [field]: idsString },
+        { where: { id: matchId } }
+      );
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating rescued count:', error);
+      throw new Error('Failed to update rescued contestants count');
+    }
+  }
 }
 
 module.exports = ContestantService;
