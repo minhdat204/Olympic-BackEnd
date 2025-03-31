@@ -44,11 +44,11 @@ module.exports = {
         DefaultValue: -1,
       },
       rescued_count_1: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.TEXT,
         DefaultValue: -1,
       },
       rescued_count_2: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.TEXT,
         DefaultValue: -1,
       },
       class_names: {
