@@ -212,12 +212,13 @@ class GroupService {
   // Lấy danh sách trọng theo trận đấu
   static async getListJudge(match_id) {
     const info = await Group.findAll({
-      attributes: ["judge_id"],
+      attributes: ["judge_id", "chot"],
       include: [
         {
           model: User,
           as: "judge",
           attributes: ["username"], // Đảm bảo lấy đúng username
+          raw: true,
         },
       ],
       where: { match_id: match_id },
@@ -228,15 +229,28 @@ class GroupService {
     return info.map((item) => ({
       judge_id: item.judge_id,
       username: item.judge?.username || "Không có dữ liệu",
+      chot: item.chot,
     }));
   }
 
   // Lấy nhóm theo trận đấu
   static async getIdGroupByMatch(match_id) {
     return Group.findAll({
-      attributes: ["id", "judge_id", "group_name"],
       where: { match_id: match_id },
     });
+  }
+  // Lấy thông tin của group của trọng tài theo trận đấu
+  static async getGroupByJudgeByMatch(match_id, judge_id) {
+    return Group.findOne({
+      where: { match_id: match_id, judge_id: judge_id },
+    });
+  }
+  //  update trong tai
+  static async updateChotByGroup(match_id, judge_id, question_order) {
+    return Group.update(
+      { chot: question_order },
+      { where: { match_id: match_id, judge_id: judge_id } }
+    );
   }
 }
 
