@@ -7,8 +7,12 @@ const handleScreenSokets = (io, socket) => {
     io.emit("screens", data);
   });
   socket.on("control_audio_question_emit", (data) => {
-    console.log(data);
     io.emit("control_audio_question_on", data);
+  });
+  socket.on("correct_answer_type_emit", (data) => {
+    console.log("jsnjsndjsjkssssn", data);
+
+    io.emit("correct_answer_type_emit", data);
   });
 };
 
