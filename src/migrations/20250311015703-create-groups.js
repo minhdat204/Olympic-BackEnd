@@ -19,6 +19,12 @@ module.exports = {
       judge_id: {
         type: Sequelize.SMALLINT,
       },
+
+      chot: {
+        type: Sequelize.TINYINT,
+        defaultValue: 0,
+      },
+      
       created_at: {
         allowNull: true,
         type: Sequelize.DATE,

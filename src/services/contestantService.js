@@ -761,8 +761,11 @@ class ContestantService {
   }
 
   /**
-   * lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
+   * Dat: lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
    * có thêm tham số để loại trừ thí sinh gold (nếu có)
+   * 
+   * @param {number} matchId - ID của trận đấu
+   * @param {number} excludeContestantId - ID của thí sinh cần loại trừ (nếu có)
    *  */
   static async getContestants20WithExclusion(
     matchId,

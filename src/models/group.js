@@ -29,7 +29,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     match_id: DataTypes.SMALLINT,
-    judge_id: DataTypes.SMALLINT
+    judge_id: DataTypes.SMALLINT,
+    chot: {
+      type: DataTypes.TINYINT,
+      defaultValue: 0
+    }
   }, {
     sequelize,
     modelName: 'Group',

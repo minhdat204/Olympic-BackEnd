@@ -85,12 +85,10 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: -1,
       },
       rescued_count_1: {
-        type: DataTypes.TINYINT,
-        defaultValue: -1,
+        type: DataTypes.TEXT,
       },
       rescued_count_2: {
-        type: DataTypes.TINYINT,
-        defaultValue: -1,
+        type: DataTypes.TEXT,
       },
       class_names: {
         type: DataTypes.JSON,
