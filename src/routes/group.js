@@ -9,8 +9,13 @@ const {
   updateGroupSchema,
   addContestantsSchema,
 } = require("../schemas/groupSchema");
-router.get('/get-group-by-match-id/:match_id', GroupController.getIdGroupByMatch);
+router.get(
+  "/get-group-by-match-id/:match_id",
+  GroupController.getIdGroupByMatch
+);
+router.patch("/chot/match/group", GroupController.updateChotByGroup);
 router.get("/list/judge/:match_id", GroupController.getListJudge);
+router.get("/info/:match_id/:judge_id", GroupController.getGroupByJudgeByMatch);
 // Các routes public
 router.get("/", GroupController.getGroups);
 router.get("/:id", GroupController.getGroupById);
@@ -51,8 +56,5 @@ router.delete(
   "/:id/contestants/:contestantId",
   GroupController.removeContestantFromGroup
 );
-
-
-
 
 module.exports = router;
