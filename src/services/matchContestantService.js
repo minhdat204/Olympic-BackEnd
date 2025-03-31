@@ -56,7 +56,7 @@ class MatchContestantService {
     await match.save();
     return match;
   }
-
+// Cập nhật trạng thái thí sinh thủ công của admin
   async updateStatus(id, status, eliminated_at_question_order) {
     try {
       let sts;
