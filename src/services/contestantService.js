@@ -440,27 +440,29 @@ class ContestantService {
     if (!data || !data.status) {
       throw new Error("Status is required");
     }
-    
+
     const matchContestants = await MatchContestant.findAll({
-      where: { 
+      where: {
         status: data.status,
-        ...(data.match_id && { match_id: data.match_id })
+        ...(data.match_id && { match_id: data.match_id }),
       },
-      include: [{
-        model: Contestant,
-        as: "contestant"
-      }],
-      order: [["registration_number", "ASC"]]
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+        },
+      ],
+      order: [["registration_number", "ASC"]],
     });
-    
-    const contestants = matchContestants.map(mc => {
+
+    const contestants = matchContestants.map((mc) => {
       const contestant = mc.contestant.toJSON();
       contestant.registration_number = mc.registration_number;
       contestant.match_status = mc.status;
       contestant.eliminated_at_question_order = mc.eliminated_at_question_order;
       return contestant;
     });
-    
+
     return contestants;
   }
 
@@ -468,16 +470,16 @@ class ContestantService {
   static async getContestantsRescue(match_id) {
     // Lấy danh sách các contestant_id có trạng thái "Được cứu" trong trận
     const rescuedContestants = await MatchContestant.findAll({
-      attributes: ['contestant_id'],
-      where: { 
-        match_id: match_id, 
-        status: "Được cứu" 
+      attributes: ["contestant_id"],
+      where: {
+        match_id: match_id,
+        status: "Được cứu",
       },
-      raw: true
+      raw: true,
     });
-    
+
     // Trả về mảng các contestant_id
-    return rescuedContestants.map(contestant => contestant.contestant_id);
+    return rescuedContestants.map((contestant) => contestant.contestant_id);
   }
 
   static async getGroupContestantByMatch(match_id) {
@@ -521,9 +523,9 @@ class ContestantService {
   static async getContestantTotal(matchId) {
     // lấy số thí sinh đang thi trong trận đấu
     const remaining = await MatchContestant.count({
-      where: { 
-        match_id: matchId, 
-        status: { [Op.or]: ["Đang thi", "Được cứu"] }
+      where: {
+        match_id: matchId,
+        status: { [Op.or]: ["Đang thi", "Được cứu"] },
       },
     });
     //lấy tổng số thí sinh trong trận đấu
@@ -682,8 +684,8 @@ class ContestantService {
   /**
    * RESULT
    * DAT: lấy danh sách thí sinh được cứu (status = "xác nhận 2")
-   * 
-   * @return 
+   *
+   * @return
    * contestant_id, created_at, eliminated_at_question_order, id (của match_contestants), match_id, registration_number, status, updated_at
    */
   static async getRescueContestants(matchId, score, rescueNumber) {
@@ -763,10 +765,12 @@ class ContestantService {
     return contestants;
   }
 
+  
+
   /**
    * Dat: lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
    * có thêm tham số để loại trừ thí sinh gold (nếu có)
-   * 
+   *
    * @param {number} matchId - ID của trận đấu
    * @param {number} excludeContestantId - ID của thí sinh cần loại trừ (nếu có)
    *  */
@@ -934,55 +938,7 @@ class ContestantService {
     return { message: "Cập nhật thành công" };
   }
 
-  /**DAT
-   * Cập nhật chuỗi id thí sinh được cứu vào db (bảng match)
-   * @param {*} matchId : id trận đấu
-   * @param {*} field : rescued_count_1, rescued_count_2
-   * @param {*} idsString : chuỗi id thí sinh được cứu (vd: 1,2,3,4)
-   * @returns {boolean} : true nếu cập nhật thành công, false nếu thất bại
-   * 
-   * NƠI SỬ DỤNG:
-   * - contestantController: getRescueContestants
-   */
-  static async updateRescuedCountInMatch(matchId, field, idsString) {
-    try {
-      // Ensure field is either 'rescued_count_1' or 'rescued_count_2' to prevent SQL injection
-      if (field !== 'rescued_count_1' && field !== 'rescued_count_2') {
-        throw new Error('Invalid field name');
-      }
-      
-      // Update the match table with the comma-separated IDs
-      await Match.update(
-        { [field]: idsString },
-        { where: { id: matchId } }
-      );
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating rescued count:', error);
-      throw new Error('Failed to update rescued contestants count');
-    }
-  }
 
-  /** DAT
-   * Lấy thông tin trận đấu theo ID
-   * @param {number} matchId - ID của trận đấu
-   * @returns {Object} Thông tin trận đấu ('id', 'match_name', 'rescued_count_1', 'rescued_count_2')
-   * 
-   * Nơi sử dụng:
-   * contestantController: updateRescueContestants
-   */
-  static async getMatchById(matchId) {
-    const match = await Match.findByPk(matchId, {
-      attributes: ['id', 'match_name', 'rescued_count_1', 'rescued_count_2']
-    });
-    
-    if (!match) {
-      throw new Error('Trận đấu không tồn tại');
-    }
-    
-    return match;
-  }
 }
 
 module.exports = ContestantService;
