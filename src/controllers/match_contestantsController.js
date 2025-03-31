@@ -163,7 +163,7 @@ exports.checkDivided = async (req, res) => {
     });
   }
 };
-// Cập nhật trạng thái thí sinh của
+// Cập nhật trạng thái thí sinh của admin
 exports.updateMatchContestantsAdmin = async (req, res) => {
   try {
     const { match_id, status, question_order } = req.body;

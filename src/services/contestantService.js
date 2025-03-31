@@ -139,9 +139,9 @@ class ContestantService {
               model: MatchContestant,
               as: "matchContestants",
               attributes: ["registration_number", "status"],
-              where: {
-                status: { [Op.in]: ["Đang thi", "Xác nhận 1", "Xác nhận 2"] },
-              },
+              // where: {
+              //   status: { [Op.in]: ["Đang thi", "Xác nhận 1", "Xác nhận 2"] },
+              // },
               required: true, // Chỉ lấy khi có dữ liệu matchContestants
             },
           ],
