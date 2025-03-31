@@ -1,5 +1,9 @@
+const group = require("../models/group");
 const GroupService = require("../services/groupService");
-
+const {
+  emitte_group_judge,
+  emitte_group_admin,
+} = require("../socketEmitters/groupEmitter");
 class GroupController {
   // Lấy danh sách nhóm
   static async getGroups(req, res) {
@@ -79,7 +83,7 @@ class GroupController {
     } catch (error) {
       const statusCode =
         error.message.includes("không tồn tại") ||
-          error.message.includes("không phải là trọng tài")
+        error.message.includes("không phải là trọng tài")
           ? 400
           : 500;
 
@@ -109,8 +113,8 @@ class GroupController {
           ? 404
           : error.message.includes("không tồn tại") ||
             error.message.includes("không phải là trọng tài")
-            ? 400
-            : 500;
+          ? 400
+          : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -197,8 +201,8 @@ class GroupController {
         error.message === "Nhóm không tồn tại"
           ? 404
           : error.message === "Thí sinh không thuộc nhóm này"
-            ? 400
-            : 500;
+          ? 400
+          : 500;
 
       res.status(statusCode).json({
         status: "error",
@@ -218,8 +222,34 @@ class GroupController {
   // lấy nhóm theo trận đấu
   static async getIdGroupByMatch(req, res) {
     try {
-      const list_group = await GroupService.getIdGroupByMatch(req.params.match_id);
+      const list_group = await GroupService.getIdGroupByMatch(
+        req.params.match_id
+      );
       res.json(list_group);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async getGroupByJudgeByMatch(req, res) {
+    try {
+      const { match_id, judge_id } = req.params;
+      const group = await GroupService.getGroupByJudgeByMatch(
+        match_id,
+        judge_id
+      );
+      res.json(group);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async updateChotByGroup(req, res) {
+    try {
+      const { match_id, judge_id, question_order } = req.body;
+      await GroupService.updateChotByGroup(match_id, judge_id, question_order);
+      await emitte_group_judge(match_id, judge_id);
+      const groups = await GroupService.getIdGroupByMatch(match_id);
+      await emitte_group_admin(match_id, groups);
+      res.json("Thành công");
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

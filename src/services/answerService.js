@@ -451,13 +451,16 @@ class AnswerService {
         match_id: match_id,
       });
     }
+
     // Tạo câu trả lời sai cho thí sinh có trạng thái "Loại" *của câu hỏi này*
-    const biLoai =
-      await contestantService.getEliminatedContestantsByQuestion(
-        match_id,
-        question_order
-      );
-    //return `bị loại ở câu hỏi ${question_order}: ${biLoai.map(c=>c.id).join(', ')}`;
+    const biLoai = await contestantService.getEliminatedContestantsByQuestion(
+      match_id,
+      question_order
+    );
+    // return { match_id, question_id };
+    // return `bị loại ở câu hỏi ${question_order}: ${biLoai
+    //   .map((c) => c.id)
+    //   .join(", ")}`;
     for (const contestant of biLoai) {
       await Answer.create({
         score: 0,
@@ -467,6 +470,7 @@ class AnswerService {
         match_id: match_id,
       });
     }
+
     //return `match_id: ${match_id}, question_id: ${question_id}, question_order: ${question_order}`;
     return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${biLoai.length} thí sinh có đáp án sai`;
   }
