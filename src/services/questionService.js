@@ -422,14 +422,27 @@ module.exports = {
   async getCurrentQuestion(match_id) {
     const match = await Match.findOne({
       where: { id: match_id },
-      include: {
-        model: Question,
-        as: "current_question",
-      },
     });
-    if (!match || !match.current_question_id)
-      throw new Error("Trận đấu hoặc câu hỏi không tồn tại");
-    return match.current_question;
+    if (!match) { throw new Error(`Trận đấu ${match_id} không tồn tại`); }
+    let question = null;
+    //Fix lỗi mới vào trận thì current_question_id == null
+    if (!match.current_question_id) {
+      question = await Question.findOne({
+        where: { match_id, question_order: 1 }
+      });
+      if (!question) { throw new Error(`Không tìm thấy câu hỏi đầu tiên của trận đấu ${match_id}`); }
+      await Match.update(
+        { current_question_id: question.id },
+        { where: { id: match_id } }
+      );
+    }
+    else {// Nếu current_question_id không null, lấy câu hỏi hiện tại
+      question = await Question.findOne({
+        where: { match_id, id: match.current_question_id }
+      });
+    }
+    if (!question) { throw new Error(`Không tìm thấy câu hỏi hiện tại của trận đấu ${match_id}`); }
+    return question;
   },
 
   // DAT: Cập nhật time_left của câu hỏi hiện tại
@@ -493,7 +506,7 @@ module.exports = {
     const match = await Match.findByPk(match_id, {
       attributes: ["current_question_id"],
     });
-    
+
     if (!match) throw new Error("Không tìm thấy trận đấu");
 
     //truy current_question_id trong bảng question để lấy thứ tự câu hỏi
