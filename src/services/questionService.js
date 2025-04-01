@@ -1,4 +1,4 @@
-const { Question, Match } = require("../models");
+const { Question, Match, Anseer } = require("../models");
 const { Sequelize } = require("sequelize");
 const fsPromises = require("fs").promises; // Dùng cho bất đồng bộ
 const fs = require("fs"); // Dùng cho đồng bộ

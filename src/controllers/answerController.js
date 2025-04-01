@@ -1,3 +1,4 @@
+const { CIDR } = require("sequelize");
 const AnswerService = require("../services/answerService");
 const questionService = require("../services/questionService");
 const { answersEmitter } = require("../socketEmitters/answersEmitter");
@@ -277,11 +278,11 @@ class AnswerController {
   static async createAnswerByMatch(req, res) {
     try {
       const { match_id, question_id } = req.body;
-      
+
       const question_order = await questionService.getQuestion_oder_Byid(
         question_id
       );
-      
+
       const status = await AnswerService.createAnswerByMatch(
         match_id,
         question_id,
@@ -293,6 +294,26 @@ class AnswerController {
         answersEmitter(match_id, true);
       }
       res.json(status);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async getCorrectAnswersCount(req, res) {
+    try {
+      const count = await AnswerService.getCorrectAnswersCount(
+        req.params.match_id
+      );
+      res.json(count);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+  static async getCorrectAnswersCountByClass(req, res) {
+    try {
+      const count = await AnswerService.getCorrectAnswersCountByClass(
+        req.params.match_id
+      );
+      res.json(count);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
