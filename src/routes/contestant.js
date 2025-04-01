@@ -66,6 +66,24 @@ router.get(
   ContestantController.getRescueContestantsInDb
 );
 
+/**
+ * DAT
+  * cập nhật tất cả thí sinh đang thi thành Bị loại trừ thí sinh gold
+  * Đồng thời cập nhật số câu hiện tại của thí sinh vào bảng MatchContestant
+  * 
+  * @param
+  * const matchId = req.params.match_id;
+  * @body
+   const { questionOrder } = req.body;
+  * 
+  * DÙNG: updateContestantsToEliminated
+ */
+router.post(
+  "/matches/:match_id/eliminated/update-question-order",
+  ContestantController.updateContestantsToEliminated
+);
+
+
 /**DAT
  * lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
  */
