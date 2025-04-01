@@ -41,6 +41,17 @@ router.get(
   AnswerController.getCorrectContestantsByQuestion
 );
 
+//  Thống kê số câu trả lời đúng theo question_order
+router.get(
+  "/count/question_order/:match_id",
+  AnswerController.getCorrectAnswersCount
+);
+
+//  Thống kế số đúng by class
+router.get(
+  "/count/class/:match_id",
+  AnswerController.getCorrectAnswersCountByClass
+);
 //
 router.post("/create/answer/match", AnswerController.createAnswerByMatch);
 // Các routes cần xác thực
