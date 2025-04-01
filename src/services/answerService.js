@@ -9,6 +9,7 @@ const matchContestantService = require("../services/matchContestantService");
 const contestantService = require("../services/contestantService");
 const { Op, Sequelize, where } = require("sequelize");
 const group = require("../models/group");
+const answer = require("../models/answer");
 
 class AnswerService {
   // Lấy danh sách câu trả lời (có hỗ trợ lọc và phân trang)
@@ -473,6 +474,47 @@ class AnswerService {
 
     //return `match_id: ${match_id}, question_id: ${question_id}, question_order: ${question_order}`;
     return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${biLoai.length} thí sinh có đáp án sai`;
+  }
+  static async getCorrectAnswersCount(match_id) {
+    const results = await Answer.findAll({
+      attributes: [
+        [Sequelize.col("question.question_order"), "question_order"],
+        [Sequelize.fn("COUNT", Sequelize.col("Answer.id")), "correct_count"],
+      ],
+      include: [
+        {
+          model: Question,
+          as: "question",
+          attributes: [],
+        },
+      ],
+      where: { is_correct: 1, match_id: match_id },
+      group: ["question.question_order"],
+      order: [[Sequelize.col("question.question_order"), "ASC"]],
+      raw: true,
+    });
+    return results;
+  }
+  // Lấy số câu đúng tho classass
+  static async getCorrectAnswersCountByClass(match_id) {
+    const results = await Answer.findAll({
+      attributes: [
+        [Sequelize.col("contestant.class"), "class"],
+        [Sequelize.fn("COUNT", Sequelize.col("Answer.id")), "correct_count"],
+      ],
+      include: [
+        {
+          model: Contestant,
+          as: "contestant",
+          attributes: [],
+        },
+      ],
+      where: { is_correct: 1, match_id: match_id },
+      group: ["contestant.class"],
+      order: [[Sequelize.col("contestant.class"), "ASC"]],
+      raw: true,
+    });
+    return results;
   }
 }
 
