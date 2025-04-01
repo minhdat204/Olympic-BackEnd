@@ -721,11 +721,64 @@ class ContestantController {
   /**
    * TOP 20 THÍ SINH
    */
+  /**DAT
+   * cập nhật tất cả thí sinh đang thi thành Bị loại trừ thí sinh gold
+   * Đồng thời cập nhật số câu hiện tại của thí sinh vào bảng MatchContestant
+   * DÙNG: 
+   *  - ContestantService : updateContestantsToEliminated
+   * 
+   * @return {boolean} : true nếu cập nhật thành công, false nếu thất bại
+   */
+  static async updateContestantsToEliminated(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const { questionOrder } = req.body;
+      const goldContestantId = await matchService.getGoldWinnerId(matchId);
+      
+      if (!questionOrder) {
+        return res.status(400).json({
+          status: "error",
+          message: "Vui lòng cung cấp thứ tự câu hỏi"
+        });
+      }
+      
+      const result = await ContestantService.updateContestantsToEliminated(matchId, questionOrder, goldContestantId);
+      
+      if (!result) {
+        return res.status(404).json({
+          status: "error",
+          message: "Không tìm thấy thí sinh phù hợp để cập nhật"
+        });
+      }
+      
+      // Lấy danh sách thí sinh sau khi cập nhật để gửi qua socket
+      const contestants = await ContestantService.getContestantsByMatchId(matchId);
+      
+      // Emit socket event để cập nhật UI
+      emitEliminatedContestants(matchId, contestants);
+      emitContestantsAdmin(matchId, 1);
+      
+      return res.status(200).json({
+        status: "success",
+        message: "Cập nhật trạng thái thí sinh thành công",
+        contestants: contestants
+      });
+    } catch (error) {
+      console.error("Error in updateContestantsToEliminated:", error);
+      return res.status(500).json({
+        status: "error",
+        message: error.message || "Đã có lỗi xảy ra khi cập nhật thí sinh"
+      });
+    }
+  }
   /**
    * Dat: lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
    * có thêm tham số để loại trừ thí sinh gold (nếu có)
    * DÙNG:
    * - ContestantService : getContestants20WithInclusion
+   * 
+   * @return {Array} contestants - danh sách 20 thí sinh vào vòng trong
+   * contestant_id, created_at, eliminated_at_question_order, id (của match_contestants), match_id, registration_number, status, updated_at
    */
   static async getContestants20WithInclusion(req, res) {
     try {

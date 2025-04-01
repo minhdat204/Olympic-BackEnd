@@ -765,7 +765,54 @@ class ContestantService {
     return contestants;
   }
 
-  
+  /**DAT
+   * cập nhật tất cả thí sinh đang thi thành Bị loại trừ thí sinh gold
+   * Đồng thời cập nhật số câu hiện tại của thí sinh vào bảng MatchContestant
+   * @param {number} matchId - ID của trận đấu
+   * @param {number} questionOrder - Số câu hỏi hiện tại
+   * @returns {Promise<void>} - Trả về một Promise khi cập nhật hoàn tất
+   * @throws {Error} - Nếu không tìm thấy thí sinh nào trong trận đấu
+   * 
+   * DÙNG cho: 
+   * - contestantController: updateContestantsToEliminated
+   */
+  static async updateContestantsToEliminated(matchId, questionOrder, goldContestantId) {
+    try {
+      // Lấy danh sách thí sinh trong trận đấu, loại trừ thí sinh gold nếu có
+      const whereClause = { 
+        match_id: matchId, 
+        status: { [Op.or]: ["Đang thi", "Được cứu", "Xác nhận 1", "Xác nhận 2"] }
+      };
+      
+      // Nếu có goldContestantId, loại trừ thí sinh này khỏi danh sách cập nhật
+      if (goldContestantId) {
+        whereClause.contestant_id = { [Op.ne]: goldContestantId };
+      }
+      
+      const contestants = await MatchContestant.findAll({
+        where: whereClause,
+      });
+
+      // Kiểm tra nếu không tìm thấy thí sinh nào
+      if (contestants.length === 0) {
+        return false;
+      }
+
+      // Cập nhật trạng thái và số câu hỏi hiện tại cho tất cả thí sinh
+      await Promise.all(
+        contestants.map((contestant) => {
+          return contestant.update({
+            status: "Bị loại",
+            eliminated_at_question_order: questionOrder,
+          });
+        })
+      );
+      return true;
+    } catch (error) {
+      console.error("Error updating contestants:", error);
+      return false;
+    }
+  }
 
   /**
    * Dat: lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh

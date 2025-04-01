@@ -187,5 +187,16 @@ module.exports = {
     const match = await this.getMatchById(matchId);
     if (!match) throw new Error("Không tìm thấy trận đấu");
     return match.gold_winner_id;
-  }
+  },
+
+  /**
+   * lấy question_order truy xuất current_question_id từ bảng match
+   * @param {number} matchId - ID của trận đấu
+   * @return {number} - order của câu hỏi hiện tại (question_order)
+   */
+  async getQuestionOrder(matchId) {
+    const match = await this.getMatchById(matchId);
+    if (!match) throw new Error("Không tìm thấy trận đấu");
+    return match.current_question_id;
+  },
 };

@@ -487,4 +487,21 @@ module.exports = {
       throw error;
     }
   },
+
+  // DAT: Lấy số thứ tự câu hỏi hiện tại
+  async getCurrentQuestionOrder(match_id) {
+    const match = await Match.findByPk(match_id, {
+      attributes: ["current_question_id"],
+    });
+    
+    if (!match) throw new Error("Không tìm thấy trận đấu");
+
+    //truy current_question_id trong bảng question để lấy thứ tự câu hỏi
+    const question = await Question.findByPk(match.current_question_id, {
+      attributes: ["question_order"],
+    });
+
+    if (!question) throw new Error("Không tìm thấy câu hỏi");
+    return question.question_order;
+  },
 };
