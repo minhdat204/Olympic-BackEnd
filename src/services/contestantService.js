@@ -765,8 +765,6 @@ class ContestantService {
     return contestants;
   }
 
-  
-
   /**
    * Dat: lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
    * có thêm tham số để loại trừ thí sinh gold (nếu có)
@@ -885,7 +883,7 @@ class ContestantService {
         {
           model: Contestant,
           as: "contestants",
-          attributes: ["fullname", "email", "class"],
+          attributes: ["fullname", "email", "class", "mssv"],
           order: ["class"],
           include: [
             {
@@ -901,11 +899,10 @@ class ContestantService {
 
     const flatList = list.flatMap((group) =>
       group.contestants.map((contestant) => ({
+        mssv: contestant.mssv,
         fullname: contestant.fullname,
-        group_name: group.group_name,
-        email: contestant.email,
         class: contestant.class,
-        match_name: group.match.match_name,
+        email: contestant.email,
         registration_number:
           contestant.matchContestants?.[0]?.registration_number || null,
       }))
@@ -937,8 +934,6 @@ class ContestantService {
 
     return { message: "Cập nhật thành công" };
   }
-
-
 }
 
 module.exports = ContestantService;
