@@ -452,7 +452,7 @@ class ContestantService {
           as: "contestant",
         },
       ],
-      order: [["registration_number", "ASC"]],
+      // order: [["registration_number", "ASC"]],
     });
 
     const contestants = matchContestants.map((mc) => {
@@ -519,6 +519,10 @@ class ContestantService {
     return list;
   }
 
+  /**
+   * SỬ DỤNG Ở:
+   * updateContestantsBulk
+   */
   // DAT: API lấy total thí sinh và thí sinh còn lại trong trận hiện tại
   static async getContestantTotal(matchId) {
     // lấy số thí sinh đang thi trong trận đấu
@@ -535,6 +539,10 @@ class ContestantService {
     return { total, remaining };
   }
 
+  /**
+   * SỬ dụng ở :
+   * updateContestantsBulk
+   */
   // DAT: API lấy ds thí sinh theo match_id
   static async getContestantsByMatchId(matchId) {
     const matchContestants = await MatchContestant.findAll({
@@ -639,6 +647,10 @@ class ContestantService {
     return total;
   }
 
+  /**
+   * SỬ DỤNG ở:
+   * updateContestantsBulk
+   */
   // Phương thức updateContestant đã sửa
   static async updateContestant(contestantIds, data) {
     // Check if contestantIds is not an array, convert it to an array
@@ -781,7 +793,7 @@ class ContestantService {
       // Lấy danh sách thí sinh trong trận đấu, loại trừ thí sinh gold nếu có
       const whereClause = { 
         match_id: matchId, 
-        status: { [Op.or]: ["Đang thi", "Được cứu", "Xác nhận 1", "Xác nhận 2"] }
+        status: { [Op.or]: ["Đang thi", "Được cứu", "Xác nhận 1", "Xác nhận 2", "Qua vòng"] }
       };
       
       // Nếu có goldContestantId, loại trừ thí sinh này khỏi danh sách cập nhật
@@ -795,16 +807,22 @@ class ContestantService {
 
       // Kiểm tra nếu không tìm thấy thí sinh nào
       if (contestants.length === 0) {
-        return false;
+        return true;
       }
 
       // Cập nhật trạng thái và số câu hỏi hiện tại cho tất cả thí sinh
       await Promise.all(
         contestants.map((contestant) => {
-          return contestant.update({
-            status: "Bị loại",
-            eliminated_at_question_order: questionOrder,
-          });
+          // tạo đối tượng cập nhật
+          // nếu thí sinh đã bị loại thì không cập nhật lại câu hỏi
+          const updateData = { status: "Bị loại" };
+                
+          // nếu thí sinh chưa bị loại thì cập nhật câu hỏi hiện tại
+          if (contestant.eliminated_at_question_order === null) {
+            updateData.eliminated_at_question_order = questionOrder;
+          }
+
+          return contestant.update(updateData);
         })
       );
       return true;

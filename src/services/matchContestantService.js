@@ -218,6 +218,35 @@ class MatchContestantService {
   //       where: { status: { Sequeliz } },
   //     });
   //   }
+
+  /**
+   * Cập nhât trạng thái thí sinh trong trận đấu
+   * @param {number} match_id - ID của trận đấu
+   * @param {number} contestant_id - ID của thí sinh
+   * @param {string} status - Trạng thái mới của thí sinh
+   * @returns {Promise<void>}
+    * @throws {Error} Nếu không tìm thấy thí sinh hoặc có lỗi trong quá trình cập nhật
+    * 
+    * SƯ DỤNG: CHƯwA ĐƯỢC SỬ DỤNG
+    * 
+   */
+  async updateContestantStatus(match_id, contestant_id, status) {
+    try {
+      const matchContestant = await MatchContestant.findOne({
+        where: { match_id, contestant_id },
+      });
+
+      if (!matchContestant) {
+        throw new Error("Không tìm thấy thí sinh trong trận đấu");
+      }
+
+      matchContestant.status = status;
+      await matchContestant.save();
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái thí sinh:", error);
+      throw error;
+    }
+  }
 }
 
 // Xuất class để có thể sử dụng lại nhiều nơi

@@ -92,11 +92,22 @@ router.get(
   ContestantController.getContestants20WithInclusion
 );
 
-// DAT: cập nhật trạng thái thí sinh hàng loạt
+/**DAT: cập nhật trạng thái thí sinh hàng loạt
+ * const { contestantIds, status } = req.body;
+ */
 router.patch(
   "/matches/:match_id/status-bulk",
   ContestantController.updateContestantsBulk
 );
+
+/**
+ * DAT: API lấy thí sinh theo trạng thái
+ */
+router.post(
+  "/matches/:match_id/status",
+  ContestantController.getContestantsWithStatus
+);
+
 // DAT: cập nhật trạng thái thí sinh "Được cứu" hàng loạt thành "Đang thi"
 router.patch(
   "/matches/:match_id/rescued-to-competing",

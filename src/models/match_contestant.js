@@ -39,7 +39,6 @@ module.exports = (sequelize, DataTypes) => {
           "Cấm thi",
           "Qua vòng"
         ),
-        defaultValue: "Đang thi",
       },
       eliminated_at_question_order: {
         type: DataTypes.TINYINT,
