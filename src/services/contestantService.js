@@ -795,7 +795,7 @@ class ContestantService {
 
       // Kiểm tra nếu không tìm thấy thí sinh nào
       if (contestants.length === 0) {
-        return false;
+        return true;
       }
 
       // Cập nhật trạng thái và số câu hỏi hiện tại cho tất cả thí sinh
