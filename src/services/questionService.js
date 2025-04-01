@@ -427,8 +427,36 @@ module.exports = {
         as: "current_question",
       },
     });
-    if (!match || !match.current_question_id)
+    if (!match)
       throw new Error("Trận đấu hoặc câu hỏi không tồn tại");
+    
+    // Kiểm tra nếu không có câu hỏi hiện tại
+    if (!match.current_question) {
+      // Tìm câu hỏi có question_order = 1 trong match này
+      const firstQuestion = await Question.findOne({
+        where: { 
+          match_id: match_id,
+          question_order: 1 
+        },
+      });
+      
+      if (firstQuestion) {
+        // Cập nhật current_question_id thành id của câu hỏi đầu tiên
+        await match.update({ current_question_id: firstQuestion.id });
+        
+        // Lấy lại match với câu hỏi đã được cập nhật
+        const updatedMatch = await Match.findOne({
+          where: { id: match_id },
+          include: {
+            model: Question,
+            as: "current_question",
+          },
+        });
+        
+        return updatedMatch.current_question;
+      }
+    }
+    
     return match.current_question;
   },
 
