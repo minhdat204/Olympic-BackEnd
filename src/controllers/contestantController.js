@@ -589,7 +589,16 @@ class ContestantController {
     }
   }
 
-  // DAT: cập nhật trạng thái thí sinh hàng loạt
+  /**
+   * DAT
+   * Cập nhật trạng thái thí sinh hàng loạt
+   * @return {object} : danh sách thí sinh sau khi cập nhật
+   * (contestant_id, created_at, eliminated_at_question_order, id (của match_contestants), match_id, registration_number, status, updated_at)
+   * 
+   * SỬ DỤNG ở :
+   * - GoldControl.jsx
+   * -... quên
+   */
   static async updateContestantsBulk(req, res) {
     try {
       const matchId = req.params.match_id;
@@ -623,6 +632,26 @@ class ContestantController {
       });
     } catch (error) {
       console.error("Error updating contestants in bulk:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  /**
+   * DAT: API lấy thí sinh theo trạng thái
+   */
+  static async getContestantsWithStatus(req, res) {
+    try {
+      const matchId = req.params.match_id;
+      const { status } = req.body; // trạng thái thí sinh (Đang thi, Bị loại, Được cứu...)
+      const contestants = await ContestantService.getContestantsWithStatus({
+        matchId,
+        status
+      });
+      res.json({
+        message: `Lấy danh sách thí sinh với trạng thái "${status}" thành công`,
+        contestants: contestants
+      });
+    } catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
@@ -789,6 +818,11 @@ class ContestantController {
         matchId,
         contestantIdToExclude
       );
+
+      //sắp xếp lại danh sách thí sinh theo thứ tự
+      contestants.sort((a, b) => {
+        return a.registration_number - b.registration_number;
+      });
 
       res.json({
         message: "Lấy danh sách 20 thí sinh thành công",
