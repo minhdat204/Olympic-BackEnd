@@ -747,7 +747,7 @@ class ContestantController {
       if (!result) {
         return res.status(404).json({
           status: "error",
-          message: "Không tìm thấy thí sinh phù hợp để cập nhật"
+          message: "Không tìm thấy thí sinh phù hợp để cập nhật! CHECK DÒNG 750 (contestantController.js)"
         });
       }
       
