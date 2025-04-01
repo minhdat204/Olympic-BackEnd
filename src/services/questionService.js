@@ -422,42 +422,59 @@ module.exports = {
   async getCurrentQuestion(match_id) {
     const match = await Match.findOne({
       where: { id: match_id },
-      include: {
-        model: Question,
-        as: "current_question",
-      },
     });
-    if (!match)
-      throw new Error("Trận đấu hoặc câu hỏi không tồn tại");
+    // if (!match)
+    //   throw new Error("Trận đấu hoặc câu hỏi không tồn tại");
     
-    // Kiểm tra nếu không có câu hỏi hiện tại
-    if (!match.current_question) {
-      // Tìm câu hỏi có question_order = 1 trong match này
-      const firstQuestion = await Question.findOne({
-        where: { 
-          match_id: match_id,
-          question_order: 1 
-        },
-      });
+    // // Kiểm tra nếu không có câu hỏi hiện tại
+    // if (!match.current_question) {
+    //   // Tìm câu hỏi có question_order = 1 trong match này
+    //   const firstQuestion = await Question.findOne({
+    //     where: { 
+    //       match_id: match_id,
+    //       question_order: 1 
+    //     },
+    //   });
       
-      if (firstQuestion) {
-        // Cập nhật current_question_id thành id của câu hỏi đầu tiên
-        await match.update({ current_question_id: firstQuestion.id });
+    //   if (firstQuestion) {
+    //     // Cập nhật current_question_id thành id của câu hỏi đầu tiên
+    //     await match.update({ current_question_id: firstQuestion.id });
         
-        // Lấy lại match với câu hỏi đã được cập nhật
-        const updatedMatch = await Match.findOne({
-          where: { id: match_id },
-          include: {
-            model: Question,
-            as: "current_question",
-          },
-        });
+    //     // Lấy lại match với câu hỏi đã được cập nhật
+    //     const updatedMatch = await Match.findOne({
+    //       where: { id: match_id },
+    //       include: {
+    //         model: Question,
+    //         as: "current_question",
+    //       },
+    //     });
         
-        return updatedMatch.current_question;
-      }
-    }
+    //     return updatedMatch.current_question;
+    //   }
+    // }
     
-    return match.current_question;
+    // return match.current_question;
+
+    if (!match) { throw new Error(`Trận đấu ${match_id} không tồn tại`); }
+    let question = null;
+    //Fix lỗi mới vào trận thì current_question_id == null
+    if (!match.current_question_id) {
+      question = await Question.findOne({
+        where: { match_id, question_order: 1 }
+      });
+      if (!question) { throw new Error(`Không tìm thấy câu hỏi đầu tiên của trận đấu ${match_id}`); }
+      await Match.update(
+        { current_question_id: question.id },
+        { where: { id: match_id } }
+      );
+    }
+    else {// Nếu current_question_id không null, lấy câu hỏi hiện tại
+      question = await Question.findOne({
+        where: { match_id, id: match.current_question_id }
+      });
+    }
+    if (!question) { throw new Error(`Không tìm thấy câu hỏi hiện tại của trận đấu ${match_id}`); }
+    return question;
   },
 
   // DAT: Cập nhật time_left của câu hỏi hiện tại
@@ -521,7 +538,7 @@ module.exports = {
     const match = await Match.findByPk(match_id, {
       attributes: ["current_question_id"],
     });
-    
+
     if (!match) throw new Error("Không tìm thấy trận đấu");
 
     //truy current_question_id trong bảng question để lấy thứ tự câu hỏi

@@ -28,7 +28,12 @@ const fixJson = (data) => {
 };
 const v2Question = (q) => {
   let v2q = { ...q.dataValues };
-  v2q.v2_options = fixJson(q.options);
+  // Fix lỗi câu trả lời không phải dạng trắc nghiệm mà lại có options
+  if (q.correct_answer_type === "Multiple Choice") {
+    v2q.v2_options = fixJson(q.options);
+  } else {
+    v2q.v2_options = [];
+  }
   v2q.v2_media_url = fixJson(q.media_url);
   v2q.v2_trac_nghiem = q.options.length > 0;
   return v2q;
