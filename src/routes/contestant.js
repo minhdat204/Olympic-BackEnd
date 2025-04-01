@@ -66,6 +66,14 @@ router.get(
   ContestantController.getRescueContestantsInDb
 );
 
+/**DAT
+ * lấy danh sách 20 thí sinh vào vòng trong tương tự như cứu trợ chỉ khác là lấy cố định 20 thí sinh
+ */
+router.get(
+  "/matches/:match_id/top20",
+  ContestantController.getContestants20WithInclusion
+);
+
 // DAT: cập nhật trạng thái thí sinh hàng loạt
 router.patch(
   "/matches/:match_id/status-bulk",

@@ -771,36 +771,22 @@ class ContestantService {
    *
    * @param {number} matchId - ID của trận đấu
    * @param {number} excludeContestantId - ID của thí sinh cần loại trừ (nếu có)
+   * @returns {Promise<Array>} - Danh sách 20 thí sinh
+   * 
+   * SỬ DỤNG Ở:
+   * contestantController: getContestants20WithInclusion
    *  */
-  static async getContestants20WithExclusion(
-    matchId,
-    excludeContestantId = null
-  ) {
+  static async getContestants20WithInclusion(matchId, goldContestantId) {
     /**
      * 1. lấy danh sách thí sinh bị loại
      */
     const eliminatedContestants = await this.getEliminatedContestants(matchId);
 
     /**
-     * 1.5 Loại bỏ thí sinh Gold nếu có
-     */
-    let filteredContestants = eliminatedContestants;
-    if (excludeContestantId) {
-      filteredContestants = eliminatedContestants.filter(
-        (contestant) =>
-          contestant.contestant_id !== parseInt(excludeContestantId)
-      );
-    }
-
-    if (filteredContestants.length < 20) {
-      throw new Error("Không đủ thí sinh bị loại để chọn 20 người");
-    }
-
-    /**
      * 2. Nhóm thí sinh theo câu hỏi
      */
     const question = [];
-    filteredContestants.map((contestant) => {
+    eliminatedContestants.map((contestant) => {
       const questionOrder = contestant.eliminated_at_question_order;
       if (!question[questionOrder]) {
         question[questionOrder] = [];
@@ -817,10 +803,10 @@ class ContestantService {
       .sort((a, b) => b - a); // Sort in descending order
 
     /**
-     * 4. chọn chính xác 20 thí sinh
+     * 4. chọn 19 thí sinh (để có chỗ cho thí sinh gold)
      */
     const selectedContestants = [];
-    let remainingSlots = 20;
+    let remainingSlots = (goldContestantId || goldContestantId !== null) ? 19 : 20; // Lấy 19 nếu có gold, 20 nếu không
 
     // duyệt từng câu hỏi đã sắp xếp
     for (const i of questionIndices) {
@@ -845,8 +831,30 @@ class ContestantService {
       }
     }
 
-    // chuyển mảng 2 chiều thành mảng 1 chiều
-    const contestants = selectedContestants.flat();
+    /**
+     * 5. Chuyển mảng 2 chiều thành mảng 1 chiều
+     */
+    let contestants = selectedContestants.flat();
+
+    /**
+     * 6. Thêm thí sinh gold vào danh sách nếu có
+     */
+    if (goldContestantId || goldContestantId !== null) {
+      const goldContestant = await MatchContestant.findOne({
+        where: { match_id: matchId, contestant_id: goldContestantId }
+      });
+
+      if (goldContestant) {
+        contestants.push(goldContestant);
+      } else {
+        console.warn(`Không tìm thấy thí sinh gold với ID ${goldContestantId}`);
+      }
+    }
+
+    // if (contestants.length < 20) {
+    //   throw new Error(`Không đủ thí sinh để chọn 20 người (chỉ có ${contestants.length})`);
+    // }
+
     return contestants;
   }
 
