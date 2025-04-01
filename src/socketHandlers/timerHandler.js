@@ -173,6 +173,7 @@ const handleTimerSockets = (io, socket) => {
       // Update database
       await QuestionService.updateQuestionBy(questionId, {
         time_left: timeRemaining,
+        timer : timeRemaining,
       });
 
       // Notify all clients in the match room
