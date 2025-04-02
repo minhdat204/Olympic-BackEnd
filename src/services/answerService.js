@@ -10,6 +10,7 @@ const contestantService = require("../services/contestantService");
 const { Op, Sequelize, where } = require("sequelize");
 const group = require("../models/group");
 const answer = require("../models/answer");
+const { raw } = require("express");
 
 class AnswerService {
   // Lấy danh sách câu trả lời (có hỗ trợ lọc và phân trang)
@@ -338,61 +339,24 @@ class AnswerService {
   }
 
   static async getTop20byMatch(match_id, limit = 20) {
-    // Bước 1: Lấy danh sách top 20 contestant_id có tổng điểm cao nhất
-    const top20Scores = await Answer.findAll({
-      attributes: [
-        "contestant_id",
-        [Sequelize.fn("SUM", Sequelize.col("Answer.score")), "total_score"],
-      ],
-      where: {
-        match_id: match_id,
-        is_correct: true,
-      },
-      group: ["contestant_id"],
-      order: [[Sequelize.literal("total_score"), "DESC"]],
-      limit: limit,
-      raw: true, // Lấy dữ liệu dạng object thuần (giúp hiệu suất tốt hơn)
-    });
-
-    // Lấy danh sách contestant_id từ kết quả trên
-    const contestantIds = top20Scores.map((c) => c.contestant_id);
-
-    // Bước 2: Lấy thông tin chi tiết của thí sinh
-    const contestants = await Contestant.findAll({
-      where: { id: contestantIds },
-      attributes: ["id", "fullname", "class"],
+    const top20 = await MatchContestant.findAll({
+      attributes: ["eliminated_at_question_order", "registration_number"],
+      where: { match_id: match_id },
       include: [
         {
-          model: MatchContestant,
-          as: "matchContestants",
-          attributes: ["registration_number"],
-          where: { match_id: match_id },
-          required: false, // Để tránh lỗi nếu không có registration_number
+          model: Contestant,
+          as: "contestant",
+          attributes: ["fullname", "class"],
         },
       ],
-      raw: true, // Lấy dữ liệu dạng object thuần
-      nest: true, // Để dễ truy cập dữ liệu lồng nhau
-    });
-
-    // Kết hợp dữ liệu
-    return top20Scores.map((item) => {
-      const contestant = contestants.find((c) => c.id === item.contestant_id);
-      return {
-        id: item.contestant_id,
-        fullname: contestant?.fullname || "N/A",
-        class: contestant?.class || "N/A",
-        registration_number:
-          contestant?.matchContestants?.registration_number || "N/A",
-        total_score: item.total_score,
-      };
+      raw: true,
+      nest: true,
     });
     return top20.map((item) => ({
-      id: item.contestant_id,
+      eliminated_at_question_order: item.eliminated_at_question_order,
       fullname: item.contestant.fullname,
       class: item.contestant.class,
-      registration_number:
-        item.contestant.matchContestants?.[0]?.registration_number || "N/A",
-      total_score: item.dataValues.total_score,
+      registration_number: item.registration_number,
     }));
   }
 
@@ -476,25 +440,36 @@ class AnswerService {
     return `Đã cập nhật điểm cho ${dangthi.length} thí sinh có đáp án đúng và ${biLoai.length} thí sinh có đáp án sai`;
   }
   static async getCorrectAnswersCount(match_id) {
-    const results = await Answer.findAll({
+    const results = await Question.findAll({
       attributes: [
-        [Sequelize.col("question.question_order"), "question_order"],
-        [Sequelize.fn("COUNT", Sequelize.col("Answer.id")), "correct_count"],
+        ["question_order", "question_order"],
+        [
+          Sequelize.fn(
+            "IFNULL",
+            Sequelize.fn("COUNT", Sequelize.col("answers.id")),
+            0
+          ),
+          "correct_count",
+        ],
       ],
       include: [
         {
-          model: Question,
-          as: "question",
+          model: Answer,
+          as: "answers",
           attributes: [],
+          required: false, // LEFT JOIN để không loại bỏ câu hỏi không có đáp án đúng
+          where: { is_correct: 1 }, // Chỉ đếm đáp án đúng
         },
       ],
-      where: { is_correct: 1, match_id: match_id },
-      group: ["question.question_order"],
-      order: [[Sequelize.col("question.question_order"), "ASC"]],
+      where: { match_id: match_id }, // Chỉ lấy câu hỏi thuộc trận đấu này
+      group: ["question_order"],
+      order: [["question_order", "ASC"]],
       raw: true,
     });
+
     return results;
   }
+
   // Lấy số câu đúng tho classass
   static async getCorrectAnswersCountByClass(match_id) {
     const results = await Answer.findAll({

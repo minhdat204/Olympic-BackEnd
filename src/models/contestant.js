@@ -50,7 +50,9 @@ module.exports = (sequelize, DataTypes) => {
       mssv: {
         type: DataTypes.STRING(12),
         allowNull: false,
-        unique: true,
+        unique: {
+          name: "contestants_mssv_unique",
+        },
       },
       fullname: {
         type: DataTypes.STRING(50),

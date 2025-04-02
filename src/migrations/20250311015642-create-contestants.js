@@ -15,7 +15,6 @@ module.exports = {
       mssv: {
         type: Sequelize.STRING(12),
         allowNull: false,
-        unique: true,
       },
       fullname: {
         type: Sequelize.STRING(50),
