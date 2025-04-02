@@ -341,7 +341,7 @@ class AnswerService {
   static async getTop20byMatch(match_id, limit = 20) {
     const top20 = await MatchContestant.findAll({
       attributes: ["eliminated_at_question_order", "registration_number"],
-      where: { match_id: match_id },
+      where: { match_id: match_id, status: "Qua vòng" },
       include: [
         {
           model: Contestant,
